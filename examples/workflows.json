@@ -1,0 +1,510 @@
+{
+  "workflows": [
+    {
+      "name": "1. Enviar Mensagem Simples",
+      "description": "Exemplo básico de envio de mensagem de texto",
+      "workflow": {
+        "nodes": [
+          {
+            "parameters": {
+              "resource": "message",
+              "operation": "sendText",
+              "phone": "5511999999999",
+              "message": "Olá! Esta é uma mensagem de teste enviada via n8n."
+            },
+            "name": "Enviar Mensagem",
+            "type": "n8n-nodes-wafly.wafly",
+            "typeVersion": 1,
+            "position": [250, 300],
+            "credentials": {
+              "waflyApi": "Wafly API"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "2. Notificação Agendada Diária",
+      "description": "Envia uma mensagem automática todos os dias às 9h",
+      "workflow": {
+        "nodes": [
+          {
+            "parameters": {
+              "rule": {
+                "interval": [
+                  {
+                    "field": "cronExpression",
+                    "expression": "0 9 * * *"
+                  }
+                ]
+              }
+            },
+            "name": "Schedule - 9h Daily",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [250, 300]
+          },
+          {
+            "parameters": {
+              "resource": "message",
+              "operation": "sendText",
+              "phone": "5511999999999",
+              "message": "🌅 Bom dia! Lembrete automático das 9h."
+            },
+            "name": "Enviar Mensagem",
+            "type": "n8n-nodes-wafly.wafly",
+            "typeVersion": 1,
+            "position": [450, 300],
+            "credentials": {
+              "waflyApi": "Wafly API"
+            }
+          }
+        ],
+        "connections": {
+          "Schedule - 9h Daily": {
+            "main": [
+              [
+                {
+                  "node": "Enviar Mensagem",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "3. Webhook para Mensagens Recebidas",
+      "description": "Recebe mensagens do WhatsApp via webhook e processa",
+      "workflow": {
+        "nodes": [
+          {
+            "parameters": {
+              "httpMethod": "POST",
+              "path": "wafly-webhook",
+              "responseMode": "responseNode",
+              "options": {}
+            },
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [250, 300],
+            "webhookId": "unique-webhook-id"
+          },
+          {
+            "parameters": {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.body.type }}",
+                    "operation": "equals",
+                    "value2": "message"
+                  }
+                ]
+              }
+            },
+            "name": "É Mensagem?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [450, 300]
+          },
+          {
+            "parameters": {
+              "resource": "message",
+              "operation": "sendText",
+              "phone": "={{ $json.body.from }}",
+              "message": "Obrigado pela sua mensagem! Recebemos: {{ $json.body.message }}"
+            },
+            "name": "Responder Automaticamente",
+            "type": "n8n-nodes-wafly.wafly",
+            "typeVersion": 1,
+            "position": [650, 250],
+            "credentials": {
+              "waflyApi": "Wafly API"
+            }
+          },
+          {
+            "parameters": {
+              "respondWith": "json",
+              "responseBody": "={{ { \"success\": true } }}"
+            },
+            "name": "Response",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [850, 300]
+          }
+        ],
+        "connections": {
+          "Webhook": {
+            "main": [
+              [
+                {
+                  "node": "É Mensagem?",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          },
+          "É Mensagem?": {
+            "main": [
+              [
+                {
+                  "node": "Responder Automaticamente",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          },
+          "Responder Automaticamente": {
+            "main": [
+              [
+                {
+                  "node": "Response",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "4. Enviar para Lista de Contatos",
+      "description": "Envia mensagem para múltiplos contatos de uma lista",
+      "workflow": {
+        "nodes": [
+          {
+            "parameters": {
+              "functionCode": "return [\n  { phone: '5511999999999', name: 'João' },\n  { phone: '5511888888888', name: 'Maria' },\n  { phone: '5511777777777', name: 'Pedro' }\n];"
+            },
+            "name": "Lista de Contatos",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [250, 300]
+          },
+          {
+            "parameters": {
+              "resource": "message",
+              "operation": "sendText",
+              "phone": "={{ $json.phone }}",
+              "message": "Olá {{ $json.name }}! Esta é uma mensagem personalizada."
+            },
+            "name": "Enviar para Cada",
+            "type": "n8n-nodes-wafly.wafly",
+            "typeVersion": 1,
+            "position": [450, 300],
+            "credentials": {
+              "waflyApi": "Wafly API"
+            }
+          }
+        ],
+        "connections": {
+          "Lista de Contatos": {
+            "main": [
+              [
+                {
+                  "node": "Enviar para Cada",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "5. Integração com Google Sheets",
+      "description": "Lê contatos do Google Sheets e envia mensagens",
+      "workflow": {
+        "nodes": [
+          {
+            "parameters": {
+              "rule": {
+                "interval": [
+                  {
+                    "field": "hours",
+                    "hoursInterval": 1
+                  }
+                ]
+              }
+            },
+            "name": "A cada 1 hora",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [250, 300]
+          },
+          {
+            "parameters": {
+              "operation": "read",
+              "sheetId": "SUA_SHEET_ID",
+              "range": "A:C"
+            },
+            "name": "Google Sheets",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 2,
+            "position": [450, 300],
+            "credentials": {
+              "googleSheetsOAuth2Api": "Google Sheets"
+            }
+          },
+          {
+            "parameters": {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.Status }}",
+                    "operation": "equals",
+                    "value2": "Pendente"
+                  }
+                ]
+              }
+            },
+            "name": "Filtrar Pendentes",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [650, 300]
+          },
+          {
+            "parameters": {
+              "resource": "message",
+              "operation": "sendText",
+              "phone": "={{ $json.Phone }}",
+              "message": "={{ $json.Message }}"
+            },
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-wafly.wafly",
+            "typeVersion": 1,
+            "position": [850, 250],
+            "credentials": {
+              "waflyApi": "Wafly API"
+            }
+          },
+          {
+            "parameters": {
+              "operation": "update",
+              "sheetId": "SUA_SHEET_ID",
+              "range": "={{ 'C' + $json.rowNumber }}",
+              "options": {
+                "valueInputMode": "USER_ENTERED"
+              }
+            },
+            "name": "Marcar como Enviado",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 2,
+            "position": [1050, 250],
+            "credentials": {
+              "googleSheetsOAuth2Api": "Google Sheets"
+            }
+          }
+        ],
+        "connections": {
+          "A cada 1 hora": {
+            "main": [
+              [
+                {
+                  "node": "Google Sheets",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          },
+          "Google Sheets": {
+            "main": [
+              [
+                {
+                  "node": "Filtrar Pendentes",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          },
+          "Filtrar Pendentes": {
+            "main": [
+              [
+                {
+                  "node": "Enviar WhatsApp",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          },
+          "Enviar WhatsApp": {
+            "main": [
+              [
+                {
+                  "node": "Marcar como Enviado",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "6. Criar Grupo e Adicionar Membros",
+      "description": "Cria um grupo e adiciona participantes automaticamente",
+      "workflow": {
+        "nodes": [
+          {
+            "parameters": {
+              "resource": "group",
+              "operation": "createGroup",
+              "groupName": "Grupo Automático - {{ $now.format('DD/MM/YYYY') }}",
+              "phones": "5511999999999,5511888888888,5511777777777"
+            },
+            "name": "Criar Grupo",
+            "type": "n8n-nodes-wafly.wafly",
+            "typeVersion": 1,
+            "position": [250, 300],
+            "credentials": {
+              "waflyApi": "Wafly API"
+            }
+          },
+          {
+            "parameters": {
+              "resource": "message",
+              "operation": "sendText",
+              "phone": "={{ $json.groupId }}",
+              "message": "🎉 Bem-vindos ao grupo! Este grupo foi criado automaticamente via n8n."
+            },
+            "name": "Enviar Boas-vindas",
+            "type": "n8n-nodes-wafly.wafly",
+            "typeVersion": 1,
+            "position": [450, 300],
+            "credentials": {
+              "waflyApi": "Wafly API"
+            }
+          }
+        ],
+        "connections": {
+          "Criar Grupo": {
+            "main": [
+              [
+                {
+                  "node": "Enviar Boas-vindas",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "7. Monitorar Status e Alertar",
+      "description": "Monitora o status da instância e envia alerta se desconectar",
+      "workflow": {
+        "nodes": [
+          {
+            "parameters": {
+              "rule": {
+                "interval": [
+                  {
+                    "field": "minutes",
+                    "minutesInterval": 5
+                  }
+                ]
+              }
+            },
+            "name": "A cada 5 minutos",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [250, 300]
+          },
+          {
+            "parameters": {
+              "resource": "instance",
+              "operation": "getStatus"
+            },
+            "name": "Verificar Status",
+            "type": "n8n-nodes-wafly.wafly",
+            "typeVersion": 1,
+            "position": [450, 300],
+            "credentials": {
+              "waflyApi": "Wafly API"
+            }
+          },
+          {
+            "parameters": {
+              "conditions": {
+                "boolean": [
+                  {
+                    "value1": "={{ $json.connected }}",
+                    "operation": "notEqual",
+                    "value2": true
+                  }
+                ]
+              }
+            },
+            "name": "Está Desconectado?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [650, 300]
+          },
+          {
+            "parameters": {
+              "resource": "message",
+              "operation": "sendText",
+              "phone": "5511999999999",
+              "message": "⚠️ ALERTA: Sua instância WhatsApp foi desconectada!"
+            },
+            "name": "Enviar Alerta",
+            "type": "n8n-nodes-wafly.wafly",
+            "typeVersion": 1,
+            "position": [850, 250],
+            "credentials": {
+              "waflyApi": "Wafly API"
+            }
+          }
+        ],
+        "connections": {
+          "A cada 5 minutos": {
+            "main": [
+              [
+                {
+                  "node": "Verificar Status",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          },
+          "Verificar Status": {
+            "main": [
+              [
+                {
+                  "node": "Está Desconectado?",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          },
+          "Está Desconectado?": {
+            "main": [
+              [
+                {
+                  "node": "Enviar Alerta",
+                  "type": "main",
+                  "index": 0
+                }
+              ]
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
