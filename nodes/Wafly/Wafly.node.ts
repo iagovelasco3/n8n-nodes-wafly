@@ -11,7 +11,7 @@ export class Wafly implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'Wafly WhatsApp',
     name: 'wafly',
-    icon: 'file:wafly.svg',
+    icon: 'file:wafly.png',
     group: ['transform'],
     version: 1,
     subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
@@ -602,6 +602,42 @@ export class Wafly implements INodeType {
             description: 'Atualizar descrição do grupo',
             action: 'Update description',
           },
+          {
+            name: 'Update Photo',
+            value: 'updatePhoto',
+            description: 'Atualizar foto do grupo',
+            action: 'Update photo',
+          },
+          {
+            name: 'Approve Participant',
+            value: 'approveParticipant',
+            description: 'Aprovar participante pendente',
+            action: 'Approve participant',
+          },
+          {
+            name: 'Reject Participant',
+            value: 'rejectParticipant',
+            description: 'Rejeitar participante pendente',
+            action: 'Reject participant',
+          },
+          {
+            name: 'Get Invite Link',
+            value: 'getInviteLink',
+            description: 'Obter link de convite do grupo',
+            action: 'Get invite link',
+          },
+          {
+            name: 'Redefine Invite Link',
+            value: 'redefineInviteLink',
+            description: 'Redefinir link de convite do grupo',
+            action: 'Redefine invite link',
+          },
+          {
+            name: 'Update Settings',
+            value: 'updateSettings',
+            description: 'Atualizar configurações do grupo',
+            action: 'Update settings',
+          },
         ],
         default: 'listGroups',
       },
@@ -625,6 +661,12 @@ export class Wafly implements INodeType {
               'leaveGroup',
               'updateName',
               'updateDescription',
+              'updatePhoto',
+              'approveParticipant',
+              'rejectParticipant',
+              'getInviteLink',
+              'redefineInviteLink',
+              'updateSettings',
             ],
           },
         },
@@ -655,7 +697,15 @@ export class Wafly implements INodeType {
         displayOptions: {
           show: {
             resource: ['group'],
-            operation: ['createGroup', 'addParticipant', 'removeParticipant', 'addAdmin', 'removeAdmin'],
+            operation: [
+              'createGroup',
+              'addParticipant',
+              'removeParticipant',
+              'addAdmin',
+              'removeAdmin',
+              'approveParticipant',
+              'rejectParticipant',
+            ],
           },
         },
         description: 'Números de telefone separados por vírgula (ex: 5511999999999,5511888888888)',
@@ -677,6 +727,121 @@ export class Wafly implements INodeType {
           },
         },
         description: 'Descrição do grupo',
+      },
+
+      {
+        displayName: 'Group Photo URL',
+        name: 'groupPhoto',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: {
+          show: {
+            resource: ['group'],
+            operation: ['updatePhoto'],
+          },
+        },
+        description: 'URL da imagem para foto do grupo',
+      },
+
+      {
+        displayName: 'Page',
+        name: 'page',
+        type: 'number',
+        default: 0,
+        displayOptions: {
+          show: {
+            resource: ['group'],
+            operation: ['listGroups'],
+          },
+        },
+        description: 'Número da página (opcional)',
+      },
+      {
+        displayName: 'Page Size',
+        name: 'pageSize',
+        type: 'number',
+        default: 0,
+        displayOptions: {
+          show: {
+            resource: ['group'],
+            operation: ['listGroups'],
+          },
+        },
+        description: 'Quantidade de grupos por página (opcional)',
+      },
+
+      {
+        displayName: 'Admin Only Message',
+        name: 'adminOnlyMessage',
+        type: 'options',
+        options: [
+          { name: 'Do Not Change', value: '' },
+          { name: 'Yes', value: 'true' },
+          { name: 'No', value: 'false' },
+        ],
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['group'],
+            operation: ['updateSettings'],
+          },
+        },
+        description: 'Apenas admins podem enviar mensagens',
+      },
+      {
+        displayName: 'Admin Only Settings',
+        name: 'adminOnlySettings',
+        type: 'options',
+        options: [
+          { name: 'Do Not Change', value: '' },
+          { name: 'Yes', value: 'true' },
+          { name: 'No', value: 'false' },
+        ],
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['group'],
+            operation: ['updateSettings'],
+          },
+        },
+        description: 'Apenas admins podem alterar configurações',
+      },
+      {
+        displayName: 'Require Admin Approval',
+        name: 'requireAdminApproval',
+        type: 'options',
+        options: [
+          { name: 'Do Not Change', value: '' },
+          { name: 'Yes', value: 'true' },
+          { name: 'No', value: 'false' },
+        ],
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['group'],
+            operation: ['updateSettings'],
+          },
+        },
+        description: 'Exigir aprovação de admin para entrar no grupo',
+      },
+      {
+        displayName: 'Admin Only Add Member',
+        name: 'adminOnlyAddMember',
+        type: 'options',
+        options: [
+          { name: 'Do Not Change', value: '' },
+          { name: 'Yes', value: 'true' },
+          { name: 'No', value: 'false' },
+        ],
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['group'],
+            operation: ['updateSettings'],
+          },
+        },
+        description: 'Apenas admins podem adicionar membros',
       },
 
       // =====================================
@@ -764,7 +929,7 @@ export class Wafly implements INodeType {
         const operation = this.getNodeParameter('operation', i) as string;
 
         let endpoint = '';
-        let method = 'GET';
+        let method: 'GET' | 'POST' | 'DELETE' = 'GET';
         let body: IDataObject = {};
 
         // =====================================
@@ -892,6 +1057,18 @@ export class Wafly implements INodeType {
           } else if (operation === 'listGroups') {
             endpoint = `${basePath}/groups`;
             method = 'GET';
+            const page = this.getNodeParameter('page', i, 0) as number;
+            const pageSize = this.getNodeParameter('pageSize', i, 0) as number;
+            const queryParams: string[] = [];
+            if (page > 0) {
+              queryParams.push(`page=${page}`);
+            }
+            if (pageSize > 0) {
+              queryParams.push(`pageSize=${pageSize}`);
+            }
+            if (queryParams.length > 0) {
+              endpoint += `?${queryParams.join('&')}`;
+            }
           } else if (operation === 'getMetadata') {
             endpoint = `${basePath}/group-metadata/${this.getNodeParameter('groupId', i)}`;
             method = 'GET';
@@ -948,6 +1125,59 @@ export class Wafly implements INodeType {
             const groupId = this.getNodeParameter('groupId', i) as string;
             const description = this.getNodeParameter('description', i) as string;
             body = { groupId, description };
+          } else if (operation === 'updatePhoto') {
+            endpoint = `${basePath}/update-group-photo`;
+            method = 'POST';
+            const groupId = this.getNodeParameter('groupId', i) as string;
+            const groupPhoto = this.getNodeParameter('groupPhoto', i) as string;
+            body = { groupId, groupPhoto };
+          } else if (operation === 'approveParticipant') {
+            endpoint = `${basePath}/approve-participant`;
+            method = 'POST';
+            const groupId = this.getNodeParameter('groupId', i) as string;
+            const phones = this.getNodeParameter('phones', i) as string;
+            body = {
+              groupId,
+              phones: phones.split(',').map((p) => p.trim()),
+            };
+          } else if (operation === 'rejectParticipant') {
+            endpoint = `${basePath}/reject-participant`;
+            method = 'POST';
+            const groupId = this.getNodeParameter('groupId', i) as string;
+            const phones = this.getNodeParameter('phones', i) as string;
+            body = {
+              groupId,
+              phones: phones.split(',').map((p) => p.trim()),
+            };
+          } else if (operation === 'getInviteLink') {
+            const groupId = this.getNodeParameter('groupId', i) as string;
+            endpoint = `${basePath}/group/invite-link?group_id=${encodeURIComponent(groupId)}`;
+            method = 'GET';
+          } else if (operation === 'redefineInviteLink') {
+            const groupId = this.getNodeParameter('groupId', i) as string;
+            endpoint = `${basePath}/redefine-invitation-link/${encodeURIComponent(groupId)}`;
+            method = 'POST';
+          } else if (operation === 'updateSettings') {
+            endpoint = `${basePath}/update-group-settings`;
+            method = 'POST';
+            const groupId = this.getNodeParameter('groupId', i) as string;
+            body = { phone: groupId };
+            const adminOnlyMessage = this.getNodeParameter('adminOnlyMessage', i, '') as string;
+            const adminOnlySettings = this.getNodeParameter('adminOnlySettings', i, '') as string;
+            const requireAdminApproval = this.getNodeParameter('requireAdminApproval', i, '') as string;
+            const adminOnlyAddMember = this.getNodeParameter('adminOnlyAddMember', i, '') as string;
+            if (adminOnlyMessage !== '') {
+              body.adminOnlyMessage = adminOnlyMessage === 'true';
+            }
+            if (adminOnlySettings !== '') {
+              body.adminOnlySettings = adminOnlySettings === 'true';
+            }
+            if (requireAdminApproval !== '') {
+              body.requireAdminApproval = requireAdminApproval === 'true';
+            }
+            if (adminOnlyAddMember !== '') {
+              body.adminOnlyAddMember = adminOnlyAddMember === 'true';
+            }
           }
         }
 

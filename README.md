@@ -29,12 +29,15 @@ Este é um nó customizado do n8n para integração com a **Wafly WhatsApp Bridg
 
 ### 👥 Grupos
 - Criar grupos
-- Listar grupos
+- Listar grupos (com paginação opcional)
 - Obter metadados do grupo
 - Adicionar/Remover participantes
+- Aprovar/Rejeitar participantes pendentes
 - Promover/Remover administradores
 - Sair do grupo
-- Atualizar nome e descrição
+- Atualizar nome, descrição e foto
+- Obter e redefinir link de convite
+- Atualizar configurações do grupo
 
 ### 🔔 Webhooks
 - Configurar webhook

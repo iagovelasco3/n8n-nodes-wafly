@@ -5,6 +5,19 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2026-06-11
+
+### Adicionado
+
+#### Recursos de Grupos
+- Atualizar foto do grupo
+- Aprovar participante pendente
+- Rejeitar participante pendente
+- Obter link de convite do grupo
+- Redefinir link de convite do grupo
+- Atualizar configurações do grupo (admin only message, settings, approval, add member)
+- Paginação opcional ao listar grupos (`page`, `pageSize`)
+
 ## [1.0.0] - 2026-01-17
 
 ### 🎉 Lançamento Inicial
