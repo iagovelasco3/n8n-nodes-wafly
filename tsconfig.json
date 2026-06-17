@@ -9,6 +9,7 @@
     "outDir": "./dist",
     "rootDir": "./",
     "composite": true,
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo",
     "removeComments": true,
     "strict": true,
     "noImplicitAny": true,
