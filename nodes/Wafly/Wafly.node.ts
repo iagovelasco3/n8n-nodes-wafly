@@ -11,7 +11,7 @@ export class Wafly implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'Wafly WhatsApp',
     name: 'wafly',
-    icon: 'file:wafly.svg',
+    icon: 'file:wafly.png',
     group: ['transform'],
     version: 1,
     subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
