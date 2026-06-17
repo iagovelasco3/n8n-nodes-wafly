@@ -337,7 +337,7 @@ Contribuições são bem-vindas! Por favor:
 
 - **Email**: contato@wafly.com.br
 - **Website**: [https://wafly.com.br](https://wafly.com.br)
-- **Comunidade no WhatsApp**: [DevZapp](https://www.devzapp.com.br/multiatendimento-v3)
+- **Comunidade no WhatsApp**: [Entrar no grupo](https://chat.whatsapp.com/BWS3Sv7TM738uIafAueH2J)
 - **Comunidade no Discord**: [Entrar no Discord](https://discord.gg/ME2yyKZUFp)
 
 ## 🙏 Agradecimentos
