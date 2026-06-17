@@ -1,4 +1,8 @@
-# n8n-nodes-wafly
+<p align="center">
+  <img src="https://raw.githubusercontent.com/iagovelasco3/n8n-nodes-wafly/main/nodes/Wafly/wafly.png" alt="Wafly" width="120" />
+</p>
+
+<h1 align="center">n8n-nodes-wafly</h1>
 
 [![NPM Version](https://img.shields.io/npm/v/n8n-nodes-wafly.svg)](https://www.npmjs.com/package/n8n-nodes-wafly)
 [![Downloads](https://img.shields.io/npm/dm/n8n-nodes-wafly.svg)](https://www.npmjs.com/package/n8n-nodes-wafly)
