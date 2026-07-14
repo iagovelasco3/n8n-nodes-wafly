@@ -1189,14 +1189,10 @@ export class Wafly implements INodeType {
           }
         }
 
-        // Make the API request
-        const responseData = await this.helpers.httpRequest({
+        // Make the API request — the Client-Token header is injected by the credential's authenticate config
+        const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'waflyApi', {
           method,
           url: `${baseUrl}${endpoint}`,
-          headers: {
-            'Client-Token': credentials.clientToken as string,
-            'Content-Type': 'application/json',
-          },
           body: Object.keys(body).length > 0 ? body : undefined,
           json: true,
         });
