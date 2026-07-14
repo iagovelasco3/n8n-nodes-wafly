@@ -15,7 +15,7 @@ export class Wafly implements INodeType {
     group: ['transform'],
     version: 1,
     subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-    description: 'Integração com Wafly WhatsApp Bridge API',
+    description: 'Interact with the Wafly WhatsApp Bridge API',
     defaults: {
       name: 'Wafly',
     },
@@ -48,18 +48,6 @@ export class Wafly implements INodeType {
             value: 'group',
           },
           {
-            name: 'Community',
-            value: 'community',
-          },
-          {
-            name: 'Newsletter',
-            value: 'newsletter',
-          },
-          {
-            name: 'Chat',
-            value: 'chat',
-          },
-          {
             name: 'Webhook',
             value: 'webhook',
           },
@@ -84,43 +72,43 @@ export class Wafly implements INodeType {
           {
             name: 'Get QR Code',
             value: 'getQrCode',
-            description: 'Obter QR Code para conectar',
+            description: 'Get the QR Code to connect the instance',
             action: 'Get QR code',
           },
           {
             name: 'Get Status',
             value: 'getStatus',
-            description: 'Verificar status da conexão',
+            description: 'Check the connection status',
             action: 'Get status',
           },
           {
             name: 'Connect',
             value: 'connect',
-            description: 'Conectar instância',
+            description: 'Connect the instance',
             action: 'Connect instance',
           },
           {
             name: 'Disconnect',
             value: 'disconnect',
-            description: 'Desconectar instância',
+            description: 'Disconnect the instance',
             action: 'Disconnect instance',
           },
           {
             name: 'Restart',
             value: 'restart',
-            description: 'Reiniciar instância',
+            description: 'Restart the instance',
             action: 'Restart instance',
           },
           {
             name: 'Get Device Info',
             value: 'getDevice',
-            description: 'Obter informações do dispositivo',
+            description: 'Get device information',
             action: 'Get device info',
           },
           {
             name: 'Check Phone Numbers',
             value: 'checkPhones',
-            description: 'Verificar se números existem no WhatsApp',
+            description: 'Check whether phone numbers exist on WhatsApp',
             action: 'Check phone numbers',
           },
         ],
@@ -144,68 +132,68 @@ export class Wafly implements INodeType {
           {
             name: 'Send Text',
             value: 'sendText',
-            description: 'Enviar mensagem de texto',
+            description: 'Send a text message',
             action: 'Send text message',
           },
           {
             name: 'Send Image',
             value: 'sendImage',
-            description: 'Enviar imagem',
+            description: 'Send an image',
             action: 'Send image',
           },
           {
             name: 'Send Video',
             value: 'sendVideo',
-            description: 'Enviar vídeo',
+            description: 'Send a video',
             action: 'Send video',
           },
           {
             name: 'Send Audio',
             value: 'sendAudio',
-            description: 'Enviar áudio',
+            description: 'Send an audio file',
             action: 'Send audio',
           },
           {
             name: 'Send Document',
             value: 'sendDocument',
-            description: 'Enviar documento',
+            description: 'Send a document',
             action: 'Send document',
           },
           {
             name: 'Send Location',
             value: 'sendLocation',
-            description: 'Enviar localização',
+            description: 'Send a location',
             action: 'Send location',
           },
           {
             name: 'Send Contact',
             value: 'sendContact',
-            description: 'Enviar contato',
+            description: 'Send a contact card',
             action: 'Send contact',
           },
           {
             name: 'Send Poll',
             value: 'sendPoll',
-            description: 'Criar enquete',
+            description: 'Send a poll',
             action: 'Send poll',
           },
           {
             name: 'Send Link',
             value: 'sendLink',
-            description: 'Enviar link com prévia',
+            description: 'Send a link with preview',
             action: 'Send link',
           },
           {
             name: 'Delete Message',
             value: 'deleteMessage',
-            description: 'Deletar mensagem',
+            description: 'Delete a message',
             action: 'Delete message',
           },
         ],
         default: 'sendText',
       },
 
-      // Phone Number Field (usado por várias operações)
+      // Phone Number Field (shared by several operations)
       {
         displayName: 'Phone Number',
         name: 'phone',
@@ -229,7 +217,7 @@ export class Wafly implements INodeType {
             ],
           },
         },
-        description: 'Número de telefone com DDI (ex: 5511999999999)',
+        description: 'Phone number including country code (e.g. 5511999999999)',
       },
 
       // Send Text Fields
@@ -248,7 +236,7 @@ export class Wafly implements INodeType {
             operation: ['sendText'],
           },
         },
-        description: 'Texto da mensagem',
+        description: 'Text of the message',
       },
 
       // Send Image Fields
@@ -264,7 +252,7 @@ export class Wafly implements INodeType {
             operation: ['sendImage'],
           },
         },
-        description: 'URL da imagem',
+        description: 'URL of the image',
       },
       {
         displayName: 'Caption',
@@ -277,7 +265,7 @@ export class Wafly implements INodeType {
             operation: ['sendImage', 'sendVideo', 'sendDocument'],
           },
         },
-        description: 'Legenda da mídia',
+        description: 'Caption for the media',
       },
 
       // Send Video Fields
@@ -293,7 +281,7 @@ export class Wafly implements INodeType {
             operation: ['sendVideo'],
           },
         },
-        description: 'URL do vídeo',
+        description: 'URL of the video',
       },
 
       // Send Audio Fields
@@ -309,7 +297,7 @@ export class Wafly implements INodeType {
             operation: ['sendAudio'],
           },
         },
-        description: 'URL do áudio',
+        description: 'URL of the audio file',
       },
 
       // Send Document Fields
@@ -325,7 +313,7 @@ export class Wafly implements INodeType {
             operation: ['sendDocument'],
           },
         },
-        description: 'URL do documento',
+        description: 'URL of the document',
       },
       {
         displayName: 'File Name',
@@ -338,7 +326,7 @@ export class Wafly implements INodeType {
             operation: ['sendDocument'],
           },
         },
-        description: 'Nome do arquivo',
+        description: 'Name of the file',
       },
 
       // Send Location Fields
@@ -354,7 +342,7 @@ export class Wafly implements INodeType {
             operation: ['sendLocation'],
           },
         },
-        description: 'Latitude da localização',
+        description: 'Latitude of the location',
       },
       {
         displayName: 'Longitude',
@@ -368,7 +356,7 @@ export class Wafly implements INodeType {
             operation: ['sendLocation'],
           },
         },
-        description: 'Longitude da localização',
+        description: 'Longitude of the location',
       },
       {
         displayName: 'Address',
@@ -381,7 +369,7 @@ export class Wafly implements INodeType {
             operation: ['sendLocation'],
           },
         },
-        description: 'Endereço da localização',
+        description: 'Address of the location',
       },
 
       // Send Contact Fields
@@ -397,7 +385,7 @@ export class Wafly implements INodeType {
             operation: ['sendContact'],
           },
         },
-        description: 'Nome do contato',
+        description: 'Name of the contact',
       },
       {
         displayName: 'Contact Phone',
@@ -411,7 +399,7 @@ export class Wafly implements INodeType {
             operation: ['sendContact'],
           },
         },
-        description: 'Telefone do contato',
+        description: 'Phone number of the contact',
       },
 
       // Send Poll Fields
@@ -427,7 +415,7 @@ export class Wafly implements INodeType {
             operation: ['sendPoll'],
           },
         },
-        description: 'Pergunta da enquete',
+        description: 'Question of the poll',
       },
       {
         displayName: 'Poll Options',
@@ -441,7 +429,7 @@ export class Wafly implements INodeType {
             operation: ['sendPoll'],
           },
         },
-        description: 'Opções separadas por vírgula (ex: Azul,Verde,Vermelho)',
+        description: 'Comma-separated poll options (e.g. Blue,Green,Red)',
       },
       {
         displayName: 'Max Options',
@@ -454,7 +442,7 @@ export class Wafly implements INodeType {
             operation: ['sendPoll'],
           },
         },
-        description: 'Número máximo de opções que podem ser selecionadas',
+        description: 'Maximum number of options that can be selected',
       },
 
       // Send Link Fields
@@ -470,7 +458,7 @@ export class Wafly implements INodeType {
             operation: ['sendLink'],
           },
         },
-        description: 'URL do link',
+        description: 'URL of the link',
       },
       {
         displayName: 'Link Message',
@@ -483,7 +471,7 @@ export class Wafly implements INodeType {
             operation: ['sendLink'],
           },
         },
-        description: 'Mensagem do link',
+        description: 'Message sent along with the link',
       },
       {
         displayName: 'Title',
@@ -496,7 +484,7 @@ export class Wafly implements INodeType {
             operation: ['sendLink'],
           },
         },
-        description: 'Título do link',
+        description: 'Title of the link preview',
       },
       {
         displayName: 'Link Description',
@@ -509,7 +497,7 @@ export class Wafly implements INodeType {
             operation: ['sendLink'],
           },
         },
-        description: 'Descrição do link',
+        description: 'Description of the link preview',
       },
 
       // Delete Message Fields
@@ -525,7 +513,7 @@ export class Wafly implements INodeType {
             operation: ['deleteMessage'],
           },
         },
-        description: 'ID da mensagem a ser deletada',
+        description: 'ID of the message to delete',
       },
 
       // =====================================
@@ -545,97 +533,97 @@ export class Wafly implements INodeType {
           {
             name: 'Create Group',
             value: 'createGroup',
-            description: 'Criar novo grupo',
+            description: 'Create a new group',
             action: 'Create group',
           },
           {
             name: 'List Groups',
             value: 'listGroups',
-            description: 'Listar todos os grupos',
+            description: 'List all groups',
             action: 'List groups',
           },
           {
             name: 'Get Metadata',
             value: 'getMetadata',
-            description: 'Obter informações do grupo',
+            description: 'Get group information',
             action: 'Get metadata',
           },
           {
             name: 'Add Participant',
             value: 'addParticipant',
-            description: 'Adicionar participante',
+            description: 'Add a participant to the group',
             action: 'Add participant',
           },
           {
             name: 'Remove Participant',
             value: 'removeParticipant',
-            description: 'Remover participante',
+            description: 'Remove a participant from the group',
             action: 'Remove participant',
           },
           {
             name: 'Promote to Admin',
             value: 'addAdmin',
-            description: 'Promover a administrador',
+            description: 'Promote a participant to admin',
             action: 'Promote to admin',
           },
           {
             name: 'Demote Admin',
             value: 'removeAdmin',
-            description: 'Remover administrador',
+            description: 'Demote an admin',
             action: 'Demote admin',
           },
           {
             name: 'Leave Group',
             value: 'leaveGroup',
-            description: 'Sair do grupo',
+            description: 'Leave the group',
             action: 'Leave group',
           },
           {
             name: 'Update Name',
             value: 'updateName',
-            description: 'Atualizar nome do grupo',
+            description: 'Update the group name',
             action: 'Update name',
           },
           {
             name: 'Update Description',
             value: 'updateDescription',
-            description: 'Atualizar descrição do grupo',
+            description: 'Update the group description',
             action: 'Update description',
           },
           {
             name: 'Update Photo',
             value: 'updatePhoto',
-            description: 'Atualizar foto do grupo',
+            description: 'Update the group photo',
             action: 'Update photo',
           },
           {
             name: 'Approve Participant',
             value: 'approveParticipant',
-            description: 'Aprovar participante pendente',
+            description: 'Approve a pending participant',
             action: 'Approve participant',
           },
           {
             name: 'Reject Participant',
             value: 'rejectParticipant',
-            description: 'Rejeitar participante pendente',
+            description: 'Reject a pending participant',
             action: 'Reject participant',
           },
           {
             name: 'Get Invite Link',
             value: 'getInviteLink',
-            description: 'Obter link de convite do grupo',
+            description: 'Get the group invite link',
             action: 'Get invite link',
           },
           {
             name: 'Redefine Invite Link',
             value: 'redefineInviteLink',
-            description: 'Redefinir link de convite do grupo',
+            description: 'Reset the group invite link',
             action: 'Redefine invite link',
           },
           {
             name: 'Update Settings',
             value: 'updateSettings',
-            description: 'Atualizar configurações do grupo',
+            description: 'Update the group settings',
             action: 'Update settings',
           },
         ],
@@ -670,7 +658,7 @@ export class Wafly implements INodeType {
             ],
           },
         },
-        description: 'ID do grupo (ex: 5511999999999-1234567890@g.us)',
+        description: 'Group ID (e.g. 5511999999999-1234567890@g.us)',
       },
 
       // Create Group Fields
@@ -686,7 +674,7 @@ export class Wafly implements INodeType {
             operation: ['createGroup', 'updateName'],
           },
         },
-        description: 'Nome do grupo',
+        description: 'Name of the group',
       },
       {
         displayName: 'Participants',
@@ -708,7 +696,7 @@ export class Wafly implements INodeType {
             ],
           },
         },
-        description: 'Números de telefone separados por vírgula (ex: 5511999999999,5511888888888)',
+        description: 'Comma-separated phone numbers (e.g. 5511999999999,5511888888888)',
       },
 
       // Update Description Field
@@ -726,7 +714,7 @@ export class Wafly implements INodeType {
             operation: ['updateDescription'],
           },
         },
-        description: 'Descrição do grupo',
+        description: 'Description of the group',
       },
 
       {
@@ -741,7 +729,7 @@ export class Wafly implements INodeType {
             operation: ['updatePhoto'],
           },
         },
-        description: 'URL da imagem para foto do grupo',
+        description: 'URL of the image to use as the group photo',
       },
 
       {
@@ -755,7 +743,7 @@ export class Wafly implements INodeType {
             operation: ['listGroups'],
           },
         },
-        description: 'Número da página (opcional)',
+        description: 'Page number (optional)',
       },
       {
         displayName: 'Page Size',
@@ -768,7 +756,7 @@ export class Wafly implements INodeType {
             operation: ['listGroups'],
           },
         },
-        description: 'Quantidade de grupos por página (opcional)',
+        description: 'Number of groups per page (optional)',
       },
 
       {
@@ -787,7 +775,7 @@ export class Wafly implements INodeType {
             operation: ['updateSettings'],
           },
         },
-        description: 'Apenas admins podem enviar mensagens',
+        description: 'Whether only admins can send messages',
       },
       {
         displayName: 'Admin Only Settings',
@@ -805,7 +793,7 @@ export class Wafly implements INodeType {
             operation: ['updateSettings'],
           },
         },
-        description: 'Apenas admins podem alterar configurações',
+        description: 'Whether only admins can change the group settings',
       },
       {
         displayName: 'Require Admin Approval',
@@ -823,7 +811,7 @@ export class Wafly implements INodeType {
             operation: ['updateSettings'],
           },
         },
-        description: 'Exigir aprovação de admin para entrar no grupo',
+        description: 'Whether joining the group requires admin approval',
       },
       {
         displayName: 'Admin Only Add Member',
@@ -841,7 +829,7 @@ export class Wafly implements INodeType {
             operation: ['updateSettings'],
           },
         },
-        description: 'Apenas admins podem adicionar membros',
+        description: 'Whether only admins can add members',
       },
 
       // =====================================
@@ -861,19 +849,19 @@ export class Wafly implements INodeType {
           {
             name: 'Set Webhook',
             value: 'setWebhook',
-            description: 'Configurar webhook',
+            description: 'Set the webhook URL',
             action: 'Set webhook',
           },
           {
             name: 'Get Webhook',
             value: 'getWebhook',
-            description: 'Obter configuração do webhook',
+            description: 'Get the webhook configuration',
             action: 'Get webhook',
           },
           {
             name: 'Delete Webhook',
             value: 'deleteWebhook',
-            description: 'Remover webhook',
+            description: 'Delete the webhook',
             action: 'Delete webhook',
           },
         ],
@@ -893,7 +881,7 @@ export class Wafly implements INodeType {
             operation: ['setWebhook'],
           },
         },
-        description: 'URL para receber eventos',
+        description: 'URL that will receive the events',
       },
 
       // Check Phones Fields (Instance)
@@ -909,7 +897,7 @@ export class Wafly implements INodeType {
             operation: ['checkPhones'],
           },
         },
-        description: 'Números separados por vírgula (ex: 5511999999999,5511888888888)',
+        description: 'Comma-separated phone numbers (e.g. 5511999999999,5511888888888)',
       },
     ],
   };

@@ -7,72 +7,68 @@
 [![NPM Version](https://img.shields.io/npm/v/n8n-nodes-wafly.svg)](https://www.npmjs.com/package/n8n-nodes-wafly)
 [![Downloads](https://img.shields.io/npm/dm/n8n-nodes-wafly.svg)](https://www.npmjs.com/package/n8n-nodes-wafly)
 
-Este é um nó customizado do n8n para integração com a **Wafly WhatsApp Bridge API**. Ele permite que você envie mensagens, gerencie grupos, configure webhooks e muito mais através do WhatsApp diretamente nos seus workflows do n8n.
+This is an n8n community node for the **Wafly WhatsApp Bridge API**. It lets you send WhatsApp messages, manage groups and configure webhooks directly from your n8n workflows.
 
-## 🚀 Funcionalidades
+[Wafly](https://wafly.com.br) is a managed WhatsApp API platform: cloud-hosted instances connected via QR Code, REST API, real-time webhooks and unlimited messages.
 
-### 📱 Instância
-- Obter QR Code para conexão
-- Verificar status da conexão
-- Conectar/Desconectar instância
-- Reiniciar instância
-- Obter informações do dispositivo
-- Verificar se números existem no WhatsApp
+## 🚀 Features
 
-### 💬 Mensagens
-- Enviar texto
-- Enviar imagem
-- Enviar vídeo
-- Enviar áudio
-- Enviar documento
-- Enviar localização
-- Enviar contato
-- Criar enquetes
-- Enviar links com prévia
-- Deletar mensagens
+### 📱 Instance
+- Get the QR Code to connect
+- Check the connection status
+- Connect / disconnect the instance
+- Restart the instance
+- Get device information
+- Check whether phone numbers exist on WhatsApp
 
-### 👥 Grupos
-- Criar grupos
-- Listar grupos (com paginação opcional)
-- Obter metadados do grupo
-- Adicionar/Remover participantes
-- Aprovar/Rejeitar participantes pendentes
-- Promover/Remover administradores
-- Sair do grupo
-- Atualizar nome, descrição e foto
-- Obter e redefinir link de convite
-- Atualizar configurações do grupo
+### 💬 Messages
+- Send text
+- Send image
+- Send video
+- Send audio
+- Send document
+- Send location
+- Send contact card
+- Send polls
+- Send links with preview
+- Delete messages
+
+### 👥 Groups
+- Create groups
+- List groups (with optional pagination)
+- Get group metadata
+- Add / remove participants
+- Approve / reject pending participants
+- Promote / demote admins
+- Leave a group
+- Update name, description and photo
+- Get and reset the invite link
+- Update group settings
 
 ### 🔔 Webhooks
-- Configurar webhook
-- Obter configuração
-- Remover webhook
+- Set the webhook URL
+- Get the webhook configuration
+- Delete the webhook
 
-## 📦 Instalação
+## 📦 Installation
 
-### Instalação via Interface do n8n
+### Install from the n8n UI
 
-1. Acesse seu n8n
-2. Vá em **Settings** > **Community Nodes**
-3. Clique em **Install a community node**
-4. Digite: `n8n-nodes-wafly`
-5. Clique em **Install**
+1. Open your n8n instance
+2. Go to **Settings** > **Community Nodes**
+3. Click **Install a community node**
+4. Enter: `n8n-nodes-wafly`
+5. Click **Install**
 
-### Instalação Manual
+### Manual installation
 
-Se você está usando uma instalação local do n8n, pode instalar o pacote via npm:
+If you run n8n locally, you can install the package via npm:
 
 ```bash
 npm install n8n-nodes-wafly
 ```
 
-Para instalação global:
-
-```bash
-npm install -g n8n-nodes-wafly
-```
-
-Se você instalou o n8n via Docker, adicione ao seu `docker-compose.yml`:
+If you run n8n via Docker, add it to your `docker-compose.yml`:
 
 ```yaml
 version: '3'
@@ -87,27 +83,25 @@ services:
       - ~/.n8n:/home/node/.n8n
 ```
 
-## 🔑 Configuração de Credenciais
+## 🔑 Credentials
 
-Antes de usar o nó, você precisa configurar suas credenciais da Wafly:
+Before using the node, create a credential of type **Wafly API** with the following fields:
 
-1. Crie uma nova credencial do tipo **Wafly API**
-2. Preencha os seguintes campos:
-   - **Client Token**: Token fornecido pela Wafly
-   - **Instance**: Nome da sua instância WhatsApp
-   - **Token**: Token da instância
-   - **Base URL**: `https://wafly.com.br/api-bridge-whats` (padrão)
+- **Client Token**: Client-Token provided by Wafly
+- **Instance**: Name of your WhatsApp instance
+- **Token**: Token of the instance
+- **Base URL**: `https://wafly.com.br/api-bridge-whats` (default)
 
-### Como obter suas credenciais:
+### How to get your credentials
 
-1. Acesse o painel da Wafly em [https://wafly.com.br](https://wafly.com.br)
-2. Faça login na sua conta
-3. Vá em **Instâncias** e crie ou selecione uma instância
-4. Copie o **Client-Token**, **Instance** e **Token**
+1. Open the Wafly dashboard at [https://wafly.com.br](https://wafly.com.br)
+2. Log in to your account
+3. Go to **Instances** and create or select an instance
+4. Copy the **Client-Token**, **Instance** and **Token**
 
-## 💡 Exemplos de Uso
+## 💡 Usage examples
 
-### Exemplo 1: Enviar Mensagem de Texto
+### Example 1: Send a text message
 
 ```json
 {
@@ -117,7 +111,7 @@ Antes de usar o nó, você precisa configurar suas credenciais da Wafly:
         "resource": "message",
         "operation": "sendText",
         "phone": "5511999999999",
-        "message": "Olá! Esta é uma mensagem enviada via n8n"
+        "message": "Hello! This message was sent via n8n"
       },
       "name": "Wafly",
       "type": "n8n-nodes-wafly.wafly",
@@ -131,7 +125,7 @@ Antes de usar o nó, você precisa configurar suas credenciais da Wafly:
 }
 ```
 
-### Exemplo 2: Criar Grupo e Adicionar Participantes
+### Example 2: Create a group and add participants
 
 ```json
 {
@@ -140,10 +134,10 @@ Antes de usar o nó, você precisa configurar suas credenciais da Wafly:
       "parameters": {
         "resource": "group",
         "operation": "createGroup",
-        "groupName": "Meu Grupo Automático",
+        "groupName": "My Automated Group",
         "phones": "5511999999999,5511888888888"
       },
-      "name": "Criar Grupo",
+      "name": "Create Group",
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
       "position": [250, 300],
@@ -155,7 +149,7 @@ Antes de usar o nó, você precisa configurar suas credenciais da Wafly:
 }
 ```
 
-### Exemplo 3: Verificar Status da Instância
+### Example 3: Check the instance status
 
 ```json
 {
@@ -165,7 +159,7 @@ Antes de usar o nó, você precisa configurar suas credenciais da Wafly:
         "resource": "instance",
         "operation": "getStatus"
       },
-      "name": "Verificar Status",
+      "name": "Check Status",
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
       "position": [250, 300],
@@ -177,13 +171,13 @@ Antes de usar o nó, você precisa configurar suas credenciais da Wafly:
 }
 ```
 
-### Exemplo 4: Workflow Completo - Enviar Mensagem Diária
+### Example 4: Full workflow — daily message
 
-Este workflow envia uma mensagem automática todos os dias às 9h:
+This workflow sends an automatic message every day at 9am:
 
 ```json
 {
-  "name": "Mensagem Diária WhatsApp",
+  "name": "Daily WhatsApp Message",
   "nodes": [
     {
       "parameters": {
@@ -196,7 +190,7 @@ Este workflow envia uma mensagem automática todos os dias às 9h:
           ]
         }
       },
-      "name": "Cron - 9h Todo Dia",
+      "name": "Cron - 9am Every Day",
       "type": "n8n-nodes-base.cron",
       "typeVersion": 1,
       "position": [250, 300]
@@ -206,9 +200,9 @@ Este workflow envia uma mensagem automática todos os dias às 9h:
         "resource": "message",
         "operation": "sendText",
         "phone": "5511999999999",
-        "message": "Bom dia! Lembrete automático das 9h."
+        "message": "Good morning! Automatic 9am reminder."
       },
-      "name": "Enviar Mensagem",
+      "name": "Send Message",
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
       "position": [450, 300],
@@ -218,11 +212,11 @@ Este workflow envia uma mensagem automática todos os dias às 9h:
     }
   ],
   "connections": {
-    "Cron - 9h Todo Dia": {
+    "Cron - 9am Every Day": {
       "main": [
         [
           {
-            "node": "Enviar Mensagem",
+            "node": "Send Message",
             "type": "main",
             "index": 0
           }
@@ -233,38 +227,38 @@ Este workflow envia uma mensagem automática todos os dias às 9h:
 }
 ```
 
-## 📚 Documentação da API
+## 📚 API documentation
 
-Para mais informações sobre os endpoints disponíveis e seus parâmetros, consulte a documentação completa da API:
+For more information about the available endpoints and their parameters, see the full API documentation:
 
-- [Documentação da API Wafly](https://wafly.com.br/documentacao)
+- [Wafly API documentation](https://wafly.com.br/documentation)
 - Base URL: `https://wafly.com.br/api-bridge-whats`
 
-## 🛠️ Desenvolvimento
+## 🛠️ Development
 
-### Pré-requisitos
+### Prerequisites
 
-- Node.js v16 ou superior
-- npm v7 ou superior
-- n8n instalado localmente (para testes)
+- Node.js v18 or later
+- npm v9 or later
+- A local n8n installation (for testing)
 
-### Setup Local
+### Local setup
 
 ```bash
-# Clone o repositório
-git clone https://github.com/wafly/n8n-nodes-wafly.git
+# Clone the repository
+git clone https://github.com/iagovelasco3/n8n-nodes-wafly.git
 cd n8n-nodes-wafly
 
-# Instale as dependências
+# Install dependencies
 npm install
 
-# Compile o código TypeScript
+# Compile the TypeScript code
 npm run build
 
-# Link o pacote localmente
+# Link the package locally
 npm link
 
-# No diretório do n8n, linke o pacote
+# In the n8n directory, link the package
 cd ~/.n8n
 npm link n8n-nodes-wafly
 ```
@@ -279,72 +273,48 @@ npm run build
 
 ```bash
 npm run lint
-npm run lintfix  # Para corrigir automaticamente
+npm run lintfix  # auto-fix
 ```
 
-### Publicação
+## 🔐 Security
 
-```bash
-# Faça login no npm
-npm login
+- Never share your credentials (Client-Token, Instance, Token)
+- Use environment variables to store sensitive credentials
+- Keep your n8n installation up to date
+- Always use HTTPS
 
-# Aumente a versão
-npm version patch  # ou minor, ou major
+## 🐛 Reporting issues
 
-# Publique
-npm publish
-```
+Found a bug or have a suggestion? Open an issue on GitHub:
 
-## 🔐 Segurança
+[https://github.com/iagovelasco3/n8n-nodes-wafly/issues](https://github.com/iagovelasco3/n8n-nodes-wafly/issues)
 
-- Nunca compartilhe suas credenciais (Client-Token, Instance, Token)
-- Use variáveis de ambiente para armazenar credenciais sensíveis
-- Mantenha seu n8n atualizado
-- Use HTTPS sempre que possível
+## 📄 License
 
-## 🐛 Reportar Problemas
+MIT License — see the [LICENSE](LICENSE) file for details.
 
-Encontrou um bug ou tem uma sugestão? Abra uma issue no GitHub:
+## 🤝 Contributing
 
-[https://github.com/wafly/n8n-nodes-wafly/issues](https://github.com/wafly/n8n-nodes-wafly/issues)
+Contributions are welcome! Please:
 
-## 📝 Changelog
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/MyFeature`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to the branch (`git push origin feature/MyFeature`)
+5. Open a Pull Request
 
-### v1.0.0 (2026-01-17)
-
-- 🎉 Lançamento inicial
-- ✅ Suporte para operações de instância
-- ✅ Suporte para envio de mensagens (texto, imagem, vídeo, áudio, etc.)
-- ✅ Gerenciamento de grupos
-- ✅ Configuração de webhooks
-- ✅ Autenticação com Client-Token
-
-## 📄 Licença
-
-MIT License - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Por favor:
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
-
-## 💬 Suporte
+## 💬 Support
 
 - **Email**: contato@wafly.com.br
 - **Website**: [https://wafly.com.br](https://wafly.com.br)
-- **Comunidade no WhatsApp**: [Entrar no grupo](https://chat.whatsapp.com/BWS3Sv7TM738uIafAueH2J)
-- **Comunidade no Discord**: [Entrar no Discord](https://discord.gg/ME2yyKZUFp)
+- **WhatsApp community**: [Join the group](https://chat.whatsapp.com/BWS3Sv7TM738uIafAueH2J)
+- **Discord community**: [Join the Discord](https://discord.gg/ME2yyKZUFp)
 
-## 🙏 Agradecimentos
+## 🙏 Acknowledgements
 
-- Equipe do [n8n](https://n8n.io) pela incrível plataforma
-- Comunidade de desenvolvedores que contribuíram
+- The [n8n](https://n8n.io) team for the amazing platform
+- The developer community for their contributions
 
 ---
 
-Feito com ❤️ pela equipe [Wafly](https://wafly.com.br)
+Made with ❤️ by the [Wafly](https://wafly.com.br) team

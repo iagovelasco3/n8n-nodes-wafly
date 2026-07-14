@@ -1,9 +1,23 @@
 # Changelog
 
-Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
+All notable changes to this project are documented in this file.
 
-O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
-e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/).
+
+## [1.2.0] - 2026-07-14
+
+### Changed
+- All node and credential UI strings (descriptions, hints) translated to English, as required by the n8n verified community node guidelines
+- README rewritten in English
+- `repository` URL in package.json fixed (now points to the real public repo)
+
+### Removed
+- Unused `n8n-core` runtime dependency (verified nodes must have zero runtime dependencies)
+- Dead `Community`, `Newsletter` and `Chat` resource options that had no implemented operations
+
+### Added
+- GitHub Actions workflow to publish to npm with provenance (`.github/workflows/publish.yml`)
 
 ## [1.1.0] - 2026-06-11
 

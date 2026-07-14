@@ -19,7 +19,7 @@ export class WaflyApi implements ICredentialType {
       },
       default: '',
       required: true,
-      description: 'Client-Token fornecido pela Wafly',
+      description: 'Client-Token provided by Wafly',
     },
     {
       displayName: 'Instance',
@@ -27,7 +27,7 @@ export class WaflyApi implements ICredentialType {
       type: 'string',
       default: '',
       required: true,
-      description: 'Nome da instância WhatsApp',
+      description: 'Name of the WhatsApp instance',
     },
     {
       displayName: 'Token',
@@ -38,7 +38,7 @@ export class WaflyApi implements ICredentialType {
       },
       default: '',
       required: true,
-      description: 'Token da instância',
+      description: 'Token of the instance',
     },
     {
       displayName: 'Base URL',
@@ -46,7 +46,7 @@ export class WaflyApi implements ICredentialType {
       type: 'string',
       default: 'https://wafly.com.br/api-bridge-whats',
       required: true,
-      description: 'URL base da API',
+      description: 'Base URL of the API',
     },
   ];
 

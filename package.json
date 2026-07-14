@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-wafly",
-  "version": "1.1.4",
-  "description": "n8n node for Wafly WhatsApp Bridge API",
+  "version": "1.2.0",
+  "description": "n8n community node for the Wafly WhatsApp Bridge API — send messages, manage groups and configure webhooks",
   "keywords": [
     "n8n-community-node-package",
     "n8n",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/wafly/n8n-nodes-wafly.git"
+    "url": "https://github.com/iagovelasco3/n8n-nodes-wafly.git"
   },
   "main": "index.js",
   "scripts": {
@@ -52,8 +52,5 @@
   },
   "peerDependencies": {
     "n8n-workflow": "*"
-  },
-  "dependencies": {
-    "n8n-core": "^1.0.0"
   }
 }
