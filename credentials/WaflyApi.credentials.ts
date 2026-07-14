@@ -62,7 +62,7 @@ export class WaflyApi implements ICredentialType {
   test: ICredentialTestRequest = {
     request: {
       baseURL: '={{$credentials.baseUrl}}',
-      url: '/instances/={{$credentials.instance}}/token/={{$credentials.token}}/status',
+      url: '=/instances/{{$credentials.instance}}/token/{{$credentials.token}}/status',
       method: 'GET',
     },
   };
