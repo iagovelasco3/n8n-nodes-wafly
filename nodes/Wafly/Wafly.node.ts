@@ -1190,18 +1190,16 @@ export class Wafly implements INodeType {
         }
 
         // Make the API request
-        const options = {
+        const responseData = await this.helpers.httpRequest({
           method,
           url: `${baseUrl}${endpoint}`,
           headers: {
-            'Client-Token': credentials.clientToken,
+            'Client-Token': credentials.clientToken as string,
             'Content-Type': 'application/json',
           },
           body: Object.keys(body).length > 0 ? body : undefined,
           json: true,
-        };
-
-        const responseData = await this.helpers.request(options);
+        });
         returnData.push(responseData as IDataObject);
       } catch (error) {
         if (this.continueOnFail()) {

@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] - 2026-07-14
+
+### Fixed
+- Replaced deprecated `this.helpers.request` with `this.helpers.httpRequest` (flagged by the n8n automated vetting)
+- Stopped shipping `.d.ts`/source maps in `dist` (declaration files tripped the credentials filename convention check)
+
 ## [1.2.0] - 2026-07-14
 
 ### Changed
