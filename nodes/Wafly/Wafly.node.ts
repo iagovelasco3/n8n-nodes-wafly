@@ -6,8 +6,13 @@ import {
   IDataObject,
   JsonObject,
   NodeApiError,
+  NodeConnectionType,
   NodeConnectionTypes,
 } from 'n8n-workflow';
+
+// n8n-workflow < 1.83 does not export NodeConnectionTypes; without this
+// fallback the node fails to load on older n8n instances ("Class could not be found")
+const mainConnection: NodeConnectionType = NodeConnectionTypes?.Main ?? ('main' as NodeConnectionType);
 
 export class Wafly implements INodeType {
   description: INodeTypeDescription = {
@@ -21,8 +26,8 @@ export class Wafly implements INodeType {
     defaults: {
       name: 'Wafly',
     },
-    inputs: [NodeConnectionTypes.Main],
-    outputs: [NodeConnectionTypes.Main],
+    inputs: [mainConnection],
+    outputs: [mainConnection],
     credentials: [
       {
         name: 'waflyApi',
