@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/iagovelasco3/n8n-nodes-wafly/main/nodes/Wafly/wafly.png" alt="Wafly" width="120" />
+  <img src="https://raw.githubusercontent.com/iagovelasco3/n8n-nodes-wafly/main/nodes/Wafly/wafly.svg" alt="Wafly" width="120" />
 </p>
 
 <h1 align="center">n8n-nodes-wafly</h1>
