@@ -2,12 +2,14 @@ import {
   IAuthenticateGeneric,
   ICredentialTestRequest,
   ICredentialType,
+  Icon,
   INodeProperties,
 } from 'n8n-workflow';
 
 export class WaflyApi implements ICredentialType {
   name = 'waflyApi';
   displayName = 'Wafly API';
+  icon: Icon = 'file:wafly.svg';
   documentationUrl = 'https://wafly.com.br/docs';
   properties: INodeProperties[] = [
     {

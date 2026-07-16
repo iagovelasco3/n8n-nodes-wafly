@@ -4,14 +4,16 @@ import {
   INodeType,
   INodeTypeDescription,
   IDataObject,
-  NodeOperationError,
+  JsonObject,
+  NodeApiError,
+  NodeConnectionTypes,
 } from 'n8n-workflow';
 
 export class Wafly implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'Wafly WhatsApp',
     name: 'wafly',
-    icon: 'file:wafly.png',
+    icon: 'file:wafly.svg',
     group: ['transform'],
     version: 1,
     subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
@@ -19,8 +21,8 @@ export class Wafly implements INodeType {
     defaults: {
       name: 'Wafly',
     },
-    inputs: ['main'],
-    outputs: ['main'],
+    inputs: [NodeConnectionTypes.Main],
+    outputs: [NodeConnectionTypes.Main],
     credentials: [
       {
         name: 'waflyApi',
@@ -1149,7 +1151,8 @@ export class Wafly implements INodeType {
             endpoint = `${basePath}/update-group-settings`;
             method = 'POST';
             const groupId = this.getNodeParameter('groupId', i) as string;
-            body = { phone: groupId };
+            // The bridge's UpdateGroupSettingsDTO requires "phone"; "groupId" is sent alongside for API consistency
+            body = { phone: groupId, groupId };
             const adminOnlyMessage = this.getNodeParameter('adminOnlyMessage', i, '') as string;
             const adminOnlySettings = this.getNodeParameter('adminOnlySettings', i, '') as string;
             const requireAdminApproval = this.getNodeParameter('requireAdminApproval', i, '') as string;
@@ -1199,10 +1202,11 @@ export class Wafly implements INodeType {
         returnData.push(responseData as IDataObject);
       } catch (error) {
         if (this.continueOnFail()) {
-          returnData.push({ error: (error as Error).message });
+          // Do not echo error.message here — it contains the request URL with instance/token
+          returnData.push({ error: 'Request failed. Check node credentials and configuration.' });
           continue;
         }
-        throw new NodeOperationError(this.getNode(), error as Error);
+        throw new NodeApiError(this.getNode(), error as JsonObject);
       }
     }
 

@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.4] - 2026-07-16
+
+### Fixed
+- HTTP errors are now thrown as `NodeApiError` (was `NodeOperationError`), preserving status code and response body in the n8n UI
+- `continueOnFail` output no longer echoes the raw error message, which contained the request URL with instance name and token
+- Group `updateSettings` now sends `groupId` in the request body (kept `phone` for backward compatibility with the bridge API)
+
+### Changed
+- Node icon converted from PNG to SVG; credential class now declares its own `icon`
+- `inputs`/`outputs` use `NodeConnectionTypes.Main` instead of the `'main'` string literal
+
 ## [1.2.3] - 2026-07-14
 
 ### Fixed
