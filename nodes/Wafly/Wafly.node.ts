@@ -191,6 +191,36 @@ export class Wafly implements INodeType {
             action: 'Send link',
           },
           {
+            name: 'Send Pix Button',
+            value: 'sendButtonPix',
+            description: 'Send a Pix payment card with copy button',
+            action: 'Send pix button',
+          },
+          {
+            name: 'Send Button List',
+            value: 'sendButtonList',
+            description: 'Send a message with up to 3 quick-reply buttons',
+            action: 'Send button list',
+          },
+          {
+            name: 'Send OTP Button',
+            value: 'sendButtonOtp',
+            description: 'Send a message with a copy-code button',
+            action: 'Send otp button',
+          },
+          {
+            name: 'Send Button Actions',
+            value: 'sendButtonActions',
+            description: 'Send advanced buttons (URL, call, reply, copy)',
+            action: 'Send button actions',
+          },
+          {
+            name: 'Send Carousel',
+            value: 'sendCarousel',
+            description: 'Send a carousel of cards with images and buttons',
+            action: 'Send carousel',
+          },
+          {
             name: 'Delete Message',
             value: 'deleteMessage',
             description: 'Delete a message',
@@ -220,6 +250,11 @@ export class Wafly implements INodeType {
               'sendContact',
               'sendPoll',
               'sendLink',
+              'sendButtonPix',
+              'sendButtonList',
+              'sendButtonOtp',
+              'sendButtonActions',
+              'sendCarousel',
               'deleteMessage',
             ],
           },
@@ -450,6 +485,269 @@ export class Wafly implements INodeType {
           },
         },
         description: 'Maximum number of options that can be selected',
+      },
+
+      // Send Pix Button Fields
+      {
+        displayName: 'Pix Key',
+        name: 'pixKey',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonPix'],
+          },
+        },
+        description: 'Pix key (email, CPF, CNPJ, phone or random key) or copy-paste code',
+      },
+      {
+        displayName: 'Pix Key Type',
+        name: 'pixKeyType',
+        type: 'options',
+        options: [
+          { name: 'Email', value: 'EMAIL' },
+          { name: 'CPF', value: 'CPF' },
+          { name: 'CNPJ', value: 'CNPJ' },
+          { name: 'Phone', value: 'PHONE' },
+          { name: 'Random Key (EVP)', value: 'EVP' },
+        ],
+        default: 'EMAIL',
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonPix'],
+          },
+        },
+        description: 'Type of the Pix key',
+      },
+      {
+        displayName: 'Merchant Name',
+        name: 'pixMerchantName',
+        type: 'string',
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonPix'],
+          },
+        },
+        description: 'Business name shown on the payment card',
+      },
+      {
+        displayName: 'Amount',
+        name: 'pixTotalAmount',
+        type: 'number',
+        default: 0,
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonPix'],
+          },
+        },
+        description: 'Amount shown on the payment card (0 lets the payer type the value)',
+      },
+      {
+        displayName: 'Description',
+        name: 'pixDescription',
+        type: 'string',
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonPix'],
+          },
+        },
+        description: 'Item/charge description shown on the payment card',
+      },
+      {
+        displayName: 'Document URL',
+        name: 'pixDocumentUrl',
+        type: 'string',
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonPix'],
+          },
+        },
+        description: 'Optional invoice PDF URL (changes the format to document + copy button)',
+      },
+
+      // Send Button List Fields
+      {
+        displayName: 'Message',
+        name: 'buttonListMessage',
+        type: 'string',
+        typeOptions: { rows: 3 },
+        default: '',
+        required: true,
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonList'],
+          },
+        },
+        description: 'Text of the message shown above the buttons',
+      },
+      {
+        displayName: 'Buttons',
+        name: 'buttonListButtons',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonList'],
+          },
+        },
+        description: 'Comma-separated button labels, up to 3 (e.g. "Yes,No,Talk to support")',
+      },
+      {
+        displayName: 'Image URL',
+        name: 'buttonListImage',
+        type: 'string',
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonList'],
+          },
+        },
+        description: 'Optional image URL shown as header',
+      },
+
+      // Send OTP Button Fields
+      {
+        displayName: 'Message',
+        name: 'otpMessage',
+        type: 'string',
+        typeOptions: { rows: 3 },
+        default: '',
+        required: true,
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonOtp'],
+          },
+        },
+        description: 'Text of the message',
+      },
+      {
+        displayName: 'Code',
+        name: 'otpCode',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonOtp'],
+          },
+        },
+        description: 'Code copied when the button is tapped',
+      },
+      {
+        displayName: 'Button Text',
+        name: 'otpButtonText',
+        type: 'string',
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonOtp'],
+          },
+        },
+        description: 'Label of the copy button (default "Copiar código")',
+      },
+
+      // Send Button Actions Fields
+      {
+        displayName: 'Message',
+        name: 'buttonActionsMessage',
+        type: 'string',
+        typeOptions: { rows: 3 },
+        default: '',
+        required: true,
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonActions'],
+          },
+        },
+        description: 'Text of the message shown above the buttons',
+      },
+      {
+        displayName: 'Buttons (JSON)',
+        name: 'buttonActionsJson',
+        type: 'json',
+        default: '[\n  { "id": "1", "type": "URL", "label": "Open site", "url": "https://example.com" },\n  { "id": "2", "type": "REPLY", "label": "Talk to us" }\n]',
+        required: true,
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonActions'],
+          },
+        },
+        description: 'Array of buttons. Types: URL (with "url"), CALL (with "phone"), REPLY, COPY (with "code").',
+      },
+      {
+        displayName: 'Title',
+        name: 'buttonActionsTitle',
+        type: 'string',
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonActions'],
+          },
+        },
+        description: 'Optional title shown above the message',
+      },
+      {
+        displayName: 'Footer',
+        name: 'buttonActionsFooter',
+        type: 'string',
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendButtonActions'],
+          },
+        },
+        description: 'Optional footer shown below the message',
+      },
+
+      // Send Carousel Fields
+      {
+        displayName: 'Message',
+        name: 'carouselMessage',
+        type: 'string',
+        typeOptions: { rows: 3 },
+        default: '',
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendCarousel'],
+          },
+        },
+        description: 'Text of the message shown above the carousel',
+      },
+      {
+        displayName: 'Cards (JSON)',
+        name: 'carouselJson',
+        type: 'json',
+        default: '[\n  {\n    "text": "Product 1 - $99",\n    "image": "https://example.com/product1.jpg",\n    "buttons": [ { "id": "buy1", "label": "Buy", "type": "REPLY" } ]\n  }\n]',
+        required: true,
+        displayOptions: {
+          show: {
+            resource: ['message'],
+            operation: ['sendCarousel'],
+          },
+        },
+        description: 'Array of carousel cards, each with text, image and buttons',
       },
 
       // Send Link Fields
@@ -1026,6 +1324,60 @@ export class Wafly implements INodeType {
             const title = this.getNodeParameter('title', i, '') as string;
             const linkDescription = this.getNodeParameter('linkDescription', i, '') as string;
             body = { phone, linkUrl, message, title, linkDescription };
+          } else if (operation === 'sendButtonPix') {
+            endpoint = `${basePath}/send-button-pix`;
+            method = 'POST';
+            const pixKey = this.getNodeParameter('pixKey', i) as string;
+            const type = this.getNodeParameter('pixKeyType', i) as string;
+            const name = this.getNodeParameter('pixMerchantName', i, '') as string;
+            const totalAmount = this.getNodeParameter('pixTotalAmount', i, 0) as number;
+            const description = this.getNodeParameter('pixDescription', i, '') as string;
+            const documentUrl = this.getNodeParameter('pixDocumentUrl', i, '') as string;
+            body = { phone, pixKey, type };
+            if (name) (body as Record<string, unknown>).name = name;
+            if (totalAmount) (body as Record<string, unknown>).totalAmount = totalAmount;
+            if (description) (body as Record<string, unknown>).description = description;
+            if (documentUrl) (body as Record<string, unknown>).documentUrl = documentUrl;
+          } else if (operation === 'sendButtonList') {
+            endpoint = `${basePath}/send-button-list`;
+            method = 'POST';
+            const message = this.getNodeParameter('buttonListMessage', i) as string;
+            const labels = this.getNodeParameter('buttonListButtons', i) as string;
+            const image = this.getNodeParameter('buttonListImage', i, '') as string;
+            const buttons = labels
+              .split(',')
+              .map((label, idx) => ({ id: String(idx + 1), label: label.trim() }))
+              .filter((b) => b.label);
+            const buttonList: Record<string, unknown> = { buttons };
+            if (image) buttonList.image = image;
+            body = { phone, message, buttonList };
+          } else if (operation === 'sendButtonOtp') {
+            endpoint = `${basePath}/send-button-otp`;
+            method = 'POST';
+            const message = this.getNodeParameter('otpMessage', i) as string;
+            const code = this.getNodeParameter('otpCode', i) as string;
+            const buttonText = this.getNodeParameter('otpButtonText', i, '') as string;
+            body = { phone, message, code };
+            if (buttonText) (body as Record<string, unknown>).buttonText = buttonText;
+          } else if (operation === 'sendButtonActions') {
+            endpoint = `${basePath}/send-button-actions`;
+            method = 'POST';
+            const message = this.getNodeParameter('buttonActionsMessage', i) as string;
+            const title = this.getNodeParameter('buttonActionsTitle', i, '') as string;
+            const footer = this.getNodeParameter('buttonActionsFooter', i, '') as string;
+            const rawButtons = this.getNodeParameter('buttonActionsJson', i) as string | object;
+            const buttonActions = typeof rawButtons === 'string' ? JSON.parse(rawButtons) : rawButtons;
+            body = { phone, message, buttonActions };
+            if (title) (body as Record<string, unknown>).title = title;
+            if (footer) (body as Record<string, unknown>).footer = footer;
+          } else if (operation === 'sendCarousel') {
+            endpoint = `${basePath}/send-carousel`;
+            method = 'POST';
+            const message = this.getNodeParameter('carouselMessage', i, '') as string;
+            const rawCards = this.getNodeParameter('carouselJson', i) as string | object;
+            const carousel = typeof rawCards === 'string' ? JSON.parse(rawCards) : rawCards;
+            body = { phone, carousel };
+            if (message) (body as Record<string, unknown>).message = message;
           } else if (operation === 'deleteMessage') {
             endpoint = `${basePath}/delete-message`;
             method = 'DELETE';
