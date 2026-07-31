@@ -1,0 +1,179 @@
+{
+  "name": "Enviar OTP por WhatsApp com validacao de numero e fallback para SMS (Wafly)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Como usar\n\nSeu backend gera o codigo e chama este webhook:\n\n```\nPOST <production-url>\n{ \"phone\": \"5511999999999\", \"code\": \"482913\" }\n```\n\nO fluxo:\n1. `Check Phone Numbers` da Wafly confirma se o numero existe no WhatsApp **antes** de gastar envio.\n2. Existe -> `Send OTP Button` (mensagem com botao de copiar codigo).\n3. Nao existe -> cai no branch de SMS, onde voce pluga seu provedor.\n\nO codigo NUNCA e gerado nem guardado aqui. O n8n so entrega. A validacao continua no seu backend.\n\nWafly: R$ 59,90 por instancia/mes, mensagens ilimitadas — o custo por OTP entregue no WhatsApp e zero marginal, ao contrario de SMS.",
+        "height": 460,
+        "width": 420,
+        "color": 4
+      },
+      "id": "sticky-setup",
+      "name": "Como usar",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-420, 60]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wafly-otp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-otp",
+      "name": "Webhook OTP",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [60, 320],
+      "webhookId": "REPLACE_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "resource": "instance",
+        "operation": "checkPhones",
+        "phonesToCheck": "={{ $json.body.phone }}"
+      },
+      "id": "wafly-check",
+      "name": "Numero existe no WhatsApp?",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [300, 320],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 1500,
+      "credentials": {
+        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// O endpoint /phone-exists-batch responde um ARRAY: [{ exists, inputPhone, outputPhone }].\n// Dependendo da versao do node esse array chega como item unico ou ja achatado em itens.\n// Este bloco normaliza os dois casos e trata falha da checagem como \"nao existe\"\n// (fail-safe: melhor cair no SMS do que nao entregar o OTP).\nconst first = $input.first().json;\nconst raw = Array.isArray(first) ? first[0] : (Array.isArray(first?.data) ? first.data[0] : first);\n\nconst exists = raw?.exists === true;\nconst phone = String(raw?.outputPhone || raw?.inputPhone || $('Webhook OTP').first().json.body.phone);\n\nreturn [{ json: { exists, phone, checkFailed: raw?.error !== undefined } }];"
+      },
+      "id": "code-normalize",
+      "name": "Normalizar resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 320]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            {
+              "id": "ex",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-exists",
+      "name": "Tem WhatsApp?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [740, 320]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendButtonOtp",
+        "phone": "={{ $json.phone }}",
+        "otpMessage": "=Seu codigo de verificacao e {{ $('Webhook OTP').item.json.body.code }}. Ele expira em 5 minutos. Nao compartilhe com ninguem.",
+        "otpCode": "={{ $('Webhook OTP').item.json.body.code }}",
+        "otpButtonText": "Copiar codigo"
+      },
+      "id": "wafly-otp",
+      "name": "Enviar OTP no WhatsApp",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [980, 220],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, channel: 'whatsapp', phone: $('Normalizar resposta').item.json.phone, messageId: $json.messageId || null }) }}",
+        "options": {}
+      },
+      "id": "respond-wa",
+      "name": "Responder: enviado por WhatsApp",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1240, 180]
+    },
+    {
+      "parameters": {},
+      "id": "noop-sms",
+      "name": "Fallback SMS (pluge seu provedor aqui)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [980, 460]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, channel: 'sms_fallback', phone: $('Normalizar resposta').item.json.phone, reason: 'numero sem WhatsApp ou checagem indisponivel' }) }}",
+        "options": {}
+      },
+      "id": "respond-sms",
+      "name": "Responder: caiu no SMS",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1240, 460]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 502,
+        "responseBody": "={{ JSON.stringify({ ok: false, channel: 'whatsapp', reason: 'falha no envio apos 3 tentativas — instancia pode estar desconectada' }) }}",
+        "options": {}
+      },
+      "id": "respond-fail",
+      "name": "Responder: falha no envio",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1240, 320]
+    }
+  ],
+  "connections": {
+    "Webhook OTP": {
+      "main": [[{ "node": "Numero existe no WhatsApp?", "type": "main", "index": 0 }]]
+    },
+    "Numero existe no WhatsApp?": {
+      "main": [[{ "node": "Normalizar resposta", "type": "main", "index": 0 }]]
+    },
+    "Normalizar resposta": {
+      "main": [[{ "node": "Tem WhatsApp?", "type": "main", "index": 0 }]]
+    },
+    "Tem WhatsApp?": {
+      "main": [
+        [{ "node": "Enviar OTP no WhatsApp", "type": "main", "index": 0 }],
+        [{ "node": "Fallback SMS (pluge seu provedor aqui)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Enviar OTP no WhatsApp": {
+      "main": [
+        [{ "node": "Responder: enviado por WhatsApp", "type": "main", "index": 0 }],
+        [{ "node": "Responder: falha no envio", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fallback SMS (pluge seu provedor aqui)": {
+      "main": [[{ "node": "Responder: caiu no SMS", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": false }
+}

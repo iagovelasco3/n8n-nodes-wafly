@@ -1,0 +1,272 @@
+{
+  "name": "Moderar grupo de WhatsApp: aprovar entrada, dar boas-vindas e remover spam de link (Wafly)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Antes de ativar\n\n1. Credencial **Wafly API** (Client-Token, instance, token). O numero da instancia precisa ser **admin do grupo**.\n2. Ative o workflow, copie a **Production URL** do Webhook e registre-a uma vez via `PUT .../update-webhook-received` (veja o README dos templates). **Nao** use a operacao `Webhook > Set Webhook` do node: ela retorna 404 nesta versao.\n3. No node **Config** preencha `adminPhones` e `allowedDomains`.\n\nEventos usados (payload Z-API da Wafly):\n- `body.notification = MEMBERSHIP_APPROVAL_REQUEST` -> pedido de entrada\n- `body.notification = GROUP_PARTICIPANT_INVITE` -> entrou no grupo\n- `body.type = ReceivedCallback` + `body.isGroup = true` -> mensagem no grupo\n\nGerenciar grupo (aprovar, remover, apagar mensagem) so e possivel via API nao-oficial. A Cloud API oficial nao expoe isso.",
+        "height": 440,
+        "width": 440,
+        "color": 4
+      },
+      "id": "sticky-setup",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-420, 40]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wafly-grupos",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-group",
+      "name": "Wafly Group Events",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [60, 340],
+      "webhookId": "REPLACE_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "adminPhones",
+              "value": "5511999999999,5511888888888",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "allowedDomains",
+              "value": "wafly.com.br,youtube.com",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "config",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [280, 340]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+                "conditions": [
+                  {
+                    "id": "r1",
+                    "leftValue": "={{ $json.body.notification }}",
+                    "rightValue": "MEMBERSHIP_APPROVAL_REQUEST",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pedido_entrada"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+                "conditions": [
+                  {
+                    "id": "r2",
+                    "leftValue": "={{ $json.body.notification }}",
+                    "rightValue": "GROUP_PARTICIPANT_INVITE",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "entrou"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+                "conditions": [
+                  {
+                    "id": "r3a",
+                    "leftValue": "={{ $json.body.isGroup }}",
+                    "rightValue": "",
+                    "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+                  },
+                  {
+                    "id": "r3b",
+                    "leftValue": "={{ $json.body.text?.message }}",
+                    "rightValue": "",
+                    "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "mensagem"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-event",
+      "name": "Que evento e esse?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [520, 340]
+    },
+    {
+      "parameters": {
+        "resource": "group",
+        "operation": "approveParticipant",
+        "groupId": "={{ $json.body.group_jid }}",
+        "phones": "={{ $json.body.participantPhone }}"
+      },
+      "id": "wafly-approve",
+      "name": "Aprovar entrada",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [800, 140],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendText",
+        "phone": "={{ $json.body.phone }}",
+        "message": "=Bem-vindo(a), {{ $json.body.notificationParameters?.[0] || 'pessoa nova' }}! Leia a descricao do grupo antes de postar. Link de divulgacao sem combinar com a moderacao e removido automaticamente."
+      },
+      "id": "wafly-welcome",
+      "name": "Boas-vindas no grupo",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [800, 320],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Detecta link de divulgacao postado por quem nao e admin.\n// Nao usamos Get Metadata aqui de proposito: a lista de admins vem do node Config,\n// entao o template nao depende do schema de participantes do endpoint group-metadata.\nconst out = [];\n\nfor (const item of $input.all()) {\n  const b = item.json.body || {};\n  const text = b.text?.message || '';\n  const sender = String(b.participantPhone || '').replace(/\\D/g, '');\n\n  const admins = String(item.json.adminPhones || '')\n    .split(',')\n    .map((p) => p.replace(/\\D/g, ''))\n    .filter(Boolean);\n\n  const allowed = String(item.json.allowedDomains || '')\n    .split(',')\n    .map((d) => d.trim().toLowerCase())\n    .filter(Boolean);\n\n  const urls = text.match(/https?:\\/\\/[^\\s]+|chat\\.whatsapp\\.com\\/[^\\s]+/gi) || [];\n\n  const offending = urls.filter((u) => {\n    const host = u.replace(/^https?:\\/\\//i, '').split('/')[0].toLowerCase();\n    return !allowed.some((d) => host === d || host.endsWith('.' + d));\n  });\n\n  const isAdmin = admins.includes(sender);\n\n  out.push({\n    json: {\n      shouldModerate: offending.length > 0 && !isAdmin,\n      groupId: b.phone,\n      messageId: b.messageId,\n      offender: sender,\n      offendingUrls: offending,\n    },\n  });\n}\n\nreturn out;"
+      },
+      "id": "code-detect",
+      "name": "Detectar link de spam",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 520]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            {
+              "id": "mod",
+              "leftValue": "={{ $json.shouldModerate }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-moderate",
+      "name": "Moderar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1020, 520]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "deleteMessage",
+        "phone": "={{ $json.groupId }}",
+        "messageId": "={{ $json.messageId }}"
+      },
+      "id": "wafly-delete",
+      "name": "Apagar mensagem",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [1240, 460],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendText",
+        "phone": "={{ $('Detectar link de spam').item.json.groupId }}",
+        "message": "=Removi um link de divulgacao postado por +{{ $('Detectar link de spam').item.json.offender }}. Regra do grupo: link so com aval da moderacao."
+      },
+      "id": "wafly-notify",
+      "name": "Avisar o grupo",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [1460, 460],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "noop-ok",
+      "name": "Mensagem legitima",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1240, 620]
+    }
+  ],
+  "connections": {
+    "Wafly Group Events": {
+      "main": [[{ "node": "Config", "type": "main", "index": 0 }]]
+    },
+    "Config": {
+      "main": [[{ "node": "Que evento e esse?", "type": "main", "index": 0 }]]
+    },
+    "Que evento e esse?": {
+      "main": [
+        [{ "node": "Aprovar entrada", "type": "main", "index": 0 }],
+        [{ "node": "Boas-vindas no grupo", "type": "main", "index": 0 }],
+        [{ "node": "Detectar link de spam", "type": "main", "index": 0 }]
+      ]
+    },
+    "Detectar link de spam": {
+      "main": [[{ "node": "Moderar?", "type": "main", "index": 0 }]]
+    },
+    "Moderar?": {
+      "main": [
+        [{ "node": "Apagar mensagem", "type": "main", "index": 0 }],
+        [{ "node": "Mensagem legitima", "type": "main", "index": 0 }]
+      ]
+    },
+    "Apagar mensagem": {
+      "main": [[{ "node": "Avisar o grupo", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": false }
+}

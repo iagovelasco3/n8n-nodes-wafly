@@ -14,6 +14,15 @@ import {
 // fallback the node fails to load on older n8n instances ("Class could not be found")
 const mainConnection: NodeConnectionType = NodeConnectionTypes?.Main ?? ('main' as NodeConnectionType);
 
+// Operações geradas a partir do schema central da API (scripts/gen-operations.mjs).
+// As escritas à mão neste arquivo têm precedência; estas cobrem o resto da
+// superfície para que nenhum endpoint fique inacessível pelo node.
+import {
+  GENERATED_OPERATIONS,
+  GENERATED_RESOURCES,
+  generatedProperties,
+} from './GeneratedOperations';
+
 export class Wafly implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'Wafly WhatsApp',
@@ -58,6 +67,9 @@ export class Wafly implements INodeType {
             name: 'Webhook',
             value: 'webhook',
           },
+          // Resources gerados do schema: newsletter, comunidades, chamadas,
+          // chats e os endpoints ainda sem operação escrita à mão.
+          ...GENERATED_RESOURCES,
         ],
         default: 'message',
       },
@@ -136,6 +148,25 @@ export class Wafly implements INodeType {
             value: 'deleteInboundConfig',
             description: 'Back to one webhook call per message',
             action: 'Disable message buffer',
+          },
+          {
+            name: 'Set Audio Transcription',
+            value: 'setTranscription',
+            description:
+              'Transcribe received audio with your own OpenAI key, so your AI agent can read voice notes',
+            action: 'Set audio transcription',
+          },
+          {
+            name: 'Get Audio Transcription',
+            value: 'getAiConfig',
+            description: 'Read the transcription settings and this month usage',
+            action: 'Get audio transcription',
+          },
+          {
+            name: 'Disable Audio Transcription',
+            value: 'deleteAiConfig',
+            description: 'Remove the stored key and stop transcribing',
+            action: 'Disable audio transcription',
           },
         ],
         default: 'getStatus',
@@ -1288,6 +1319,47 @@ export class Wafly implements INodeType {
         description:
           'Concat keeps your existing flow working untouched; batch requires handling a new array',
       },
+      // =====================================
+      // AUDIO TRANSCRIPTION (instance: setTranscription)
+      // =====================================
+      // Half of every WhatsApp conversation in Brazil is voice notes, and an AI
+      // agent cannot listen. The key is YOURS: the provider cost lands on your
+      // own OpenAI account and Wafly charges nothing for it.
+      {
+        displayName: 'OpenAI API Key',
+        name: 'transcriptionApiKey',
+        type: 'string',
+        typeOptions: { password: true },
+        default: '',
+        displayOptions: {
+          show: { resource: ['instance'], operation: ['setTranscription'] },
+        },
+        description:
+          'Your own OpenAI key. Stored encrypted and never returned by the API. Leave empty to keep the key already registered.',
+      },
+      {
+        displayName: 'Max Audio (Seconds)',
+        name: 'transcriptionMaxAudioSeconds',
+        type: 'number',
+        default: 300,
+        typeOptions: { minValue: 5, maxValue: 1500 },
+        displayOptions: {
+          show: { resource: ['instance'], operation: ['setTranscription'] },
+        },
+        description: 'Longer audios are skipped, protecting you from unexpected cost',
+      },
+      {
+        displayName: 'Monthly Cap (Minutes)',
+        name: 'transcriptionMonthlyCap',
+        type: 'number',
+        default: 500,
+        typeOptions: { minValue: 1 },
+        displayOptions: {
+          show: { resource: ['instance'], operation: ['setTranscription'] },
+        },
+        description:
+          'Spend limit. Once reached, transcription stops until the month rolls over.',
+      },
       {
         displayName: 'Include Groups',
         name: 'bufferIncludeGroups',
@@ -1299,6 +1371,7 @@ export class Wafly implements INodeType {
         description:
           'Whether to group messages in group chats too. Grouping is per participant, so different people never get merged.',
       },
+      ...generatedProperties,
     ],
   };
 
@@ -1372,6 +1445,27 @@ export class Wafly implements INodeType {
             method = 'GET';
           } else if (operation === 'deleteInboundConfig') {
             endpoint = `${basePath}/inbound-config`;
+            method = 'DELETE';
+          } else if (operation === 'setTranscription') {
+            endpoint = `${basePath}/ai-config`;
+            method = 'PUT';
+            const key = (this.getNodeParameter('transcriptionApiKey', i, '') as string).trim();
+            body = {
+              provider: 'openai',
+              // Chave vazia = mantém a já cadastrada, para ajustar o teto sem
+              // precisar recolar o segredo no workflow.
+              ...(key ? { api_key: key } : {}),
+              transcription: {
+                enabled: true,
+                max_audio_seconds: this.getNodeParameter('transcriptionMaxAudioSeconds', i) as number,
+                monthly_minutes_cap: this.getNodeParameter('transcriptionMonthlyCap', i) as number,
+              },
+            };
+          } else if (operation === 'getAiConfig') {
+            endpoint = `${basePath}/ai-config`;
+            method = 'GET';
+          } else if (operation === 'deleteAiConfig') {
+            endpoint = `${basePath}/ai-config`;
             method = 'DELETE';
           }
         }
@@ -1663,6 +1757,30 @@ export class Wafly implements INodeType {
           } else if (operation === 'deleteWebhook') {
             endpoint = `${basePath}/webhook`;
             method = 'DELETE';
+          }
+        }
+
+        // Operações geradas: se o par resource:operation existir no mapa e nenhuma
+        // operação escrita à mão tiver definido o endpoint, monta a chamada a
+        // partir do schema. A ordem garante a precedência do código manual.
+        const generated = GENERATED_OPERATIONS[`${resource}:${operation}`];
+        if (generated && !endpoint) {
+          let genPath = generated.path;
+          for (const param of generated.pathParams) {
+            const value = this.getNodeParameter(`gp_${param}`, i) as string;
+            genPath = genPath.replace(`{${param}}`, encodeURIComponent(value));
+          }
+          // Endpoint de parceiro não vive sob /instances/{instance}/token/{token}.
+          endpoint = generated.isPartner
+            ? genPath
+            : `/instances/${instance}/token/${token}${genPath}`;
+          method = generated.method;
+          if (generated.hasBody) {
+            const raw = this.getNodeParameter('gp_body', i, '{}');
+            body =
+              typeof raw === 'string'
+                ? (JSON.parse(raw || '{}') as IDataObject)
+                : (raw as IDataObject);
           }
         }
 

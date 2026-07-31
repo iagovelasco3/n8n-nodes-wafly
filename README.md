@@ -21,6 +21,11 @@ This is an n8n community node for the **Wafly WhatsApp Bridge API**. It lets you
 - Get device information
 - Check whether phone numbers exist on WhatsApp
 - **Message Buffer** — group split messages so an AI agent answers once, not once per message
+- **Audio Transcription** — received voice notes arrive transcribed in the webhook, using your own OpenAI key
+
+### 📡 Newsletter / Channel, Community, Chat, Call
+- Full coverage of the published API: newsletters and channels, communities,
+  chat management and the calls beta. See **Operation** under each resource.
 
 ### 💬 Messages
 - Send text
@@ -171,6 +176,52 @@ Before using the node, create a credential of type **Wafly API** with the follow
   ]
 }
 ```
+
+### Example 4: Let your AI agent understand voice notes
+
+Half of every WhatsApp conversation in Brazil is a voice note, and an LLM cannot
+listen. **Set Audio Transcription** makes the transcript arrive in the webhook,
+so you skip building download + speech-to-text.
+
+**The OpenAI key is yours** — the cost lands on your own OpenAI account and Wafly
+charges nothing for it. It is stored encrypted and never returned by the API.
+
+```json
+{
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "instance",
+        "operation": "setTranscription",
+        "transcriptionApiKey": "sk-proj-...",
+        "transcriptionMaxAudioSeconds": 300,
+        "transcriptionMonthlyCap": 500
+      },
+      "name": "Transcribe Voice Notes",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "credentials": { "waflyApi": "Wafly API" }
+    }
+  ]
+}
+```
+
+Run it **once per instance**. After that, the audio webhook carries:
+
+```json
+{
+  "audio": { "audioUrl": "https://...", "seconds": 4 },
+  "transcription": { "status": "ok", "text": "oi, queria saber o preço", "latency_ms": 1180 }
+}
+```
+
+If the provider refuses (wrong key, quota) or the monthly cap is reached, **the
+message still arrives** — only with `transcription.status = "error"` and the
+reason. Nothing is lost.
+
+Leave the key field empty on later calls to keep the stored key and change only
+the limits.
 
 ### Example 4: Stop your AI agent from answering three times
 

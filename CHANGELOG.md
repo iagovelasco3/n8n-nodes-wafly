@@ -5,6 +5,28 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.5.0] - 2026-07-30
+
+### Added
+- **Audio Transcription** on the *Instance* resource: **Set / Get / Disable
+  Audio Transcription**. Half of every WhatsApp conversation in Brazil is voice
+  notes and an AI agent cannot listen — with this on, the transcript arrives in
+  the webhook and you skip building download + speech-to-text yourself.
+  **The OpenAI key is yours**: the provider cost lands on your own account and
+  Wafly charges nothing for it. The key is stored encrypted and never returned.
+- **57 more operations, generated from the API schema.** The node covered 40 of
+  the 100 published endpoints; the rest are now reachable through new resources:
+  *Newsletter / Channel* (17), *Call (Beta)* (14), *Community* (7),
+  *Instance (More)* (6), *Message (More)* (7), *Chat* (3), *Group (More)* (2)
+  and *Partner* (1).
+
+### Changed
+- Operations are now generated from the same schema that feeds the Wafly API
+  docs, OpenAPI spec and Postman collection (`npm run gen:ops`, also run on
+  `prebuild`). Hand-written operations keep precedence — they have better UX
+  (validated fields, converted units); generation only fills the gaps. This is
+  why the node had drifted 60 endpoints behind in the first place.
+
 ## [1.4.0] - 2026-07-30
 
 ### Added
