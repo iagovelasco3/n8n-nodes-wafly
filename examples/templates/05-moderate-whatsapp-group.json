@@ -1,0 +1,436 @@
+{
+  "name": "Approve join requests and remove link spam in WhatsApp groups",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Approve join requests, welcome members and remove link spam in WhatsApp groups\n\n> **Community node - self-hosted n8n only.** This template uses `n8n-nodes-wafly`, which cannot be installed on n8n Cloud.\n\n### Who's it for\n\nAnyone running a WhatsApp community: a paid group, a customer community, a class cohort. Moderating by hand does not scale past a few hundred members, and link spam is what kills a group.\n\n### How it works\n\nOne webhook receives every group event and a Switch routes it by type. A join request is approved automatically. A new member gets a welcome message with the rules. A message posted in the group goes through a spam check that looks for links outside your allowlist, posted by someone who is not an admin, and deletes it, then tells the group why.\n\nThe admin list and the allowed domains live in a single Set node, so you configure the template in one place instead of editing expressions.\n\n### How to set up\n\n1. Create the Wafly API credential. The instance number must be an **admin** of the group.\n2. Fill `adminPhones` and `allowedDomains` in the Config node.\n3. Activate the workflow and register the Webhook production URL on your instance with the curl in the grey note.\n\n### Requirements\n\nSelf-hosted n8n, a Wafly account, and the connected number promoted to group admin.\n\n### How to customize\n\nChange the welcome copy, add domains to the allowlist, or extend the spam check to catch phone numbers and invite links. Group management like approving and removing members is only available on unofficial APIs.",
+        "height": 920,
+        "width": 460
+      },
+      "id": "sticky-description",
+      "name": "Template description",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -920,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Setup\n\n1. **Wafly API** credential (Client-Token, instance, token). The instance number must be a **group admin**.\n2. Activate the workflow, copy the Webhook **Production URL** and register it once:\n\n```\ncurl -X PUT \\\n  \"https://wafly.com.br/api-bridge-whats/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received\" \\\n  -H \"Client-Token: YOUR_CLIENT_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"value\":\"PASTE_THE_PRODUCTION_URL\"}'\n```\n\n> Do not use the node's `Webhook > Set Webhook` operation: it calls a route that returns 404.\n\n3. Fill `adminPhones` and `allowedDomains` in the **Config** node.\n\nEvents used (Z-API shaped payload):\n- `body.notification = MEMBERSHIP_APPROVAL_REQUEST` -> join request\n- `body.notification = GROUP_PARTICIPANT_INVITE` -> member joined\n- `body.type = ReceivedCallback` + `body.isGroup = true` -> message in the group",
+        "height": 620,
+        "width": 440,
+        "color": 6
+      },
+      "id": "sticky-setup",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wafly-group-events",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-group",
+      "name": "Wafly Group Events",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        60,
+        340
+      ],
+      "webhookId": "REPLACE_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "adminPhones",
+              "value": "5511999999999,5511888888888",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "allowedDomains",
+              "value": "wafly.com.br,youtube.com",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "config",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        280,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "r1",
+                    "leftValue": "={{ $json.body.notification }}",
+                    "rightValue": "MEMBERSHIP_APPROVAL_REQUEST",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "join_request"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "r2",
+                    "leftValue": "={{ $json.body.notification }}",
+                    "rightValue": "GROUP_PARTICIPANT_INVITE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "joined"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "r3a",
+                    "leftValue": "={{ $json.body.isGroup }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  },
+                  {
+                    "id": "r3b",
+                    "leftValue": "={{ $json.body.text?.message }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "group_message"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-event",
+      "name": "Which event is it?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        520,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "group",
+        "operation": "approveParticipant",
+        "groupId": "={{ $json.body.group_jid }}",
+        "phones": "={{ $json.body.participantPhone }}"
+      },
+      "id": "wafly-approve",
+      "name": "Approve join request",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [
+        800,
+        140
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendText",
+        "phone": "={{ $json.body.phone }}",
+        "message": "=Welcome, {{ $json.body.notificationParameters?.[0] || 'friend' }}! Please read the group description before posting. Promotional links that were not cleared with the moderators are removed automatically."
+      },
+      "id": "wafly-welcome",
+      "name": "Welcome the new member",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [
+        800,
+        320
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Detects a promotional link posted by someone who is not an admin.\n// Get Metadata is deliberately not used here: the admin list comes from the Config\n// node, so the template does not depend on the group-metadata participant schema.\nconst out = [];\n\nfor (const item of $input.all()) {\n  const b = item.json.body || {};\n  const text = b.text?.message || '';\n  const sender = String(b.participantPhone || '').replace(/\\D/g, '');\n\n  const admins = String(item.json.adminPhones || '')\n    .split(',')\n    .map((p) => p.replace(/\\D/g, ''))\n    .filter(Boolean);\n\n  const allowed = String(item.json.allowedDomains || '')\n    .split(',')\n    .map((d) => d.trim().toLowerCase())\n    .filter(Boolean);\n\n  const urls = text.match(/https?:\\/\\/[^\\s]+|chat\\.whatsapp\\.com\\/[^\\s]+/gi) || [];\n\n  const offending = urls.filter((u) => {\n    const host = u.replace(/^https?:\\/\\//i, '').split('/')[0].toLowerCase();\n    return !allowed.some((d) => host === d || host.endsWith('.' + d));\n  });\n\n  const isAdmin = admins.includes(sender);\n\n  out.push({\n    json: {\n      shouldModerate: offending.length > 0 && !isAdmin,\n      groupId: b.phone,\n      messageId: b.messageId,\n      offender: sender,\n      offendingUrls: offending,\n    },\n  });\n}\n\nreturn out;"
+      },
+      "id": "code-detect",
+      "name": "Detect link spam",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "mod",
+              "leftValue": "={{ $json.shouldModerate }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-moderate",
+      "name": "Moderate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1020,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "deleteMessage",
+        "phone": "={{ $json.groupId }}",
+        "messageId": "={{ $json.messageId }}"
+      },
+      "id": "wafly-delete",
+      "name": "Apagar group_message",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        460
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendText",
+        "phone": "={{ $('Detect link spam').item.json.groupId }}",
+        "message": "=Removed a promotional link posted by +{{ $('Detect link spam').item.json.offender }}. Group rule: links only with moderator approval."
+      },
+      "id": "wafly-notify",
+      "name": "Tell the group why",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        460
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "noop-ok",
+      "name": "Legitimate message",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        620
+      ]
+    }
+  ],
+  "connections": {
+    "Wafly Group Events": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Which event is it?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Which event is it?": {
+      "main": [
+        [
+          {
+            "node": "Approve join request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Welcome the new member",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Detect link spam",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect link spam": {
+      "main": [
+        [
+          {
+            "node": "Moderate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Moderate?": {
+      "main": [
+        [
+          {
+            "node": "Apagar group_message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Legitimate message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apagar group_message": {
+      "main": [
+        [
+          {
+            "node": "Tell the group why",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

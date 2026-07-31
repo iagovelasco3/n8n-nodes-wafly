@@ -1,0 +1,299 @@
+{
+  "name": "Send one-time passwords over WhatsApp with SMS fallback",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Send one-time passwords over WhatsApp with SMS fallback\n\n> **Community node - self-hosted n8n only.** This template uses `n8n-nodes-wafly`, which cannot be installed on n8n Cloud.\n\n### Who's it for\n\nAny product that verifies a phone number at signup, login or checkout. WhatsApp delivery costs a fraction of SMS in most markets, but only works if the number actually has WhatsApp.\n\n### How it works\n\nYour app POSTs a phone number and a code to the webhook. The workflow first asks WhatsApp whether that number exists, which is the step most implementations skip and then wonder why delivery silently fails. If it exists, the code goes out as a native OTP message with a copy button, and the workflow answers your app with the message id. If it does not, the run drops into an SMS branch you plug your own provider into. Send failures retry three times and then answer with a 502 instead of pretending the code was delivered.\n\n### How to set up\n\n1. Create the Wafly API credential.\n2. Activate the workflow and POST `{ \"phone\": \"5511999999999\", \"code\": \"123456\" }` to the production URL.\n3. Replace the SMS placeholder node with your provider.\n\n### Requirements\n\nSelf-hosted n8n, a Wafly account, and an SMS provider if you want the fallback.\n\n### How to customize\n\nGenerate the code inside the workflow instead of receiving it, change the expiry copy, or store each attempt in a database to rate-limit by phone number.",
+        "height": 920,
+        "width": 460
+      },
+      "id": "sticky-description",
+      "name": "Template description",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -920,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Setup\n\n1. **Wafly API** credential (Client-Token, instance, token).\n2. Activate the workflow and POST to the production URL:\n\n```\n{ \"phone\": \"5511999999999\", \"code\": \"123456\" }\n```\n\n3. The response is JSON: `{ ok, channel, phone, messageId }`. Channel is `whatsapp` or `sms`.\n4. Replace the **SMS fallback** node with your own provider.\n\nGenerate and store the code on your side. This workflow only delivers it, so your app stays the single source of truth for what is valid and for how long.",
+        "height": 420,
+        "width": 420,
+        "color": 6
+      },
+      "id": "sticky-setup",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wafly-otp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-otp",
+      "name": "OTP request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        60,
+        320
+      ],
+      "webhookId": "REPLACE_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "resource": "instance",
+        "operation": "checkPhones",
+        "phonesToCheck": "={{ $json.body.phone }}"
+      },
+      "id": "wafly-check",
+      "name": "Does the number have WhatsApp?",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [
+        300,
+        320
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 1500,
+      "credentials": {
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// The /phone-exists-batch endpoint responds with an ARRAY: [{ exists, inputPhone, outputPhone }].\n// Depending on the node version this array arrives as a single item or already flattened.\n// This block normalizes both cases and treats a failed check as \"does not exist\"\n// (fail-safe: better to fall back to SMS than to not deliver the OTP at all).\nconst first = $input.first().json;\nconst raw = Array.isArray(first) ? first[0] : (Array.isArray(first?.data) ? first.data[0] : first);\n\nconst exists = raw?.exists === true;\nconst phone = String(raw?.outputPhone || raw?.inputPhone || $('OTP request').first().json.body.phone);\n\nreturn [{ json: { exists, phone, checkFailed: raw?.error !== undefined } }];"
+      },
+      "id": "code-normalize",
+      "name": "Normalize the check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ex",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-exists",
+      "name": "Has WhatsApp?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        740,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendButtonOtp",
+        "phone": "={{ $json.phone }}",
+        "otpMessage": "=Your verification code is {{ $('OTP request').item.json.body.code }}. It expires in 5 minutes. Do not share it with anyone.",
+        "otpCode": "={{ $('OTP request').item.json.body.code }}",
+        "otpButtonText": "Copy code"
+      },
+      "id": "wafly-otp",
+      "name": "Send the OTP",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [
+        980,
+        220
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, channel: 'whatsapp', phone: $('Normalize the check').item.json.phone, messageId: $json.messageId || null }) }}",
+        "options": {}
+      },
+      "id": "respond-wa",
+      "name": "Respond: sent on WhatsApp",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1240,
+        180
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "noop-sms",
+      "name": "SMS fallback (plug your provider here)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        980,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, channel: 'sms_fallback', phone: $('Normalize the check').item.json.phone, reason: 'number has no WhatsApp, or the check was unavailable' }) }}",
+        "options": {}
+      },
+      "id": "respond-sms",
+      "name": "Respond: fell back to SMS",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1240,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 502,
+        "responseBody": "={{ JSON.stringify({ ok: false, channel: 'whatsapp', reason: 'delivery failed after 3 attempts, the instance may be disconnected' }) }}",
+        "options": {}
+      },
+      "id": "respond-fail",
+      "name": "Respond: delivery failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1240,
+        320
+      ]
+    }
+  ],
+  "connections": {
+    "OTP request": {
+      "main": [
+        [
+          {
+            "node": "Does the number have WhatsApp?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Does the number have WhatsApp?": {
+      "main": [
+        [
+          {
+            "node": "Normalize the check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize the check": {
+      "main": [
+        [
+          {
+            "node": "Has WhatsApp?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has WhatsApp?": {
+      "main": [
+        [
+          {
+            "node": "Send the OTP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SMS fallback (plug your provider here)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send the OTP": {
+      "main": [
+        [
+          {
+            "node": "Respond: sent on WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: delivery failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SMS fallback (plug your provider here)": {
+      "main": [
+        [
+          {
+            "node": "Respond: fell back to SMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

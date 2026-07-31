@@ -1,0 +1,280 @@
+{
+  "name": "Qualify inbound WhatsApp leads with AI and hand hot ones to a human",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Qualify inbound WhatsApp leads with AI and hand hot ones to a human\n\n> **Community node - self-hosted n8n only.** This template uses `n8n-nodes-wafly`, which cannot be installed on n8n Cloud.\n\n### Who's it for\n\nSmall sales teams that get inbound on WhatsApp and cannot answer everything. The goal is not to let a bot close the deal, it is to make sure a human never misses the two messages a week that are worth answering.\n\n### How it works\n\nAn inbound message arrives on the webhook. Non-customer traffic is filtered out first: your own echoes, group chats and empty messages.\n\nAn LLM then reads the message and returns a small JSON object: intent, whether the person named a budget or a deadline, and a temperature of hot, warm or cold. The parser is deliberately defensive, so a malformed answer becomes a warm lead instead of a crashed run. A model that fails should never drop a lead on the floor.\n\nHot leads get a short holding reply and your sales number gets a WhatsApp message with the lead's number and what they asked for. Warm leads get an answer and no page. Cold ones are logged and left alone.\n\nMemory is keyed by phone number, so a person who writes three times is one conversation rather than three cold starts.\n\n### How to set up\n\n1. Create the Wafly API credential and an OpenAI credential.\n2. Put the phone number that should receive handoffs into the Config node.\n3. Activate the workflow and register the Webhook production URL on your instance with the curl in the grey note.\n\n### Requirements\n\nSelf-hosted n8n, a Wafly account, an OpenAI API key, and a phone number to receive handoffs.\n\n### How to customize\n\nEdit the qualification prompt to match how you actually score leads, change the temperature thresholds, or send the handoff to a CRM instead of a phone.",
+        "height": 980,
+        "width": 460
+      },
+      "id": "sticky-description",
+      "name": "Template description",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-840, 40]
+    },
+    {
+      "parameters": {
+        "content": "## Setup\n\n1. **Wafly API** credential (Client-Token, instance, token) and an **OpenAI** credential.\n2. Set `salesPhone` in the **Config** node. Use the international format, digits only.\n3. Activate the workflow, copy the Webhook **Production URL** and register it once:\n\n```\ncurl -X PUT \\\n  \"https://wafly.com.br/api-bridge-whats/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received\" \\\n  -H \"Client-Token: YOUR_CLIENT_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"value\":\"PASTE_THE_PRODUCTION_URL\"}'\n```\n\n> Do not use the node's `Webhook > Set Webhook` operation: it calls a route that returns 404.\n\nThe inbound payload is Z-API shaped: `body.type`, `body.phone`, `body.text.message`, `body.fromMe`, `body.isGroup`.",
+        "height": 480,
+        "width": 400,
+        "color": 6
+      },
+      "id": "sticky-setup",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-340, 40]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wafly-lead-qualifier",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-inbound",
+      "name": "Wafly Inbound",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-340, 580],
+      "webhookId": "REPLACE_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s1",
+              "name": "salesPhone",
+              "value": "5511999999999",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "config",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-100, 580]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c-type",
+              "leftValue": "={{ $json.body.type }}",
+              "rightValue": "ReceivedCallback",
+              "operator": { "type": "string", "operation": "equals" }
+            },
+            {
+              "id": "c-fromme",
+              "leftValue": "={{ $json.body.fromMe }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "false", "singleValue": true }
+            },
+            {
+              "id": "c-group",
+              "leftValue": "={{ $json.body.isGroup }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "false", "singleValue": true }
+            },
+            {
+              "id": "c-text",
+              "leftValue": "={{ $json.body.text?.message }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-customer",
+      "name": "A customer wrote in?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [140, 580]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.text.message }}",
+        "options": {
+          "systemMessage": "You qualify inbound sales leads that arrive over WhatsApp.\n\nReturn ONLY a JSON object, no prose and no markdown fence, with exactly these keys:\n{\"intent\": string, \"budget_mentioned\": boolean, \"deadline_mentioned\": boolean, \"temperature\": \"hot\" | \"warm\" | \"cold\", \"reply\": string}\n\nRules for temperature:\n- hot: they describe a concrete need AND mention a budget, a deadline, or ask to talk to someone.\n- warm: a real question about the product with no urgency signal.\n- cold: greeting only, wrong number, spam, or unrelated.\n\n\"reply\" is what we send back to the person: at most 2 short sentences, no markdown, in the same language they used. For a hot lead, say a human will follow up shortly. Never invent prices, deadlines or policies."
+        }
+      },
+      "id": "qualifier",
+      "name": "Qualify the lead",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [400, 560],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": { "temperature": 0 }
+      },
+      "id": "llm",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [340, 800],
+      "credentials": {
+        "openAiApi": { "id": "REPLACE_OPENAI_CREDENTIAL_ID", "name": "OpenAI account" }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Wafly Inbound').item.json.body.phone }}",
+        "contextWindowLength": 8
+      },
+      "id": "memory",
+      "name": "Memory per phone number",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [520, 800]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the model's JSON defensively.\n//\n// A model that answers badly must not cost a lead, so anything unparseable\n// degrades to a warm lead with a neutral reply instead of throwing. Warm is\n// the safe default: it answers the person without paging a human at 2am.\nconst raw = String($input.first().json.output ?? '').trim();\nconst lead = $('Wafly Inbound').first().json.body || {};\nconst cfg = $('Config').first().json;\n\nconst fallback = {\n  intent: 'unparsed',\n  budget_mentioned: false,\n  deadline_mentioned: false,\n  temperature: 'warm',\n  reply: 'Thanks for reaching out. Someone from the team will get back to you shortly.',\n};\n\nlet parsed = fallback;\ntry {\n  // Models still wrap JSON in a fence now and then even when told not to.\n  const cleaned = raw.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();\n  const candidate = JSON.parse(cleaned);\n  if (candidate && typeof candidate === 'object') {\n    parsed = { ...fallback, ...candidate };\n  }\n} catch (e) {\n  // keep the fallback\n}\n\nif (!['hot', 'warm', 'cold'].includes(parsed.temperature)) parsed.temperature = 'warm';\nif (!String(parsed.reply || '').trim()) parsed.reply = fallback.reply;\n\nreturn [{\n  json: {\n    ...parsed,\n    leadPhone: lead.phone,\n    leadName: lead.senderName || lead.chatName || 'unknown',\n    leadMessage: lead.text?.message || '',\n    salesPhone: cfg.salesPhone,\n    parsedOk: parsed.intent !== 'unparsed',\n  },\n}];"
+      },
+      "id": "parse",
+      "name": "Parse the qualification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 560]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendText",
+        "phone": "={{ $json.leadPhone }}",
+        "message": "={{ $json.reply }}"
+      },
+      "id": "wafly-reply",
+      "name": "Reply to the lead",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [900, 560],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "hot",
+              "leftValue": "={{ $json.temperature }}",
+              "rightValue": "hot",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-hot",
+      "name": "Hot lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1140, 560]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendText",
+        "phone": "={{ $('Parse the qualification').item.json.salesPhone }}",
+        "message": "=Hot lead on WhatsApp\n\nFrom: {{ $('Parse the qualification').item.json.leadName }} (+{{ $('Parse the qualification').item.json.leadPhone }})\nIntent: {{ $('Parse the qualification').item.json.intent }}\nBudget mentioned: {{ $('Parse the qualification').item.json.budget_mentioned }}\nDeadline mentioned: {{ $('Parse the qualification').item.json.deadline_mentioned }}\n\nWhat they said:\n{{ $('Parse the qualification').item.json.leadMessage }}"
+      },
+      "id": "wafly-handoff",
+      "name": "Page the sales number",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [1400, 480],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "noop-nurture",
+      "name": "Warm or cold, no handoff",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1400, 640]
+    },
+    {
+      "parameters": {},
+      "id": "noop-ignore",
+      "name": "Ignore (group, echo, no text)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [400, 720]
+    }
+  ],
+  "connections": {
+    "Wafly Inbound": {
+      "main": [[{ "node": "Config", "type": "main", "index": 0 }]]
+    },
+    "Config": {
+      "main": [[{ "node": "A customer wrote in?", "type": "main", "index": 0 }]]
+    },
+    "A customer wrote in?": {
+      "main": [
+        [{ "node": "Qualify the lead", "type": "main", "index": 0 }],
+        [{ "node": "Ignore (group, echo, no text)", "type": "main", "index": 0 }]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [[{ "node": "Qualify the lead", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Memory per phone number": {
+      "ai_memory": [[{ "node": "Qualify the lead", "type": "ai_memory", "index": 0 }]]
+    },
+    "Qualify the lead": {
+      "main": [[{ "node": "Parse the qualification", "type": "main", "index": 0 }]]
+    },
+    "Parse the qualification": {
+      "main": [[{ "node": "Reply to the lead", "type": "main", "index": 0 }]]
+    },
+    "Reply to the lead": {
+      "main": [[{ "node": "Hot lead?", "type": "main", "index": 0 }]]
+    },
+    "Hot lead?": {
+      "main": [
+        [{ "node": "Page the sales number", "type": "main", "index": 0 }],
+        [{ "node": "Warm or cold, no handoff", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": false }
+}
