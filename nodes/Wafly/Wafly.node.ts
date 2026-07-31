@@ -118,6 +118,25 @@ export class Wafly implements INodeType {
             description: 'Check whether phone numbers exist on WhatsApp',
             action: 'Check phone numbers',
           },
+          {
+            name: 'Set Message Buffer',
+            value: 'setMessageBuffer',
+            description:
+              'Group split messages before the webhook fires, so an AI agent answers once instead of once per message',
+            action: 'Set message buffer',
+          },
+          {
+            name: 'Get Message Buffer',
+            value: 'getInboundConfig',
+            description: 'Read the current inbound delivery configuration',
+            action: 'Get message buffer',
+          },
+          {
+            name: 'Disable Message Buffer',
+            value: 'deleteInboundConfig',
+            description: 'Back to one webhook call per message',
+            action: 'Disable message buffer',
+          },
         ],
         default: 'getStatus',
       },
@@ -1204,6 +1223,82 @@ export class Wafly implements INodeType {
         },
         description: 'Comma-separated phone numbers (e.g. 5511999999999,5511888888888)',
       },
+
+      // =====================================
+      // MESSAGE BUFFER (instance: setMessageBuffer)
+      // =====================================
+      // Nobody writes a paragraph on WhatsApp — people send "hi", "you there?",
+      // "how much is it?" as three messages, and an AI agent answers three times.
+      // These fields configure the grouping so it arrives as a single webhook call.
+      {
+        displayName: 'Window (Seconds)',
+        name: 'bufferWindowSeconds',
+        type: 'number',
+        default: 8,
+        typeOptions: { minValue: 1, maxValue: 20 },
+        displayOptions: {
+          show: { resource: ['instance'], operation: ['setMessageBuffer'] },
+        },
+        description:
+          'Silence window. Restarts on every new message, so delivery happens when the person stops typing.',
+      },
+      {
+        displayName: 'Max Wait (Seconds)',
+        name: 'bufferMaxWaitSeconds',
+        type: 'number',
+        default: 30,
+        typeOptions: { minValue: 1, maxValue: 30 },
+        displayOptions: {
+          show: { resource: ['instance'], operation: ['setMessageBuffer'] },
+        },
+        description:
+          'Hard ceiling from the first message, so someone typing non-stop cannot postpone delivery forever',
+      },
+      {
+        displayName: 'Max Messages',
+        name: 'bufferMaxMessages',
+        type: 'number',
+        default: 10,
+        typeOptions: { minValue: 2, maxValue: 50 },
+        displayOptions: {
+          show: { resource: ['instance'], operation: ['setMessageBuffer'] },
+        },
+        description: 'Deliver immediately once this many messages pile up',
+      },
+      {
+        displayName: 'Mode',
+        name: 'bufferMode',
+        type: 'options',
+        default: 'concat',
+        options: [
+          {
+            name: 'Concat (Recommended)',
+            value: 'concat',
+            description: 'Joins the texts into one message, keeping the usual payload shape',
+          },
+          {
+            name: 'Batch',
+            value: 'batch',
+            description: 'Adds a bufferedMessages array — changes the payload shape',
+          },
+        ],
+        displayOptions: {
+          show: { resource: ['instance'], operation: ['setMessageBuffer'] },
+        },
+        description:
+          'Concat keeps your existing flow working untouched; batch requires handling a new array',
+      },
+      {
+        displayName: 'Include Groups',
+        name: 'bufferIncludeGroups',
+        type: 'boolean',
+        default: false,
+        displayOptions: {
+          show: { resource: ['instance'], operation: ['setMessageBuffer'] },
+        },
+        description:
+          'Whether to group messages in group chats too. Grouping is per participant, so different people never get merged.',
+      },
     ],
   };
 
@@ -1222,7 +1317,7 @@ export class Wafly implements INodeType {
         const operation = this.getNodeParameter('operation', i) as string;
 
         let endpoint = '';
-        let method: 'GET' | 'POST' | 'DELETE' = 'GET';
+        let method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET';
         let body: IDataObject = {};
 
         // =====================================
@@ -1256,6 +1351,28 @@ export class Wafly implements INodeType {
             body = {
               phones: phonesToCheck.split(',').map((p) => p.trim()),
             };
+          } else if (operation === 'setMessageBuffer') {
+            endpoint = `${basePath}/inbound-config`;
+            method = 'PUT';
+            // A API trabalha em milissegundos, mas segundos é o que faz sentido
+            // para quem está configurando "quanto tempo esperar a pessoa terminar
+            // de escrever".
+            body = {
+              buffer: {
+                enabled: true,
+                window_ms: (this.getNodeParameter('bufferWindowSeconds', i) as number) * 1000,
+                max_wait_ms: (this.getNodeParameter('bufferMaxWaitSeconds', i) as number) * 1000,
+                max_messages: this.getNodeParameter('bufferMaxMessages', i) as number,
+                mode: this.getNodeParameter('bufferMode', i) as string,
+                include_groups: this.getNodeParameter('bufferIncludeGroups', i) as boolean,
+              },
+            };
+          } else if (operation === 'getInboundConfig') {
+            endpoint = `${basePath}/inbound-config`;
+            method = 'GET';
+          } else if (operation === 'deleteInboundConfig') {
+            endpoint = `${basePath}/inbound-config`;
+            method = 'DELETE';
           }
         }
 

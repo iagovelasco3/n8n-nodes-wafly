@@ -5,6 +5,26 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] - 2026-07-30
+
+### Added
+- **Message Buffer** operations on the *Instance* resource: **Set Message
+  Buffer**, **Get Message Buffer** and **Disable Message Buffer**.
+
+  Nobody writes a paragraph on WhatsApp. People send "hi", then "you there?",
+  then "how much is it?" — three webhook calls, and an AI agent answers three
+  times. With the buffer enabled those arrive as a **single** call.
+
+  The default `concat` mode keeps the payload shape unchanged (the texts are
+  joined in the usual text field), so existing workflows keep working without
+  edits. `batch` mode adds a `bufferedMessages` array for whoever wants the
+  messages separated.
+
+  Window and max wait are set in **seconds** in the node and converted to
+  milliseconds for the API. Media, reactions and button replies are never
+  grouped — and any text still waiting is delivered *before* them, so the
+  conversation never arrives out of order.
+
 ## [1.3.0] - 2026-07-21
 
 ### Added
