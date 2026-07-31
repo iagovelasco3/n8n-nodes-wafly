@@ -20,6 +20,7 @@ This is an n8n community node for the **Wafly WhatsApp Bridge API**. It lets you
 - Restart the instance
 - Get device information
 - Check whether phone numbers exist on WhatsApp
+- **Message Buffer** — group split messages so an AI agent answers once, not once per message
 
 ### 💬 Messages
 - Send text
@@ -170,6 +171,80 @@ Before using the node, create a credential of type **Wafly API** with the follow
   ]
 }
 ```
+
+### Example 4: Stop your AI agent from answering three times
+
+Nobody writes a paragraph on WhatsApp. People send `hi`, then `you there?`, then
+`how much is it?` — three separate webhooks, so an AI agent replies three times,
+and the first two replies were written without knowing what the person was still
+about to type.
+
+**Set Message Buffer** groups those into a single webhook call:
+
+```json
+{
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "instance",
+        "operation": "setMessageBuffer",
+        "bufferWindowSeconds": 8,
+        "bufferMaxWaitSeconds": 30,
+        "bufferMaxMessages": 10,
+        "bufferMode": "concat",
+        "bufferIncludeGroups": false
+      },
+      "name": "Group Split Messages",
+      "type": "n8n-nodes-wafly.wafly",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "credentials": {
+        "waflyApi": "Wafly API"
+      }
+    }
+  ]
+}
+```
+
+Run it **once per instance** — it is a setting, not a per-message step.
+
+**What your webhook receives after that.** Before:
+
+```
+POST /your-webhook   { "text": { "message": "hi" } }
+POST /your-webhook   { "text": { "message": "you there?" } }
+POST /your-webhook   { "text": { "message": "how much is it?" } }
+```
+
+After:
+
+```json
+{
+  "phone": "5511999999999",
+  "text": { "message": "hi\nyou there?\nhow much is it?" },
+  "buffered": { "count": 3, "messageIds": ["...", "...", "..."], "waitedMs": 8012 }
+}
+```
+
+The payload keeps the exact same shape, so **an existing workflow keeps working
+without edits** — your AI Agent node just receives the whole thought at once.
+When a single message arrives, the payload is identical to before, without the
+extra `buffered` field.
+
+| Field | Default | What it does |
+|---|---|---|
+| Window (seconds) | 8 | Silence window. Restarts on every new message, so delivery happens when the person stops typing. Max 20. |
+| Max Wait (seconds) | 30 | Hard ceiling from the first message, so someone typing non-stop cannot postpone delivery forever. Max 30. |
+| Max Messages | 10 | Deliver immediately once this many pile up. Max 50. |
+| Mode | concat | `concat` keeps the usual payload shape. `batch` adds a `bufferedMessages` array and changes it. |
+| Include Groups | false | Grouping in group chats is **per participant** — different people never get merged. |
+
+> Media, reactions and button replies are never grouped. If text is still waiting
+> in the window when an audio arrives, the pending text is delivered **first**, so
+> the conversation never reaches your agent out of order.
+
+Use **Get Message Buffer** to read the current setting and **Disable Message
+Buffer** to go back to one webhook call per message.
 
 ### Example 4: Full workflow — daily message
 
