@@ -5,6 +5,25 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.5.1] - 2026-07-30
+
+### Fixed
+- **The node UI is fully in English again.** 45 of the 65 generated operations
+  and every generated field description were showing in Portuguese, because the
+  generator pulled the `summary` straight from the API schema — which lives in
+  the frontend repo and serves the Brazilian docs. Hand-written operations were
+  already in English, so the node had ended up half in each language.
+  Labels are now translated in the generator (`EN_LABEL`), which also warns when
+  a new endpoint arrives without a translation instead of silently shipping
+  Portuguese.
+- Two labels also got clearer: *"Código de emparelhamento (GET)/(POST)"* named
+  the HTTP method instead of the actual difference, and became **Get Pairing
+  Code (Phone in Query)** and **(Phone in Body)**.
+
+**No breaking change:** only display labels changed. Operation identifiers,
+option values, field names and routes are byte-for-byte identical, so existing
+workflows keep working untouched.
+
 ## [1.5.0] - 2026-07-30
 
 ### Added

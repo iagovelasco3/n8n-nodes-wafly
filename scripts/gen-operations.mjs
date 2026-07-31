@@ -116,6 +116,89 @@ const RESOURCE_BY_SECTION = {
   parceiros: { value: 'partner', label: 'Partner' },
 };
 
+
+// --- rótulos em inglês -------------------------------------------------------
+// O schema vive no repositório do frontend e serve a documentação brasileira,
+// então os `summary` são em português. A UI do n8n é em inglês — é a convenção
+// do ecossistema e é o idioma das operações escritas à mão neste node. Sem esta
+// tradução o node ficava metade em cada idioma, que foi como ele nasceu.
+//
+// A tradução mora AQUI, e não no schema, de propósito: rótulo de node é assunto
+// do node. Poluir o schema com um campo só para isto acoplaria a documentação
+// pública a um consumidor específico.
+//
+// Nome sem entrada aqui é reportado no fim da execução, para nunca passar
+// português em silêncio.
+const EN_LABEL = {
+  'Aceitar convite de admin': 'Accept Admin Invite',
+  'Alterar descrição da newsletter': 'Update Newsletter Description',
+  'Alterar nome da newsletter': 'Update Newsletter Name',
+  'Anexar transcrição': 'Attach Call Transcript',
+  'Atender chamada': 'Accept Call',
+  'Atualizar foto do grupo (por URL)': 'Update Group Photo From URL',
+  'Atualizar imagem da newsletter': 'Update Newsletter Picture',
+  'Baixar gravação': 'Download Call Recording',
+  'Buscar newsletters': 'Search Newsletters',
+  'Configurar chamadas recebidas': 'Set Incoming Call Handling',
+  'Configurações da comunidade': 'Update Community Settings',
+  'Configurações da newsletter': 'Update Newsletter Settings',
+  'Criar comunidade': 'Create Community',
+  'Criar instância (parceiro)': 'Create Instance (Partner)',
+  'Criar newsletter': 'Create Newsletter',
+  // "(GET)" e "(POST)" descreviam o metodo HTTP em vez da diferenca real: um le
+  // o telefone da query string, o outro do corpo. O rotulo agora diz isso.
+  'Código de emparelhamento (GET)': 'Get Pairing Code (Phone in Query)',
+  'Código de emparelhamento (POST)': 'Get Pairing Code (Phone in Body)',
+  'Deixar de seguir newsletter': 'Unfollow Newsletter',
+  'Deletar newsletter': 'Delete Newsletter',
+  'Desafio de passkey (WebAuthn)': 'Get Passkey Challenge (WebAuthn)',
+  'Desativar comunidade': 'Deactivate Community',
+  'Desvincular grupos da comunidade': 'Unlink Groups From Community',
+  'Encerrar chamada': 'Terminate Call',
+  'Enviar GIF': 'Send GIF',
+  'Enviar assinatura de passkey': 'Send Passkey Assertion',
+  'Enviar contato': 'Send Contacts',
+  'Enviar documento': 'Send Document',
+  'Enviar evento': 'Send Event',
+  'Enviar lista de opções': 'Send Option List',
+  'Enviar vídeo redondo (PTV)': 'Send Round Video (PTV)',
+  'Falar texto na chamada (TTS)': 'Speak Text on Call (TTS)',
+  'Fixar mensagem': 'Pin Message',
+  'Iniciar chamada': 'Start Call',
+  'Iniciar gravação': 'Start Call Recording',
+  'Listar comunidades': 'List Communities',
+  'Listar conversas': 'List Chats',
+  'Listar newsletters': 'List Newsletters',
+  'Marcar chat como lido/não lido': 'Mark Chat Read or Unread',
+  'Metadados da comunidade': 'Get Community Metadata',
+  'Metadados da newsletter': 'Get Newsletter Metadata',
+  'Metadados de um chat': 'Get Chat Metadata',
+  'Obter link de convite': 'Get Group Invite Link',
+  'Parar gravação': 'Stop Call Recording',
+  'Ponte WebRTC': 'WebRTC Bridge',
+  'QR Code para conexão': 'Get QR Code Image',
+  'Reativar som da newsletter': 'Unmute Newsletter',
+  'Recusar chamada': 'Reject Call',
+  'Reiniciar com desconexão': 'Restart With Disconnect',
+  'Remover administrador da newsletter': 'Remove Newsletter Admin',
+  'Revogar convite de admin': 'Revoke Admin Invite',
+  'Seguir newsletter': 'Follow Newsletter',
+  'Silenciar newsletter': 'Mute Newsletter',
+  'Tocar áudio na chamada': 'Play Audio on Call',
+  'Transferir propriedade da newsletter': 'Transfer Newsletter Ownership',
+  'Ver configuração de chamadas': 'Get Call Handling Config',
+  'Ver transcrição': 'Get Call Transcript',
+  'Vincular grupos à comunidade': 'Link Groups To Community',
+};
+
+const missingLabels = new Set();
+function enLabel(ptSummary) {
+  const en = EN_LABEL[ptSummary];
+  if (en) return en;
+  missingLabels.add(ptSummary);
+  return ptSummary;
+}
+
 const resources = new Map();
 let generatedCount = 0;
 
@@ -133,7 +216,7 @@ for (const section of sections) {
     if (!resources.has(res.value)) resources.set(res.value, { ...res, ops: [] });
     resources.get(res.value).ops.push({
       name: opName,
-      display: ep.summary,
+      display: enLabel(ep.summary),
       method: ep.method,
       path: rel,
       pathParams,
@@ -191,7 +274,7 @@ ${res.ops
     default: '',
     required: true,
     displayOptions: { show: { resource: [${jsStr(res.value)}], operation: [${ops.map(jsStr).join(', ')}] } },
-    description: 'Valor de {${param}} na rota',
+    description: 'Value for {${param}} in the request path',
   },`);
   }
 
@@ -206,7 +289,7 @@ ${res.ops
     type: 'json',
     default: '{}',
     displayOptions: { show: { resource: [${jsStr(res.value)}], operation: [${withBody.map((o) => jsStr(o.name)).join(', ')}] } },
-    description: 'Corpo da requisição. Campos esperados por operação: ${withBody
+    description: 'Request body. Fields expected per operation: ${withBody
       .filter((o) => o.bodyFields.length)
       .map((o) => `${o.name} → ${o.bodyFields.map((f) => f.name + (f.required ? '*' : '')).join(', ')}`)
       .join(' | ')
@@ -266,3 +349,9 @@ writeFileSync(OUT_PATH, out);
 console.log(`✅ ${generatedCount} operações geradas em ${resourceList.length} resources`);
 for (const r of resourceList) console.log(`   ${r.label}: ${r.ops.length}`);
 console.log(`   → ${OUT_PATH}`);
+
+if (missingLabels.size) {
+  console.warn(`\n⚠️  ${missingLabels.size} rótulo(s) sem tradução em EN_LABEL — ficaram em português na UI do node:`);
+  for (const l of missingLabels) console.warn(`   · ${l}`);
+  console.warn('   Adicione em EN_LABEL no topo deste script.');
+}
