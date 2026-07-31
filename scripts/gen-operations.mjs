@@ -25,9 +25,16 @@ const OUT_PATH = resolve(__dirname, '../nodes/Wafly/GeneratedOperations.ts');
 const NODE_PATH = resolve(__dirname, '../nodes/Wafly/Wafly.node.ts');
 
 if (!existsSync(SCHEMA_PATH)) {
-  console.error(`❌ schema não encontrado em ${SCHEMA_PATH}`);
-  console.error('   defina WAFLY_SCHEMA_PATH apontando para endpoints-schema.ts');
-  process.exit(1);
+  // NÃO é erro: o schema vive no repositório do frontend, que não existe no
+  // runner de CI nem na máquina de quem só clonou este pacote. O resultado da
+  // geração (GeneratedOperations.ts) é COMMITADO justamente por isso, então o
+  // build segue normalmente com o que já está versionado.
+  //
+  // Falhar aqui quebrou o publish da v1.5.0: o prebuild abortou no CI porque
+  // procurou ../frontend, que não existe lá.
+  console.warn(`ℹ️  schema não encontrado em ${SCHEMA_PATH} — usando o GeneratedOperations.ts versionado.`);
+  console.warn('   Para regenerar, rode com o repo do frontend ao lado ou defina WAFLY_SCHEMA_PATH.');
+  process.exit(0);
 }
 
 const schema = readFileSync(SCHEMA_PATH, 'utf8');
