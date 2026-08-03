@@ -4,23 +4,23 @@
     {
       "parameters": {
         "content": "## Send one-time passwords over WhatsApp with SMS fallback\n\n> **Community node - self-hosted n8n only.** This template uses `n8n-nodes-wafly`, which cannot be installed on n8n Cloud.\n\n### Who's it for\n\nAny product that verifies a phone number at signup, login or checkout. WhatsApp delivery costs a fraction of SMS in most markets, but only works if the number actually has WhatsApp.\n\n### How it works\n\nYour app POSTs a phone number and a code to the webhook. The workflow first asks WhatsApp whether that number exists, which is the step most implementations skip and then wonder why delivery silently fails. If it exists, the code goes out as a native OTP message with a copy button, and the workflow answers your app with the message id. If it does not, the run drops into an SMS branch you plug your own provider into. Send failures retry three times and then answer with a 502 instead of pretending the code was delivered.\n\n### How to set up\n\n1. Create the Wafly API credential.\n2. Activate the workflow and POST `{ \"phone\": \"5511999999999\", \"code\": \"123456\" }` to the production URL.\n3. Replace the SMS placeholder node with your provider.\n\n### Requirements\n\nSelf-hosted n8n, a Wafly account, and an SMS provider if you want the fallback.\n\n### How to customize\n\nGenerate the code inside the workflow instead of receiving it, change the expiry copy, or store each attempt in a database to rate-limit by phone number.",
-        "height": 920,
-        "width": 460
+        "height": 1600,
+        "width": 520
       },
       "id": "sticky-description",
       "name": "Template description",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -920,
-        60
+        -1180,
+        0
       ]
     },
     {
       "parameters": {
         "content": "## Setup\n\n1. **Wafly API** credential (Client-Token, instance, token).\n2. Activate the workflow and POST to the production URL:\n\n```\n{ \"phone\": \"5511999999999\", \"code\": \"123456\" }\n```\n\n3. The response is JSON: `{ ok, channel, phone, messageId }`. Channel is `whatsapp` or `sms`.\n4. Replace the **SMS fallback** node with your own provider.\n\nGenerate and store the code on your side. This workflow only delivers it, so your app stays the single source of truth for what is valid and for how long.",
-        "height": 420,
-        "width": 420,
+        "height": 1600,
+        "width": 560,
         "color": 6
       },
       "id": "sticky-setup",
@@ -28,8 +28,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -420,
-        60
+        -620,
+        0
       ]
     },
     {
@@ -44,8 +44,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        60,
-        320
+        0,
+        400
       ],
       "webhookId": "REPLACE_WEBHOOK_ID"
     },
@@ -60,8 +60,8 @@
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
       "position": [
-        300,
-        320
+        260,
+        400
       ],
       "onError": "continueRegularOutput",
       "retryOnFail": true,
@@ -84,7 +84,7 @@
       "typeVersion": 2,
       "position": [
         520,
-        320
+        400
       ]
     },
     {
@@ -117,8 +117,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        740,
-        320
+        780,
+        400
       ]
     },
     {
@@ -135,8 +135,8 @@
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
       "position": [
-        980,
-        220
+        1060,
+        200
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -160,8 +160,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1240,
-        180
+        1360,
+        80
       ]
     },
     {
@@ -171,8 +171,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        980,
-        460
+        1060,
+        660
       ]
     },
     {
@@ -186,8 +186,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1240,
-        460
+        1360,
+        660
       ]
     },
     {
@@ -202,8 +202,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1240,
-        320
+        1360,
+        340
       ]
     }
   ],

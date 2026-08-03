@@ -4,23 +4,23 @@
     {
       "parameters": {
         "content": "## Approve join requests, welcome members and remove link spam in WhatsApp groups\n\n> **Community node - self-hosted n8n only.** This template uses `n8n-nodes-wafly`, which cannot be installed on n8n Cloud.\n\n### Who's it for\n\nAnyone running a WhatsApp community: a paid group, a customer community, a class cohort. Moderating by hand does not scale past a few hundred members, and link spam is what kills a group.\n\n### How it works\n\nOne webhook receives every group event and a Switch routes it by type. A join request is approved automatically. A new member gets a welcome message with the rules. A message posted in the group goes through a spam check that looks for links outside your allowlist, posted by someone who is not an admin, and deletes it, then tells the group why.\n\nThe admin list and the allowed domains live in a single Set node, so you configure the template in one place instead of editing expressions.\n\n### How to set up\n\n1. Create the Wafly API credential. The instance number must be an **admin** of the group.\n2. Fill `adminPhones` and `allowedDomains` in the Config node.\n3. Activate the workflow and register the Webhook production URL on your instance with the curl in the grey note.\n\n### Requirements\n\nSelf-hosted n8n, a Wafly account, and the connected number promoted to group admin.\n\n### How to customize\n\nChange the welcome copy, add domains to the allowlist, or extend the spam check to catch phone numbers and invite links. Group management like approving and removing members is only available on unofficial APIs.",
-        "height": 920,
-        "width": 460
+        "height": 1700,
+        "width": 520
       },
       "id": "sticky-description",
       "name": "Template description",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -920,
-        40
+        -1180,
+        0
       ]
     },
     {
       "parameters": {
         "content": "## Setup\n\n1. **Wafly API** credential (Client-Token, instance, token). The instance number must be a **group admin**.\n2. Activate the workflow, copy the Webhook **Production URL** and register it once:\n\n```\ncurl -X PUT \\\n  \"https://wafly.com.br/api-bridge-whats/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received\" \\\n  -H \"Client-Token: YOUR_CLIENT_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"value\":\"PASTE_THE_PRODUCTION_URL\"}'\n```\n\n> Do not use the node's `Webhook > Set Webhook` operation: it calls a route that returns 404.\n\n3. Fill `adminPhones` and `allowedDomains` in the **Config** node.\n\nEvents used (Z-API shaped payload):\n- `body.notification = MEMBERSHIP_APPROVAL_REQUEST` -> join request\n- `body.notification = GROUP_PARTICIPANT_INVITE` -> member joined\n- `body.type = ReceivedCallback` + `body.isGroup = true` -> message in the group",
-        "height": 620,
-        "width": 440,
+        "height": 1700,
+        "width": 560,
         "color": 6
       },
       "id": "sticky-setup",
@@ -28,8 +28,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -420,
-        40
+        -620,
+        0
       ]
     },
     {
@@ -44,8 +44,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        60,
-        340
+        0,
+        400
       ],
       "webhookId": "REPLACE_WEBHOOK_ID"
     },
@@ -75,8 +75,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        280,
-        340
+        260,
+        400
       ]
     },
     {
@@ -176,7 +176,7 @@
       "typeVersion": 3,
       "position": [
         520,
-        340
+        400
       ]
     },
     {
@@ -191,8 +191,8 @@
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
       "position": [
-        800,
-        140
+        820,
+        80
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -216,8 +216,8 @@
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
       "position": [
-        800,
-        320
+        820,
+        400
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -238,8 +238,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        800,
-        520
+        820,
+        720
       ]
     },
     {
@@ -272,8 +272,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1020,
-        520
+        1080,
+        720
       ]
     },
     {
@@ -288,8 +288,8 @@
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
       "position": [
-        1240,
-        460
+        1340,
+        640
       ],
       "onError": "continueRegularOutput",
       "retryOnFail": true,
@@ -314,8 +314,8 @@
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
       "position": [
-        1460,
-        460
+        1600,
+        640
       ],
       "onError": "continueRegularOutput",
       "credentials": {
@@ -332,8 +332,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1240,
-        620
+        1340,
+        900
       ]
     }
   ],

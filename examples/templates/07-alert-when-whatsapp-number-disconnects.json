@@ -4,27 +4,33 @@
     {
       "parameters": {
         "content": "## Check WhatsApp connection on a schedule and alert when the number drops\n\n> **Community node - self-hosted n8n only.** This template uses `n8n-nodes-wafly`, which cannot be installed on n8n Cloud.\n\n### Who's it for\n\nAnyone whose product depends on a WhatsApp number staying online: support inboxes, AI agents, order notifications, OTP delivery. On an unofficial API the session can be revoked by WhatsApp at any time, and the usual way you find out is a customer complaining.\n\n### How it works\n\nEvery five minutes the workflow asks the API for the instance status. A Code node reads the two fields that actually matter, `connected` and `smartphoneConnected`, and classifies the run as online, degraded or offline. Degraded means the session is alive but the phone is unreachable, which is the state that silently breaks media downloads.\n\nAn alert only fires on a **change** of state, so a number that stays down does not page you every five minutes. Recovery is announced too. State is kept in workflow static data, so nothing external is needed.\n\nThe alert deliberately does **not** go out over WhatsApp. Alerting about a dead WhatsApp number through that same number is how outages go unnoticed, so the notification is an HTTP POST to any incoming webhook you already use, such as Slack, Discord or Telegram.\n\n### How to set up\n\n1. Create the Wafly API credential.\n2. Paste your alert webhook URL into the Config node.\n3. Activate the workflow. It runs every five minutes.\n\n### Requirements\n\nSelf-hosted n8n, a Wafly account, and an incoming webhook URL for the channel you want to be paged on.\n\n### How to customize\n\nChange the schedule, treat degraded as non-paging, or add a second Wafly node to alert through a **different** connected number.",
-        "height": 940,
-        "width": 460
+        "height": 1900,
+        "width": 520
       },
       "id": "sticky-description",
       "name": "Template description",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-820, 40]
+      "position": [
+        -1180,
+        0
+      ]
     },
     {
       "parameters": {
         "content": "## Why not alert over WhatsApp\n\nIf the number is disconnected, a WhatsApp alert about that number cannot be delivered. The alert would be lost exactly when it matters.\n\nSo the notification goes out over HTTP to a webhook of your choice. Slack, Discord and Telegram all expose one, and none of them need an n8n credential.\n\nIf you do want a WhatsApp alert, add a second Wafly node using a **second instance**, and keep the HTTP alert as the fallback.",
-        "height": 320,
-        "width": 380,
+        "height": 1900,
+        "width": 560,
         "color": 6
       },
       "id": "sticky-why",
       "name": "Design note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-320, 40]
+      "position": [
+        -620,
+        0
+      ]
     },
     {
       "parameters": {
@@ -41,7 +47,10 @@
       "name": "Every 5 minutes",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [-320, 420]
+      "position": [
+        0,
+        400
+      ]
     },
     {
       "parameters": {
@@ -67,7 +76,10 @@
       "name": "Config",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-100, 420]
+      "position": [
+        260,
+        400
+      ]
     },
     {
       "parameters": {
@@ -78,13 +90,19 @@
       "name": "Get instance status",
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
-      "position": [140, 420],
+      "position": [
+        520,
+        400
+      ],
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
       "credentials": {
-        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
       }
     },
     {
@@ -95,7 +113,10 @@
       "name": "Classify and detect change",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [380, 420]
+      "position": [
+        780,
+        400
+      ]
     },
     {
       "parameters": {
@@ -111,7 +132,11 @@
               "id": "changed",
               "leftValue": "={{ $json.shouldAlert }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -122,7 +147,10 @@
       "name": "State changed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [620, 420]
+      "position": [
+        1040,
+        400
+      ]
     },
     {
       "parameters": {
@@ -137,7 +165,10 @@
       "name": "Post the alert",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [880, 340],
+      "position": [
+        1320,
+        260
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000
@@ -148,30 +179,81 @@
       "name": "No change, nothing to do",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [880, 500]
+      "position": [
+        1320,
+        560
+      ]
     }
   ],
   "connections": {
     "Every 5 minutes": {
-      "main": [[{ "node": "Config", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Config": {
-      "main": [[{ "node": "Get instance status", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Get instance status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Get instance status": {
-      "main": [[{ "node": "Classify and detect change", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Classify and detect change",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Classify and detect change": {
-      "main": [[{ "node": "State changed?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "State changed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "State changed?": {
       "main": [
-        [{ "node": "Post the alert", "type": "main", "index": 0 }],
-        [{ "node": "No change, nothing to do", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Post the alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No change, nothing to do",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "pinData": {},
-  "meta": { "templateCredsSetupCompleted": false }
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
 }
