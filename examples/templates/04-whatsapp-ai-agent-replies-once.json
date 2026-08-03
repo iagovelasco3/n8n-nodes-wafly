@@ -4,27 +4,33 @@
     {
       "parameters": {
         "content": "## Reply to grouped WhatsApp messages with an AI agent\n\n> **Community node — self-hosted n8n only.** This template uses `n8n-nodes-wafly`, which cannot be installed on n8n Cloud.\n\n### Who's it for\n\nAnyone running an AI agent on WhatsApp: support, pre-sales qualification, booking. It solves a problem you only hit in production.\n\n### How it works\n\nNobody writes a paragraph on WhatsApp. People send \"hi\", \"you there?\", \"how much is the pro plan?\" as three messages. That is three webhook calls, so the agent answers three times, spends three LLM calls, and reads like a bot.\n\nThe usual workaround is a Wait node plus a Redis lock. This template solves it at the API level: the WhatsApp provider holds the messages for a silence window and sends **one** webhook with the text already joined, keeping the payload shape unchanged.\n\nVoice notes are handled too. Transcription uses your own OpenAI key, so the provider cost lands on your account, and the transcript arrives in the same webhook.\n\n### How to set up\n\n1. Create the Wafly API credential and an OpenAI credential.\n2. Run the two setup nodes at the bottom once (grouping, then optional transcription).\n3. Activate the workflow and register the Webhook production URL on your instance with the curl in the grey note.\n\n### Requirements\n\nSelf-hosted n8n, a Wafly account (3-day trial, no card), an OpenAI API key.\n\n### How to customize\n\nEdit the system message in the AI Agent node. Tune the silence window (8s) and the hard ceiling (30s) in the first setup node. Swap the memory node for a database if you need history beyond the last 12 turns.",
-        "height": 900,
-        "width": 460
+        "height": 1400,
+        "width": 520
       },
       "id": "sticky-why",
       "name": "Template description",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-820, 20]
+      "position": [
+        -1180,
+        0
+      ]
     },
     {
       "parameters": {
-        "content": "## Setup (run once)\n\n1. Create the **Wafly API** credential (Client-Token, instance, token). No card needed for the 3 day trial at wafly.com.br.\n2. Activate this workflow and copy the **Production URL** of the Webhook node.\n3. Point your instance at that URL, once:\n\n```\ncurl -X PUT \\\n  \"https://wafly.com.br/api-bridge-whats/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received\" \\\n  -H \"Client-Token: YOUR_CLIENT_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"value\":\"PASTE_THE_PRODUCTION_URL\"}'\n```\n\n> Do not use the node's `Webhook > Set Webhook` operation: it calls a route that does not exist and returns 404. Use the curl above.\n\n4. Hit **Test step** on *1. Group split messages* below. Optionally also *2. Transcribe voice notes* after pasting your OpenAI key.\n\nThe inbound payload is Z-API shaped: `body.type`, `body.phone`, `body.text.message`, `body.fromMe`, `body.isGroup`.",
-        "height": 500,
-        "width": 420,
+        "content": "## Setup (run once)\n\n1. Create the **Wafly API** credential (Client-Token, instance, token). No card needed for the 3 day trial at wafly.com.br.\n2. Activate this workflow and copy the **Production URL** of the Webhook node.\n3. Point your instance at that URL, once:\n\n```\nBASE=https://wafly.com.br/api-bridge-whats\nINST=YOUR_INSTANCE\nTOKEN=YOUR_TOKEN\n\ncurl -X PUT \\\n  \"$BASE/instances/$INST/token/$TOKEN/update-webhook-received\" \\\n  -H \"Client-Token: YOUR_CLIENT_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"value\":\"PASTE_THE_PRODUCTION_URL\"}'\n```\n\n> Do not use the node's `Webhook > Set Webhook` operation: it calls a route that does not exist and returns 404. Use the curl above.\n\n4. Hit **Test step** on *1. Group split messages* below. Optionally also *2. Transcribe voice notes* after pasting your OpenAI key.\n\nThe inbound payload is Z-API shaped: `body.type`, `body.phone`, `body.text.message`, `body.fromMe`, `body.isGroup`.",
+        "height": 1400,
+        "width": 560,
         "color": 6
       },
       "id": "sticky-setup",
       "name": "Setup",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-340, 20]
+      "position": [
+        -620,
+        0
+      ]
     },
     {
       "parameters": {},
@@ -32,7 +38,10 @@
       "name": "Run setup once",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [-340, 540]
+      "position": [
+        0,
+        0
+      ]
     },
     {
       "parameters": {
@@ -48,11 +57,17 @@
       "name": "1. Group split messages",
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
-      "position": [-100, 540],
+      "position": [
+        260,
+        0
+      ],
       "notesInFlow": true,
       "notes": "Silence window of 8s, hard ceiling of 30s",
       "credentials": {
-        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
       }
     },
     {
@@ -67,11 +82,17 @@
       "name": "2. Transcribe voice notes (optional)",
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
-      "position": [160, 540],
+      "position": [
+        520,
+        0
+      ],
       "notesInFlow": true,
       "notes": "Paste your own OpenAI key. Capped at 500 min/month.",
       "credentials": {
-        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
       }
     },
     {
@@ -85,7 +106,10 @@
       "name": "Wafly Inbound",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-340, 260],
+      "position": [
+        0,
+        360
+      ],
       "webhookId": "REPLACE_WEBHOOK_ID"
     },
     {
@@ -96,7 +120,10 @@
       "name": "Text or voice, one field",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-100, 260]
+      "position": [
+        260,
+        360
+      ]
     },
     {
       "parameters": {
@@ -112,25 +139,40 @@
               "id": "cond-type",
               "leftValue": "={{ $json.type }}",
               "rightValue": "ReceivedCallback",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             },
             {
               "id": "cond-fromme",
               "leftValue": "={{ $json.fromMe }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "false", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
             },
             {
               "id": "cond-group",
               "leftValue": "={{ $json.isGroup }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "false", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
             },
             {
               "id": "cond-question",
               "leftValue": "={{ $json.question }}",
               "rightValue": "",
-              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -141,7 +183,10 @@
       "name": "A customer said something?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [140, 260]
+      "position": [
+        520,
+        360
+      ]
     },
     {
       "parameters": {
@@ -155,21 +200,32 @@
       "name": "AI Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
-      "position": [400, 240],
+      "position": [
+        820,
+        340
+      ],
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
         "model": "gpt-4o-mini",
-        "options": { "temperature": 0.3 }
+        "options": {
+          "temperature": 0.3
+        }
       },
       "id": "llm",
       "name": "OpenAI Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1,
-      "position": [340, 460],
+      "position": [
+        760,
+        640
+      ],
       "credentials": {
-        "openAiApi": { "id": "REPLACE_OPENAI_CREDENTIAL_ID", "name": "OpenAI account" }
+        "openAiApi": {
+          "id": "REPLACE_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
       }
     },
     {
@@ -182,7 +238,10 @@
       "name": "Memory per phone number",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
-      "position": [520, 460]
+      "position": [
+        1060,
+        640
+      ]
     },
     {
       "parameters": {
@@ -195,12 +254,18 @@
       "name": "Reply on WhatsApp",
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
-      "position": [760, 240],
+      "position": [
+        1160,
+        340
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "credentials": {
-        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
       }
     },
     {
@@ -209,39 +274,114 @@
       "name": "Ignore (group, echo, no text)",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [400, 400]
+      "position": [
+        820,
+        920
+      ]
     }
   ],
   "connections": {
     "Run setup once": {
-      "main": [[{ "node": "1. Group split messages", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "1. Group split messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "1. Group split messages": {
-      "main": [[{ "node": "2. Transcribe voice notes (optional)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "2. Transcribe voice notes (optional)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Wafly Inbound": {
-      "main": [[{ "node": "Text or voice, one field", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Text or voice, one field",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Text or voice, one field": {
-      "main": [[{ "node": "A customer said something?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "A customer said something?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "A customer said something?": {
       "main": [
-        [{ "node": "AI Agent", "type": "main", "index": 0 }],
-        [{ "node": "Ignore (group, echo, no text)", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ignore (group, echo, no text)",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "OpenAI Chat Model": {
-      "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Memory per phone number": {
-      "ai_memory": [[{ "node": "AI Agent", "type": "ai_memory", "index": 0 }]]
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
     },
     "AI Agent": {
-      "main": [[{ "node": "Reply on WhatsApp", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Reply on WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "pinData": {},
-  "meta": { "templateCredsSetupCompleted": false }
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
 }

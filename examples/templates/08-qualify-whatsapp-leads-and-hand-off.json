@@ -4,27 +4,33 @@
     {
       "parameters": {
         "content": "## Qualify inbound WhatsApp leads with AI and hand hot ones to a human\n\n> **Community node - self-hosted n8n only.** This template uses `n8n-nodes-wafly`, which cannot be installed on n8n Cloud.\n\n### Who's it for\n\nSmall sales teams that get inbound on WhatsApp and cannot answer everything. The goal is not to let a bot close the deal, it is to make sure a human never misses the two messages a week that are worth answering.\n\n### How it works\n\nAn inbound message arrives on the webhook. Non-customer traffic is filtered out first: your own echoes, group chats and empty messages.\n\nAn LLM then reads the message and returns a small JSON object: intent, whether the person named a budget or a deadline, and a temperature of hot, warm or cold. The parser is deliberately defensive, so a malformed answer becomes a warm lead instead of a crashed run. A model that fails should never drop a lead on the floor.\n\nHot leads get a short holding reply and your sales number gets a WhatsApp message with the lead's number and what they asked for. Warm leads get an answer and no page. Cold ones are logged and left alone.\n\nMemory is keyed by phone number, so a person who writes three times is one conversation rather than three cold starts.\n\n### How to set up\n\n1. Create the Wafly API credential and an OpenAI credential.\n2. Put the phone number that should receive handoffs into the Config node.\n3. Activate the workflow and register the Webhook production URL on your instance with the curl in the grey note.\n\n### Requirements\n\nSelf-hosted n8n, a Wafly account, an OpenAI API key, and a phone number to receive handoffs.\n\n### How to customize\n\nEdit the qualification prompt to match how you actually score leads, change the temperature thresholds, or send the handoff to a CRM instead of a phone.",
-        "height": 980,
-        "width": 460
+        "height": 1500,
+        "width": 520
       },
       "id": "sticky-description",
       "name": "Template description",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-840, 40]
+      "position": [
+        -1180,
+        0
+      ]
     },
     {
       "parameters": {
         "content": "## Setup\n\n1. **Wafly API** credential (Client-Token, instance, token) and an **OpenAI** credential.\n2. Set `salesPhone` in the **Config** node. Use the international format, digits only.\n3. Activate the workflow, copy the Webhook **Production URL** and register it once:\n\n```\ncurl -X PUT \\\n  \"https://wafly.com.br/api-bridge-whats/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received\" \\\n  -H \"Client-Token: YOUR_CLIENT_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"value\":\"PASTE_THE_PRODUCTION_URL\"}'\n```\n\n> Do not use the node's `Webhook > Set Webhook` operation: it calls a route that returns 404.\n\nThe inbound payload is Z-API shaped: `body.type`, `body.phone`, `body.text.message`, `body.fromMe`, `body.isGroup`.",
-        "height": 480,
-        "width": 400,
+        "height": 1500,
+        "width": 560,
         "color": 6
       },
       "id": "sticky-setup",
       "name": "Setup",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-340, 40]
+      "position": [
+        -620,
+        0
+      ]
     },
     {
       "parameters": {
@@ -37,7 +43,10 @@
       "name": "Wafly Inbound",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-340, 580],
+      "position": [
+        0,
+        360
+      ],
       "webhookId": "REPLACE_WEBHOOK_ID"
     },
     {
@@ -59,7 +68,10 @@
       "name": "Config",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-100, 580]
+      "position": [
+        260,
+        360
+      ]
     },
     {
       "parameters": {
@@ -75,25 +87,40 @@
               "id": "c-type",
               "leftValue": "={{ $json.body.type }}",
               "rightValue": "ReceivedCallback",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             },
             {
               "id": "c-fromme",
               "leftValue": "={{ $json.body.fromMe }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "false", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
             },
             {
               "id": "c-group",
               "leftValue": "={{ $json.body.isGroup }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "false", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
             },
             {
               "id": "c-text",
               "leftValue": "={{ $json.body.text?.message }}",
               "rightValue": "",
-              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -104,7 +131,10 @@
       "name": "A customer wrote in?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [140, 580]
+      "position": [
+        520,
+        360
+      ]
     },
     {
       "parameters": {
@@ -118,21 +148,32 @@
       "name": "Qualify the lead",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
-      "position": [400, 560],
+      "position": [
+        820,
+        340
+      ],
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
         "model": "gpt-4o-mini",
-        "options": { "temperature": 0 }
+        "options": {
+          "temperature": 0
+        }
       },
       "id": "llm",
       "name": "OpenAI Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1,
-      "position": [340, 800],
+      "position": [
+        760,
+        660
+      ],
       "credentials": {
-        "openAiApi": { "id": "REPLACE_OPENAI_CREDENTIAL_ID", "name": "OpenAI account" }
+        "openAiApi": {
+          "id": "REPLACE_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
       }
     },
     {
@@ -145,7 +186,10 @@
       "name": "Memory per phone number",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
-      "position": [520, 800]
+      "position": [
+        1060,
+        660
+      ]
     },
     {
       "parameters": {
@@ -155,7 +199,10 @@
       "name": "Parse the qualification",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [660, 560]
+      "position": [
+        1180,
+        360
+      ]
     },
     {
       "parameters": {
@@ -168,12 +215,18 @@
       "name": "Reply to the lead",
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
-      "position": [900, 560],
+      "position": [
+        1440,
+        360
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "credentials": {
-        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
       }
     },
     {
@@ -190,7 +243,10 @@
               "id": "hot",
               "leftValue": "={{ $json.temperature }}",
               "rightValue": "hot",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -201,7 +257,10 @@
       "name": "Hot lead?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [1140, 560]
+      "position": [
+        1700,
+        360
+      ]
     },
     {
       "parameters": {
@@ -214,12 +273,18 @@
       "name": "Page the sales number",
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
-      "position": [1400, 480],
+      "position": [
+        1980,
+        240
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "credentials": {
-        "waflyApi": { "id": "REPLACE_WAFLY_CREDENTIAL_ID", "name": "Wafly account" }
+        "waflyApi": {
+          "id": "REPLACE_WAFLY_CREDENTIAL_ID",
+          "name": "Wafly account"
+        }
       }
     },
     {
@@ -228,7 +293,10 @@
       "name": "Warm or cold, no handoff",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [1400, 640]
+      "position": [
+        1980,
+        560
+      ]
     },
     {
       "parameters": {},
@@ -236,45 +304,132 @@
       "name": "Ignore (group, echo, no text)",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [400, 720]
+      "position": [
+        520,
+        920
+      ]
     }
   ],
   "connections": {
     "Wafly Inbound": {
-      "main": [[{ "node": "Config", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Config": {
-      "main": [[{ "node": "A customer wrote in?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "A customer wrote in?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "A customer wrote in?": {
       "main": [
-        [{ "node": "Qualify the lead", "type": "main", "index": 0 }],
-        [{ "node": "Ignore (group, echo, no text)", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Qualify the lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ignore (group, echo, no text)",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "OpenAI Chat Model": {
-      "ai_languageModel": [[{ "node": "Qualify the lead", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "Qualify the lead",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Memory per phone number": {
-      "ai_memory": [[{ "node": "Qualify the lead", "type": "ai_memory", "index": 0 }]]
+      "ai_memory": [
+        [
+          {
+            "node": "Qualify the lead",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Qualify the lead": {
-      "main": [[{ "node": "Parse the qualification", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Parse the qualification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Parse the qualification": {
-      "main": [[{ "node": "Reply to the lead", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Reply to the lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Reply to the lead": {
-      "main": [[{ "node": "Hot lead?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Hot lead?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Hot lead?": {
       "main": [
-        [{ "node": "Page the sales number", "type": "main", "index": 0 }],
-        [{ "node": "Warm or cold, no handoff", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Page the sales number",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Warm or cold, no handoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "pinData": {},
-  "meta": { "templateCredsSetupCompleted": false }
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
 }
