@@ -11,6 +11,23 @@ This is an n8n community node for the **Wafly WhatsApp Bridge API**. It lets you
 
 [Wafly](https://wafly.com.br) is a managed WhatsApp API platform: cloud-hosted instances connected via QR Code, REST API, real-time webhooks and unlimited messages.
 
+## 🧩 Ready-made workflow templates
+
+Five workflows you can import and run, instead of starting from a blank canvas:
+
+| Template | What it does |
+|---|---|
+| [AI agent replies once](examples/templates/04-whatsapp-ai-agent-replies-once.json) | Buffers messages that arrive in a burst so your agent answers once instead of three times |
+| [Qualify inbound leads](examples/templates/08-qualify-whatsapp-leads-and-hand-off.json) | Scores the conversation with AI and hands hot leads to a human |
+| [Moderate a group](examples/templates/05-moderate-whatsapp-group.json) | Approves join requests, welcomes members and removes link spam |
+| [Send OTP with SMS fallback](examples/templates/06-send-otp-over-whatsapp.json) | Validates the number first, falls back to SMS when WhatsApp is unreachable |
+| [Alert on disconnect](examples/templates/07-alert-when-whatsapp-number-disconnects.json) | Checks the connection on a schedule and alerts when the number drops |
+
+Import the JSON, create the **Wafly API** credential and activate. All of them run on
+self-hosted n8n, since community nodes are not available on n8n Cloud.
+
+Portuguese versions of these flows are in [`examples/templates`](examples/templates).
+
 ## 🚀 Features
 
 ### 📱 Instance
