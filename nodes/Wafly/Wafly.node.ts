@@ -14,9 +14,9 @@ import {
 // fallback the node fails to load on older n8n instances ("Class could not be found")
 const mainConnection: NodeConnectionType = NodeConnectionTypes?.Main ?? ('main' as NodeConnectionType);
 
-// Operações geradas a partir do schema central da API (scripts/gen-operations.mjs).
-// As escritas à mão neste arquivo têm precedência; estas cobrem o resto da
-// superfície para que nenhum endpoint fique inacessível pelo node.
+// Operations generated from the central API schema (scripts/gen-operations.mjs).
+// The hand-written ones in this file take precedence; these cover the rest of
+// the surface so that no endpoint is unreachable from the node.
 import {
   GENERATED_OPERATIONS,
   GENERATED_RESOURCES,
@@ -67,8 +67,8 @@ export class Wafly implements INodeType {
             name: 'Webhook',
             value: 'webhook',
           },
-          // Resources gerados do schema: newsletter, comunidades, chamadas,
-          // chats e os endpoints ainda sem operação escrita à mão.
+          // Resources generated from the schema: newsletter, communities, calls,
+          // chats and the endpoints that still have no hand-written operation.
           ...GENERATED_RESOURCES,
         ],
         default: 'message',
@@ -1427,9 +1427,9 @@ export class Wafly implements INodeType {
           } else if (operation === 'setMessageBuffer') {
             endpoint = `${basePath}/inbound-config`;
             method = 'PUT';
-            // A API trabalha em milissegundos, mas segundos é o que faz sentido
-            // para quem está configurando "quanto tempo esperar a pessoa terminar
-            // de escrever".
+            // The API works in milliseconds, but seconds is what makes sense to
+            // whoever is configuring "how long to wait for the person to finish
+            // typing".
             body = {
               buffer: {
                 enabled: true,
@@ -1452,8 +1452,8 @@ export class Wafly implements INodeType {
             const key = (this.getNodeParameter('transcriptionApiKey', i, '') as string).trim();
             body = {
               provider: 'openai',
-              // Chave vazia = mantém a já cadastrada, para ajustar o teto sem
-              // precisar recolar o segredo no workflow.
+              // Empty key = keep the one already stored, so the cap can be
+              // adjusted without pasting the secret into the workflow again.
               ...(key ? { api_key: key } : {}),
               transcription: {
                 enabled: true,
@@ -1760,9 +1760,9 @@ export class Wafly implements INodeType {
           }
         }
 
-        // Operações geradas: se o par resource:operation existir no mapa e nenhuma
-        // operação escrita à mão tiver definido o endpoint, monta a chamada a
-        // partir do schema. A ordem garante a precedência do código manual.
+        // Generated operations: if the resource:operation pair exists in the map
+        // and no hand-written operation has set the endpoint, build the call from
+        // the schema. This ordering is what gives the manual code precedence.
         const generated = GENERATED_OPERATIONS[`${resource}:${operation}`];
         if (generated && !endpoint) {
           let genPath = generated.path;
@@ -1770,7 +1770,7 @@ export class Wafly implements INodeType {
             const value = this.getNodeParameter(`gp_${param}`, i) as string;
             genPath = genPath.replace(`{${param}}`, encodeURIComponent(value));
           }
-          // Endpoint de parceiro não vive sob /instances/{instance}/token/{token}.
+          // Partner endpoints do not live under /instances/{instance}/token/{token}.
           endpoint = generated.isPartner
             ? genPath
             : `/instances/${instance}/token/${token}${genPath}`;

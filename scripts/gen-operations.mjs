@@ -1,17 +1,16 @@
 #!/usr/bin/env node
-// Gera as operações do node a partir do schema central de endpoints do frontend
-// (src/data/endpoints-schema.ts), que já é a fonte de verdade de /documentation,
-// /api-docs, openapi.json, llms.txt e da collection do Postman.
+// Generates the node operations from the frontend's central endpoint schema
+// (src/data/endpoints-schema.ts), which is already the source of truth for
+// /documentation, /api-docs, openapi.json, llms.txt and the Postman collection.
 //
-// POR QUE GERAR EM VEZ DE ESCREVER À MÃO: quando medimos, o node cobria 40 de
-// 100 endpoints. Escrever os 60 restantes à mão resolveria hoje e recriaria a
-// dívida na próxima vez que a API crescesse — foi exatamente assim que a
-// diferença apareceu. Gerando, endpoint novo no schema vira operação no node
-// rodando um comando.
+// WHY GENERATE INSTEAD OF HAND-WRITING: when we measured, the node covered 40 of
+// 100 endpoints. Writing the remaining 60 by hand would solve it today and
+// recreate the debt the next time the API grew — which is exactly how the gap
+// appeared in the first place. By generating, a new endpoint in the schema
+// becomes a node operation by running a single command.
 //
-// As operações escritas à mão continuam existindo e têm PRECEDÊNCIA: elas têm
-// UX melhor (campos com validação, unidades convertidas). O gerador só preenche
-// o que falta.
+// The hand-written operations still exist and take PRECEDENCE: they have better
+// UX (validated fields, converted units). The generator only fills in the gaps.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -25,26 +24,27 @@ const OUT_PATH = resolve(__dirname, '../nodes/Wafly/GeneratedOperations.ts');
 const NODE_PATH = resolve(__dirname, '../nodes/Wafly/Wafly.node.ts');
 
 if (!existsSync(SCHEMA_PATH)) {
-  // NÃO é erro: o schema vive no repositório do frontend, que não existe no
-  // runner de CI nem na máquina de quem só clonou este pacote. O resultado da
-  // geração (GeneratedOperations.ts) é COMMITADO justamente por isso, então o
-  // build segue normalmente com o que já está versionado.
+  // This is NOT an error: the schema lives in the frontend repository, which is
+  // not present on the CI runner nor on the machine of anyone who only cloned
+  // this package. That is precisely why the generated output
+  // (GeneratedOperations.ts) is COMMITTED, so the build proceeds normally with
+  // whatever is already checked in.
   //
-  // Falhar aqui quebrou o publish da v1.5.0: o prebuild abortou no CI porque
-  // procurou ../frontend, que não existe lá.
-  console.warn(`ℹ️  schema não encontrado em ${SCHEMA_PATH} — usando o GeneratedOperations.ts versionado.`);
-  console.warn('   Para regenerar, rode com o repo do frontend ao lado ou defina WAFLY_SCHEMA_PATH.');
+  // Failing here broke the v1.5.0 publish: prebuild aborted on CI because it
+  // looked for ../frontend, which does not exist there.
+  console.warn(`ℹ️  schema not found at ${SCHEMA_PATH} — using the committed GeneratedOperations.ts.`);
+  console.warn('   To regenerate, run with the frontend repo alongside or set WAFLY_SCHEMA_PATH.');
   process.exit(0);
 }
 
 const schema = readFileSync(SCHEMA_PATH, 'utf8');
 const nodeSrc = readFileSync(NODE_PATH, 'utf8');
 
-// --- parse do schema ---------------------------------------------------------
-// Regex em vez de AST de propósito: o arquivo é gerado/editado por humanos num
-// formato estável e previsível, e adicionar um parser de TS aqui traria uma
-// dependência pesada para ganhar pouco. Se o formato mudar, o gerador falha
-// alto (contagem zero) em vez de emitir lixo silenciosamente.
+// --- schema parsing ----------------------------------------------------------
+// Regex instead of an AST on purpose: the file is generated/edited by humans in
+// a stable, predictable format, and pulling in a TS parser here would add a
+// heavy dependency for little gain. If the format changes, the generator fails
+// loudly (zero count) instead of silently emitting garbage.
 
 const sections = [];
 const sectionRe = /id:\s*'([^']+)',\s*\n\s*name:\s*'([^']+)',\s*\n\s*description:/g;
@@ -65,7 +65,7 @@ while ((em = epRe.exec(schema)) !== null) {
     summary: em[4].replace(/\\'/g, "'"),
     index: em.index,
   };
-  // requestBody: nomes dos campos, para gerar entradas no node
+  // requestBody: field names, used to generate node inputs
   const after = schema.slice(em.index, em.index + 6000);
   const bodyBlock = after.match(/requestBody:\s*\[([\s\S]*?)\n\s{6}\]/);
   ep.bodyFields = bodyBlock
@@ -82,7 +82,7 @@ for (const ep of allEndpoints) {
   owner?.endpoints.push(ep);
 }
 
-// --- o que o node já cobre ---------------------------------------------------
+// --- what the node already covers --------------------------------------------
 const implementedPaths = new Set();
 for (const m of nodeSrc.matchAll(/endpoint = `\$\{basePath\}([^`]*)`/g)) {
   implementedPaths.add(normalize(m[1]));
@@ -103,7 +103,7 @@ function relPath(p) {
   return rel || '/';
 }
 
-// --- seleção -----------------------------------------------------------------
+// --- selection ---------------------------------------------------------------
 const RESOURCE_BY_SECTION = {
   instancia: { value: 'instanceExtra', label: 'Instance (More)' },
   mensagens: { value: 'messageExtra', label: 'Message (More)' },
@@ -117,18 +117,19 @@ const RESOURCE_BY_SECTION = {
 };
 
 
-// --- rótulos em inglês -------------------------------------------------------
-// O schema vive no repositório do frontend e serve a documentação brasileira,
-// então os `summary` são em português. A UI do n8n é em inglês — é a convenção
-// do ecossistema e é o idioma das operações escritas à mão neste node. Sem esta
-// tradução o node ficava metade em cada idioma, que foi como ele nasceu.
+// --- English labels ----------------------------------------------------------
+// The schema lives in the frontend repository and serves the Brazilian
+// documentation, so its `summary` fields are in Portuguese. The n8n UI is in
+// English — that is the ecosystem convention and the language of the
+// hand-written operations in this node. Without this translation the node would
+// end up half in each language, which is how it started out.
 //
-// A tradução mora AQUI, e não no schema, de propósito: rótulo de node é assunto
-// do node. Poluir o schema com um campo só para isto acoplaria a documentação
-// pública a um consumidor específico.
+// The translation lives HERE rather than in the schema on purpose: node labels
+// are the node's business. Polluting the schema with a field just for this
+// would couple the public documentation to one specific consumer.
 //
-// Nome sem entrada aqui é reportado no fim da execução, para nunca passar
-// português em silêncio.
+// Any name without an entry here is reported at the end of the run, so
+// Portuguese never slips through silently.
 const EN_LABEL = {
   'Aceitar convite de admin': 'Accept Admin Invite',
   'Alterar descrição da newsletter': 'Update Newsletter Description',
@@ -145,8 +146,9 @@ const EN_LABEL = {
   'Criar comunidade': 'Create Community',
   'Criar instância (parceiro)': 'Create Instance (Partner)',
   'Criar newsletter': 'Create Newsletter',
-  // "(GET)" e "(POST)" descreviam o metodo HTTP em vez da diferenca real: um le
-  // o telefone da query string, o outro do corpo. O rotulo agora diz isso.
+  // "(GET)" and "(POST)" described the HTTP method instead of the real
+  // difference: one reads the phone from the query string, the other from the
+  // body. The label now says that.
   'Código de emparelhamento (GET)': 'Get Pairing Code (Phone in Query)',
   'Código de emparelhamento (POST)': 'Get Pairing Code (Phone in Body)',
   'Deixar de seguir newsletter': 'Unfollow Newsletter',
@@ -208,7 +210,7 @@ for (const section of sections) {
 
   for (const ep of section.endpoints) {
     const rel = relPath(ep.path);
-    if (implementedPaths.has(normalize(rel))) continue; // já feito à mão: não duplicar
+    if (implementedPaths.has(normalize(rel))) continue; // already hand-written: do not duplicate
 
     const pathParams = [...rel.matchAll(/\{([^}]+)\}/g)].map((m) => m[1]);
     const opName = toOperationName(ep.id);
@@ -235,7 +237,7 @@ function jsStr(s) {
   return `'${String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 }
 
-// --- emissão -----------------------------------------------------------------
+// --- emission ----------------------------------------------------------------
 const resourceList = [...resources.values()];
 
 const opDefs = [];
@@ -258,7 +260,7 @@ ${res.ops
     default: ${jsStr(res.ops[0].name)},
   },`);
 
-  // Um campo por parâmetro de caminho, só nas operações que o usam.
+  // One field per path parameter, shown only on the operations that use it.
   const byParam = new Map();
   for (const o of res.ops) {
     for (const p of o.pathParams) {
@@ -278,9 +280,9 @@ ${res.ops
   },`);
   }
 
-  // Corpo em JSON. Um formulário campo a campo para 60 endpoints geraria uma UI
-  // impossível de manter; o JSON mantém a operação utilizável e o exemplo dos
-  // campos esperados vai na descrição.
+  // JSON body. A field-by-field form for 60 endpoints would produce a UI that is
+  // impossible to maintain; JSON keeps the operation usable and the example of
+  // the expected fields goes into the description.
   const withBody = res.ops.filter((o) => o.method !== 'GET' && o.method !== 'DELETE');
   if (withBody.length) {
     props.push(`  {
@@ -308,19 +310,18 @@ function humanize(s) {
   return s.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()).trim();
 }
 
-const out = `// ⚠️ ARQUIVO GERADO — não edite à mão.
-// Gerado por scripts/gen-operations.mjs a partir do schema central de endpoints
-// (frontend/src/data/endpoints-schema.ts), a mesma fonte de /documentation,
-// /api-docs, openapi.json, llms.txt e do Postman.
+const out = `// ⚠️ GENERATED FILE — do not edit by hand.
+// Generated by scripts/gen-operations.mjs from the central endpoint schema
+// (frontend/src/data/endpoints-schema.ts), the same source behind
+// /documentation, /api-docs, openapi.json, llms.txt and the Postman collection.
 //
-// Regenerar:  npm run gen:ops
+// To regenerate:  npm run gen:ops
 //
-// As operações escritas à mão no Wafly.node.ts têm PRECEDÊNCIA e não aparecem
-// aqui: elas têm UX melhor (campos validados, unidades convertidas). Este
-// arquivo cobre o resto da API para que nenhum endpoint fique inacessível pelo
-// node.
+// The hand-written operations in Wafly.node.ts take PRECEDENCE and do not show
+// up here: they have better UX (validated fields, converted units). This file
+// covers the rest of the API so that no endpoint is unreachable from the node.
 //
-// Endpoints cobertos aqui: ${generatedCount}
+// Endpoints covered here: ${generatedCount}
 
 import type { INodeProperties } from 'n8n-workflow';
 
@@ -346,12 +347,12 @@ ${props.join('\n')}
 `;
 
 writeFileSync(OUT_PATH, out);
-console.log(`✅ ${generatedCount} operações geradas em ${resourceList.length} resources`);
+console.log(`✅ ${generatedCount} operations generated across ${resourceList.length} resources`);
 for (const r of resourceList) console.log(`   ${r.label}: ${r.ops.length}`);
 console.log(`   → ${OUT_PATH}`);
 
 if (missingLabels.size) {
-  console.warn(`\n⚠️  ${missingLabels.size} rótulo(s) sem tradução em EN_LABEL — ficaram em português na UI do node:`);
+  console.warn(`\n⚠️  ${missingLabels.size} label(s) missing from EN_LABEL — they stayed in Portuguese in the node UI:`);
   for (const l of missingLabels) console.warn(`   · ${l}`);
-  console.warn('   Adicione em EN_LABEL no topo deste script.');
+  console.warn('   Add them to EN_LABEL at the top of this script.');
 }
