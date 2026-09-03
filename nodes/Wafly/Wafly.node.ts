@@ -703,7 +703,7 @@ export class Wafly implements INodeType {
             operation: ['sendButtonOtp'],
           },
         },
-        description: 'Label of the copy button (default "Copiar código")',
+        description: 'Label of the copy button (default: "Copy code")',
       },
 
       // Send Button Actions Fields
