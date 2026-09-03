@@ -10,7 +10,8 @@ export class WaflyApi implements ICredentialType {
   name = 'waflyApi';
   displayName = 'Wafly API';
   icon: Icon = 'file:wafly.svg';
-  documentationUrl = 'https://wafly.com.br/docs';
+  documentationUrl =
+    'https://wafly.io/api-docs?utm_source=n8n&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=credential_help';
   properties: INodeProperties[] = [
     {
       displayName: 'Client Token',

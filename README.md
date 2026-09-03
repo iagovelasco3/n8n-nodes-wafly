@@ -9,7 +9,9 @@
 
 This is an n8n community node for the **Wafly WhatsApp Bridge API**. It lets you send WhatsApp messages, manage groups and configure webhooks directly from your n8n workflows.
 
-[Wafly](https://wafly.com.br) is a managed WhatsApp API platform: cloud-hosted instances connected via QR Code, REST API, real-time webhooks and unlimited messages.
+[Wafly](https://wafly.io/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_intro) is a managed WhatsApp API platform: cloud-hosted instances connected via QR Code, REST API, real-time webhooks and unlimited messages.
+
+**[Start a free 3-day trial](https://wafly.io/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_top_cta)** — $20/month per connected WhatsApp number for international accounts.
 
 ## 🧩 Ready-made workflow templates
 
@@ -117,8 +119,8 @@ Before using the node, create a credential of type **Wafly API** with the follow
 
 ### How to get your credentials
 
-1. Open the Wafly dashboard at [https://wafly.com.br](https://wafly.com.br)
-2. Log in to your account
+1. [Create your Wafly account](https://wafly.io/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=credentials_setup) or log in to the dashboard
+2. Complete the free 3-day trial setup
 3. Go to **Instances** and create or select an instance
 4. Copy the **Client-Token**, **Instance** and **Token**
 
@@ -374,7 +376,7 @@ This workflow sends an automatic message every day at 9am:
 
 For more information about the available endpoints and their parameters, see the full API documentation:
 
-- [Wafly API documentation](https://wafly.com.br/documentation)
+- [Wafly API documentation](https://wafly.io/api-docs?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=api_documentation)
 - Base URL: `https://wafly.com.br/api-bridge-whats`
 
 ## 🛠️ Development
@@ -449,7 +451,7 @@ Contributions are welcome! Please:
 ## 💬 Support
 
 - **Email**: contato@wafly.com.br
-- **Website**: [https://wafly.com.br](https://wafly.com.br)
+- **Website**: [wafly.io](https://wafly.io/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=support)
 - **WhatsApp community**: [Join the group](https://chat.whatsapp.com/BWS3Sv7TM738uIafAueH2J)
 - **Discord community**: [Join the Discord](https://discord.gg/ME2yyKZUFp)
 
@@ -460,4 +462,4 @@ Contributions are welcome! Please:
 
 ---
 
-Made with ❤️ by the [Wafly](https://wafly.com.br) team
+Made with ❤️ by the [Wafly](https://wafly.io/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=footer) team

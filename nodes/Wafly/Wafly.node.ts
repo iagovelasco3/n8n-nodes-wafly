@@ -12,16 +12,13 @@ import {
 
 // n8n-workflow < 1.83 does not export NodeConnectionTypes; without this
 // fallback the node fails to load on older n8n instances ("Class could not be found")
-const mainConnection: NodeConnectionType = NodeConnectionTypes?.Main ?? ('main' as NodeConnectionType);
+const mainConnection: NodeConnectionType =
+  NodeConnectionTypes?.Main ?? ('main' as NodeConnectionType);
 
 // Operations generated from the central API schema (scripts/gen-operations.mjs).
 // The hand-written ones in this file take precedence; these cover the rest of
 // the surface so that no endpoint is unreachable from the node.
-import {
-  GENERATED_OPERATIONS,
-  GENERATED_RESOURCES,
-  generatedProperties,
-} from './GeneratedOperations';
+import { GENERATED_OPERATIONS } from './GeneratedOperations';
 
 export class Wafly implements INodeType {
   description: INodeTypeDescription = {
@@ -51,25 +48,21 @@ export class Wafly implements INodeType {
         type: 'options',
         noDataExpression: true,
         options: [
-          {
-            name: 'Instance',
-            value: 'instance',
-          },
-          {
-            name: 'Message',
-            value: 'message',
-          },
-          {
-            name: 'Group',
-            value: 'group',
-          },
-          {
-            name: 'Webhook',
-            value: 'webhook',
-          },
-          // Resources generated from the schema: newsletter, communities, calls,
-          // chats and the endpoints that still have no hand-written operation.
-          ...GENERATED_RESOURCES,
+          // GENERATED_RESOURCE_OPTIONS:START
+          // Hand-written and generated resources, kept alphabetized for n8n verification.
+          { name: 'Call (Beta)', value: 'call' },
+          { name: 'Chat', value: 'chat' },
+          { name: 'Community', value: 'community' },
+          { name: 'Group', value: 'group' },
+          { name: 'Group (More)', value: 'groupExtra' },
+          { name: 'Instance', value: 'instance' },
+          { name: 'Instance (More)', value: 'instanceExtra' },
+          { name: 'Message', value: 'message' },
+          { name: 'Message (More)', value: 'messageExtra' },
+          { name: 'Newsletter / Channel', value: 'newsletter' },
+          { name: 'Partner', value: 'partner' },
+          { name: 'Webhook', value: 'webhook' },
+          // GENERATED_RESOURCE_OPTIONS:END
         ],
         default: 'message',
       },
@@ -89,6 +82,54 @@ export class Wafly implements INodeType {
         },
         options: [
           {
+            name: 'Check Phone Numbers',
+            value: 'checkPhones',
+            description: 'Check whether phone numbers exist on WhatsApp',
+            action: 'Check phone numbers',
+          },
+          {
+            name: 'Connect',
+            value: 'connect',
+            description: 'Connect the instance',
+            action: 'Connect instance',
+          },
+          {
+            name: 'Disable Audio Transcription',
+            value: 'deleteAiConfig',
+            description: 'Remove the stored key and stop transcribing',
+            action: 'Disable audio transcription',
+          },
+          {
+            name: 'Disable Message Buffer',
+            value: 'deleteInboundConfig',
+            description: 'Back to one webhook call per message',
+            action: 'Disable message buffer',
+          },
+          {
+            name: 'Disconnect',
+            value: 'disconnect',
+            description: 'Disconnect the instance',
+            action: 'Disconnect instance',
+          },
+          {
+            name: 'Get Audio Transcription',
+            value: 'getAiConfig',
+            description: 'Read the transcription settings and this month usage',
+            action: 'Get audio transcription',
+          },
+          {
+            name: 'Get Device Info',
+            value: 'getDevice',
+            description: 'Get device information',
+            action: 'Get device info',
+          },
+          {
+            name: 'Get Message Buffer',
+            value: 'getInboundConfig',
+            description: 'Read the current inbound delivery configuration',
+            action: 'Get message buffer',
+          },
+          {
             name: 'Get QR Code',
             value: 'getQrCode',
             description: 'Get the QR Code to connect the instance',
@@ -101,53 +142,10 @@ export class Wafly implements INodeType {
             action: 'Get status',
           },
           {
-            name: 'Connect',
-            value: 'connect',
-            description: 'Connect the instance',
-            action: 'Connect instance',
-          },
-          {
-            name: 'Disconnect',
-            value: 'disconnect',
-            description: 'Disconnect the instance',
-            action: 'Disconnect instance',
-          },
-          {
             name: 'Restart',
             value: 'restart',
             description: 'Restart the instance',
             action: 'Restart instance',
-          },
-          {
-            name: 'Get Device Info',
-            value: 'getDevice',
-            description: 'Get device information',
-            action: 'Get device info',
-          },
-          {
-            name: 'Check Phone Numbers',
-            value: 'checkPhones',
-            description: 'Check whether phone numbers exist on WhatsApp',
-            action: 'Check phone numbers',
-          },
-          {
-            name: 'Set Message Buffer',
-            value: 'setMessageBuffer',
-            description:
-              'Group split messages before the webhook fires, so an AI agent answers once instead of once per message',
-            action: 'Set message buffer',
-          },
-          {
-            name: 'Get Message Buffer',
-            value: 'getInboundConfig',
-            description: 'Read the current inbound delivery configuration',
-            action: 'Get message buffer',
-          },
-          {
-            name: 'Disable Message Buffer',
-            value: 'deleteInboundConfig',
-            description: 'Back to one webhook call per message',
-            action: 'Disable message buffer',
           },
           {
             name: 'Set Audio Transcription',
@@ -157,16 +155,11 @@ export class Wafly implements INodeType {
             action: 'Set audio transcription',
           },
           {
-            name: 'Get Audio Transcription',
-            value: 'getAiConfig',
-            description: 'Read the transcription settings and this month usage',
-            action: 'Get audio transcription',
-          },
-          {
-            name: 'Disable Audio Transcription',
-            value: 'deleteAiConfig',
-            description: 'Remove the stored key and stop transcribing',
-            action: 'Disable audio transcription',
+            name: 'Set Message Buffer',
+            value: 'setMessageBuffer',
+            description:
+              'Group split messages before the webhook fires, so an AI agent answers once instead of once per message',
+            action: 'Set message buffer',
           },
         ],
         default: 'getStatus',
@@ -187,22 +180,10 @@ export class Wafly implements INodeType {
         },
         options: [
           {
-            name: 'Send Text',
-            value: 'sendText',
-            description: 'Send a text message',
-            action: 'Send text message',
-          },
-          {
-            name: 'Send Image',
-            value: 'sendImage',
-            description: 'Send an image',
-            action: 'Send image',
-          },
-          {
-            name: 'Send Video',
-            value: 'sendVideo',
-            description: 'Send a video',
-            action: 'Send video',
+            name: 'Delete Message',
+            value: 'deleteMessage',
+            description: 'Delete a message',
+            action: 'Delete message',
           },
           {
             name: 'Send Audio',
@@ -211,40 +192,10 @@ export class Wafly implements INodeType {
             action: 'Send audio',
           },
           {
-            name: 'Send Document',
-            value: 'sendDocument',
-            description: 'Send a document',
-            action: 'Send document',
-          },
-          {
-            name: 'Send Location',
-            value: 'sendLocation',
-            description: 'Send a location',
-            action: 'Send location',
-          },
-          {
-            name: 'Send Contact',
-            value: 'sendContact',
-            description: 'Send a contact card',
-            action: 'Send contact',
-          },
-          {
-            name: 'Send Poll',
-            value: 'sendPoll',
-            description: 'Send a poll',
-            action: 'Send poll',
-          },
-          {
-            name: 'Send Link',
-            value: 'sendLink',
-            description: 'Send a link with preview',
-            action: 'Send link',
-          },
-          {
-            name: 'Send Pix Button',
-            value: 'sendButtonPix',
-            description: 'Send a Pix payment card with copy button',
-            action: 'Send pix button',
+            name: 'Send Button Actions',
+            value: 'sendButtonActions',
+            description: 'Send advanced buttons (URL, call, reply, copy)',
+            action: 'Send button actions',
           },
           {
             name: 'Send Button List',
@@ -253,28 +204,70 @@ export class Wafly implements INodeType {
             action: 'Send button list',
           },
           {
-            name: 'Send OTP Button',
-            value: 'sendButtonOtp',
-            description: 'Send a message with a copy-code button',
-            action: 'Send otp button',
-          },
-          {
-            name: 'Send Button Actions',
-            value: 'sendButtonActions',
-            description: 'Send advanced buttons (URL, call, reply, copy)',
-            action: 'Send button actions',
-          },
-          {
             name: 'Send Carousel',
             value: 'sendCarousel',
             description: 'Send a carousel of cards with images and buttons',
             action: 'Send carousel',
           },
           {
-            name: 'Delete Message',
-            value: 'deleteMessage',
-            description: 'Delete a message',
-            action: 'Delete message',
+            name: 'Send Contact',
+            value: 'sendContact',
+            description: 'Send a contact card',
+            action: 'Send contact',
+          },
+          {
+            name: 'Send Document',
+            value: 'sendDocument',
+            description: 'Send a document',
+            action: 'Send document',
+          },
+          {
+            name: 'Send Image',
+            value: 'sendImage',
+            description: 'Send an image',
+            action: 'Send image',
+          },
+          {
+            name: 'Send Link',
+            value: 'sendLink',
+            description: 'Send a link with preview',
+            action: 'Send link',
+          },
+          {
+            name: 'Send Location',
+            value: 'sendLocation',
+            description: 'Send a location',
+            action: 'Send location',
+          },
+          {
+            name: 'Send OTP Button',
+            value: 'sendButtonOtp',
+            description: 'Send a message with a copy-code button',
+            action: 'Send otp button',
+          },
+          {
+            name: 'Send Pix Button',
+            value: 'sendButtonPix',
+            description: 'Send a Pix payment card with copy button',
+            action: 'Send pix button',
+          },
+          {
+            name: 'Send Poll',
+            value: 'sendPoll',
+            description: 'Send a poll',
+            action: 'Send poll',
+          },
+          {
+            name: 'Send Text',
+            value: 'sendText',
+            description: 'Send a text message',
+            action: 'Send text message',
+          },
+          {
+            name: 'Send Video',
+            value: 'sendVideo',
+            description: 'Send a video',
+            action: 'Send video',
           },
         ],
         default: 'sendText',
@@ -557,9 +550,9 @@ export class Wafly implements INodeType {
         name: 'pixKeyType',
         type: 'options',
         options: [
-          { name: 'Email', value: 'EMAIL' },
-          { name: 'CPF', value: 'CPF' },
           { name: 'CNPJ', value: 'CNPJ' },
+          { name: 'CPF', value: 'CPF' },
+          { name: 'Email', value: 'EMAIL' },
           { name: 'Phone', value: 'PHONE' },
           { name: 'Random Key (EVP)', value: 'EVP' },
         ],
@@ -733,7 +726,8 @@ export class Wafly implements INodeType {
         displayName: 'Buttons (JSON)',
         name: 'buttonActionsJson',
         type: 'json',
-        default: '[\n  { "id": "1", "type": "URL", "label": "Open site", "url": "https://example.com" },\n  { "id": "2", "type": "REPLY", "label": "Talk to us" }\n]',
+        default:
+          '[\n  { "id": "1", "type": "URL", "label": "Open site", "url": "https://example.com" },\n  { "id": "2", "type": "REPLY", "label": "Talk to us" }\n]',
         required: true,
         displayOptions: {
           show: {
@@ -741,7 +735,8 @@ export class Wafly implements INodeType {
             operation: ['sendButtonActions'],
           },
         },
-        description: 'Array of buttons. Types: URL (with "url"), CALL (with "phone"), REPLY, COPY (with "code").',
+        description:
+          'Array of buttons. Types: URL (with "URL"), CALL (with "phone"), REPLY, COPY (with "code").',
       },
       {
         displayName: 'Title',
@@ -789,7 +784,8 @@ export class Wafly implements INodeType {
         displayName: 'Cards (JSON)',
         name: 'carouselJson',
         type: 'json',
-        default: '[\n  {\n    "text": "Product 1 - $99",\n    "image": "https://example.com/product1.jpg",\n    "buttons": [ { "id": "buy1", "label": "Buy", "type": "REPLY" } ]\n  }\n]',
+        default:
+          '[\n  {\n    "text": "Product 1 - $99",\n    "image": "https://example.com/product1.jpg",\n    "buttons": [ { "id": "buy1", "label": "Buy", "type": "REPLY" } ]\n  }\n]',
         required: true,
         displayOptions: {
           show: {
@@ -886,70 +882,10 @@ export class Wafly implements INodeType {
         },
         options: [
           {
-            name: 'Create Group',
-            value: 'createGroup',
-            description: 'Create a new group',
-            action: 'Create group',
-          },
-          {
-            name: 'List Groups',
-            value: 'listGroups',
-            description: 'List all groups',
-            action: 'List groups',
-          },
-          {
-            name: 'Get Metadata',
-            value: 'getMetadata',
-            description: 'Get group information',
-            action: 'Get metadata',
-          },
-          {
             name: 'Add Participant',
             value: 'addParticipant',
             description: 'Add a participant to the group',
             action: 'Add participant',
-          },
-          {
-            name: 'Remove Participant',
-            value: 'removeParticipant',
-            description: 'Remove a participant from the group',
-            action: 'Remove participant',
-          },
-          {
-            name: 'Promote to Admin',
-            value: 'addAdmin',
-            description: 'Promote a participant to admin',
-            action: 'Promote to admin',
-          },
-          {
-            name: 'Demote Admin',
-            value: 'removeAdmin',
-            description: 'Demote an admin',
-            action: 'Demote admin',
-          },
-          {
-            name: 'Leave Group',
-            value: 'leaveGroup',
-            description: 'Leave the group',
-            action: 'Leave group',
-          },
-          {
-            name: 'Update Name',
-            value: 'updateName',
-            description: 'Update the group name',
-            action: 'Update name',
-          },
-          {
-            name: 'Update Description',
-            value: 'updateDescription',
-            description: 'Update the group description',
-            action: 'Update description',
-          },
-          {
-            name: 'Update Photo',
-            value: 'updatePhoto',
-            description: 'Update the group photo',
-            action: 'Update photo',
           },
           {
             name: 'Approve Participant',
@@ -958,10 +894,16 @@ export class Wafly implements INodeType {
             action: 'Approve participant',
           },
           {
-            name: 'Reject Participant',
-            value: 'rejectParticipant',
-            description: 'Reject a pending participant',
-            action: 'Reject participant',
+            name: 'Create Group',
+            value: 'createGroup',
+            description: 'Create a new group',
+            action: 'Create group',
+          },
+          {
+            name: 'Demote Admin',
+            value: 'removeAdmin',
+            description: 'Demote an admin',
+            action: 'Demote admin',
           },
           {
             name: 'Get Invite Link',
@@ -970,10 +912,64 @@ export class Wafly implements INodeType {
             action: 'Get invite link',
           },
           {
+            name: 'Get Metadata',
+            value: 'getMetadata',
+            description: 'Get group information',
+            action: 'Get metadata',
+          },
+          {
+            name: 'Leave Group',
+            value: 'leaveGroup',
+            description: 'Leave the group',
+            action: 'Leave group',
+          },
+          {
+            name: 'List Groups',
+            value: 'listGroups',
+            description: 'List all groups',
+            action: 'List groups',
+          },
+          {
+            name: 'Promote to Admin',
+            value: 'addAdmin',
+            description: 'Promote a participant to admin',
+            action: 'Promote to admin',
+          },
+          {
             name: 'Redefine Invite Link',
             value: 'redefineInviteLink',
             description: 'Reset the group invite link',
             action: 'Redefine invite link',
+          },
+          {
+            name: 'Reject Participant',
+            value: 'rejectParticipant',
+            description: 'Reject a pending participant',
+            action: 'Reject participant',
+          },
+          {
+            name: 'Remove Participant',
+            value: 'removeParticipant',
+            description: 'Remove a participant from the group',
+            action: 'Remove participant',
+          },
+          {
+            name: 'Update Description',
+            value: 'updateDescription',
+            description: 'Update the group description',
+            action: 'Update description',
+          },
+          {
+            name: 'Update Name',
+            value: 'updateName',
+            description: 'Update the group name',
+            action: 'Update name',
+          },
+          {
+            name: 'Update Photo',
+            value: 'updatePhoto',
+            description: 'Update the group photo',
+            action: 'Update photo',
           },
           {
             name: 'Update Settings',
@@ -1357,8 +1353,7 @@ export class Wafly implements INodeType {
         displayOptions: {
           show: { resource: ['instance'], operation: ['setTranscription'] },
         },
-        description:
-          'Spend limit. Once reached, transcription stops until the month rolls over.',
+        description: 'Spend limit. Once reached, transcription stops until the month rolls over.',
       },
       {
         displayName: 'Include Groups',
@@ -1371,8 +1366,257 @@ export class Wafly implements INodeType {
         description:
           'Whether to group messages in group chats too. Grouping is per participant, so different people never get merged.',
       },
-      ...generatedProperties,
+      // GENERATED_NODE_PROPERTIES:START
+      // Additional operations generated from the central endpoint schema.
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['messageExtra'] } },
+        options: [
+          { name: 'Pin Message', value: 'pinMessage', action: 'Pin message' },
+          { name: 'Send Contacts', value: 'sendContacts', action: 'Send contacts' },
+          { name: 'Send Document', value: 'sendDocument', action: 'Send document' },
+          { name: 'Send Event', value: 'sendEvent', action: 'Send event' },
+          { name: 'Send GIF', value: 'sendGif', action: 'Send GIF' },
+          { name: 'Send Option List', value: 'sendOptionList', action: 'Send option list' },
+          { name: 'Send Round Video (PTV)', value: 'sendPtv', action: 'Send round video (PTV)' },
+        ],
+        default: 'pinMessage',
+      },
+      {
+        displayName: 'Type',
+        name: 'gp_type',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['messageExtra'], operation: ['sendDocument'] } },
+        description: 'Value for {type} in the request path',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['messageExtra'], operation: ['pinMessage', 'sendContacts', 'sendDocument', 'sendEvent', 'sendGif', 'sendOptionList', 'sendPtv'] } },
+        description: 'Request body. Fields expected per operation: pinMessage → phone*, messageId*, messageAction*, pinMessageDuration*, sender | sendContacts → contacts | sendEvent → event* | sendOptionList → optionList*.',
+      },
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['groupExtra'] } },
+        options: [
+          { name: 'Get Group Invite Link', value: 'groupInviteLink', action: 'Get group invite link' },
+          { name: 'Update Group Photo From URL', value: 'groupPhotoUrl', action: 'Update group photo from URL' },
+        ],
+        default: 'groupInviteLink',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['groupExtra'], operation: ['groupPhotoUrl'] } },
+        description: 'Request body for this operation',
+      },
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['newsletter'] } },
+        options: [
+          { name: 'Accept Admin Invite', value: 'newsletterAcceptAdminInvite', action: 'Accept admin invite' },
+          { name: 'Create Newsletter', value: 'createNewsletter', action: 'Create newsletter' },
+          { name: 'Delete Newsletter', value: 'deleteNewsletter', action: 'Delete newsletter' },
+          { name: 'Follow Newsletter', value: 'followNewsletter', action: 'Follow newsletter' },
+          { name: 'Get Newsletter Metadata', value: 'newsletterMetadata', action: 'Get newsletter metadata' },
+          { name: 'List Newsletters', value: 'listNewsletters', action: 'List newsletters' },
+          { name: 'Mute Newsletter', value: 'muteNewsletter', action: 'Mute newsletter' },
+          { name: 'Remove Newsletter Admin', value: 'newsletterRemoveAdmin', action: 'Remove newsletter admin' },
+          { name: 'Revoke Admin Invite', value: 'newsletterRevokeAdminInvite', action: 'Revoke admin invite' },
+          { name: 'Search Newsletters', value: 'searchNewsletter', action: 'Search newsletters' },
+          { name: 'Transfer Newsletter Ownership', value: 'newsletterTransferOwnership', action: 'Transfer newsletter ownership' },
+          { name: 'Unfollow Newsletter', value: 'unfollowNewsletter', action: 'Unfollow newsletter' },
+          { name: 'Unmute Newsletter', value: 'unmuteNewsletter', action: 'Unmute newsletter' },
+          { name: 'Update Newsletter Description', value: 'updateNewsletterDescription', action: 'Update newsletter description' },
+          { name: 'Update Newsletter Name', value: 'updateNewsletterName', action: 'Update newsletter name' },
+          { name: 'Update Newsletter Picture', value: 'updateNewsletterPicture', action: 'Update newsletter picture' },
+          { name: 'Update Newsletter Settings', value: 'newsletterSettings', action: 'Update newsletter settings' },
+        ],
+        default: 'newsletterAcceptAdminInvite',
+      },
+      {
+        displayName: 'Newsletter ID',
+        name: 'gp_newsletterId',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['newsletter'], operation: ['newsletterAcceptAdminInvite', 'newsletterMetadata', 'newsletterRemoveAdmin', 'newsletterRevokeAdminInvite', 'newsletterTransferOwnership', 'newsletterSettings'] } },
+        description: 'Value for {newsletterId} in the request path',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['newsletter'], operation: ['newsletterAcceptAdminInvite', 'createNewsletter', 'followNewsletter', 'muteNewsletter', 'newsletterRemoveAdmin', 'newsletterRevokeAdminInvite', 'searchNewsletter', 'newsletterTransferOwnership', 'unfollowNewsletter', 'unmuteNewsletter', 'updateNewsletterDescription', 'updateNewsletterName', 'updateNewsletterPicture', 'newsletterSettings'] } },
+        description: 'Request body. Fields expected per operation: searchNewsletter → view, filters | newsletterSettings → reactionCodes.',
+      },
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['instanceExtra'] } },
+        options: [
+          { name: 'Get Pairing Code (Phone in Body)', value: 'pairingCodePost', action: 'Get pairing code phone in body' },
+          { name: 'Get Pairing Code (Phone in Query)', value: 'pairingCode', action: 'Get pairing code phone in query' },
+          { name: 'Get Passkey Challenge (WebAuthn)', value: 'passkeyChallenge', action: 'Get passkey challenge webauthn' },
+          { name: 'Get QR Code Image', value: 'getQrCode', action: 'Get QR code image' },
+          { name: 'Restart With Disconnect', value: 'restartWithDisconnect', action: 'Restart with disconnect' },
+          { name: 'Send Passkey Assertion', value: 'passkeyResponse', action: 'Send passkey assertion' },
+        ],
+        default: 'pairingCodePost',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['instanceExtra'], operation: ['pairingCodePost', 'restartWithDisconnect', 'passkeyResponse'] } },
+        description: 'Request body. Fields expected per operation: pairingCodePost → connected | restartWithDisconnect → connected | passkeyResponse → phones*.',
+      },
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['chat'] } },
+        options: [
+          { name: 'Get Chat Metadata', value: 'chatMetadata', action: 'Get chat metadata' },
+          { name: 'List Chats', value: 'listChats', action: 'List chats' },
+          { name: 'Mark Chat Read or Unread', value: 'modifyChat', action: 'Mark chat read or unread' },
+        ],
+        default: 'chatMetadata',
+      },
+      {
+        displayName: 'Phone',
+        name: 'gp_phone',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['chat'], operation: ['chatMetadata'] } },
+        description: 'Value for {phone} in the request path',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['chat'], operation: ['modifyChat'] } },
+        description: 'Request body. Fields expected per operation: modifyChat → phone*, action*.',
+      },
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['community'] } },
+        options: [
+          { name: 'Create Community', value: 'createCommunity', action: 'Create community' },
+          { name: 'Deactivate Community', value: 'deleteCommunity', action: 'Deactivate community' },
+          { name: 'Get Community Metadata', value: 'communityMetadata', action: 'Get community metadata' },
+          { name: 'Link Groups To Community', value: 'linkCommunity', action: 'Link groups to community' },
+          { name: 'List Communities', value: 'listCommunities', action: 'List communities' },
+          { name: 'Unlink Groups From Community', value: 'unlinkCommunity', action: 'Unlink groups from community' },
+          { name: 'Update Community Settings', value: 'communitySettings', action: 'Update community settings' },
+        ],
+        default: 'createCommunity',
+      },
+      {
+        displayName: 'Community ID',
+        name: 'gp_communityId',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['community'], operation: ['deleteCommunity', 'communityMetadata'] } },
+        description: 'Value for {communityId} in the request path',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['community'], operation: ['createCommunity', 'linkCommunity', 'unlinkCommunity', 'communitySettings'] } },
+        description: 'Request body. Fields expected per operation: communitySettings → whoCanAddNewGroups*.',
+      },
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['partner'] } },
+        options: [
+          { name: 'Create Instance (Partner)', value: 'partnerCreateInstance', action: 'Create instance partner' },
+        ],
+        default: 'partnerCreateInstance',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['partner'], operation: ['partnerCreateInstance'] } },
+        description: 'Request body. Fields expected per operation: partnerCreateInstance → receivedCallbackUrl, deliveryCallbackUrl, disconnectedCallbackUrl, messageStatusCallbackUrl.',
+      },
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['call'] } },
+        options: [
+          { name: 'Accept Call', value: 'callAccept', action: 'Accept call' },
+          { name: 'Attach Call Transcript', value: 'callTranscriptPost', action: 'Attach call transcript' },
+          { name: 'Download Call Recording', value: 'callRecording', action: 'Download call recording' },
+          { name: 'Get Call Handling Config', value: 'callConfigGet', action: 'Get call handling config' },
+          { name: 'Get Call Transcript', value: 'callTranscriptGet', action: 'Get call transcript' },
+          { name: 'Play Audio on Call', value: 'callPlay', action: 'Play audio on call' },
+          { name: 'Reject Call', value: 'callReject', action: 'Reject call' },
+          { name: 'Set Incoming Call Handling', value: 'callConfigSet', action: 'Set incoming call handling' },
+          { name: 'Speak Text on Call (TTS)', value: 'callSay', action: 'Speak text on call (TTS)' },
+          { name: 'Start Call', value: 'callStart', action: 'Start call' },
+          { name: 'Start Call Recording', value: 'callRecordStart', action: 'Start call recording' },
+          { name: 'Stop Call Recording', value: 'callRecordStop', action: 'Stop call recording' },
+          { name: 'Terminate Call', value: 'callTerminate', action: 'Terminate call' },
+          { name: 'WebRTC Bridge', value: 'callWebrtc', action: 'Webrtc bridge' },
+        ],
+        default: 'callAccept',
+      },
+      {
+        displayName: 'Call ID',
+        name: 'gp_callId',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['call'], operation: ['callTranscriptPost', 'callRecording', 'callTranscriptGet', 'callRecordStart', 'callRecordStop'] } },
+        description: 'Value for {callId} in the request path',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['call'], operation: ['callAccept', 'callTranscriptPost', 'callPlay', 'callReject', 'callConfigSet', 'callSay', 'callStart', 'callRecordStart', 'callRecordStop', 'callTerminate', 'callWebrtc'] } },
+        description: 'Request body. Fields expected per operation: callTranscriptPost → segments* | callPlay → base64, hangupAfter | callConfigSet → onIncoming*, mp3, ai, human | callSay → voiceId, hangupAfter | callStart → phone*, video, mp3Url, mp3Base64, hangupAfter | callRecordStart → segments* | callRecordStop → segments*.',
+      },
+      // GENERATED_NODE_PROPERTIES:END
     ],
+    usableAsTool: true,
   };
 
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
@@ -1457,7 +1701,10 @@ export class Wafly implements INodeType {
               ...(key ? { api_key: key } : {}),
               transcription: {
                 enabled: true,
-                max_audio_seconds: this.getNodeParameter('transcriptionMaxAudioSeconds', i) as number,
+                max_audio_seconds: this.getNodeParameter(
+                  'transcriptionMaxAudioSeconds',
+                  i,
+                ) as number,
                 monthly_minutes_cap: this.getNodeParameter('transcriptionMonthlyCap', i) as number,
               },
             };
@@ -1577,7 +1824,8 @@ export class Wafly implements INodeType {
             const title = this.getNodeParameter('buttonActionsTitle', i, '') as string;
             const footer = this.getNodeParameter('buttonActionsFooter', i, '') as string;
             const rawButtons = this.getNodeParameter('buttonActionsJson', i) as string | object;
-            const buttonActions = typeof rawButtons === 'string' ? JSON.parse(rawButtons) : rawButtons;
+            const buttonActions =
+              typeof rawButtons === 'string' ? JSON.parse(rawButtons) : rawButtons;
             body = { phone, message, buttonActions };
             if (title) (body as Record<string, unknown>).title = title;
             if (footer) (body as Record<string, unknown>).footer = footer;
@@ -1723,7 +1971,11 @@ export class Wafly implements INodeType {
             body = { phone: groupId, groupId };
             const adminOnlyMessage = this.getNodeParameter('adminOnlyMessage', i, '') as string;
             const adminOnlySettings = this.getNodeParameter('adminOnlySettings', i, '') as string;
-            const requireAdminApproval = this.getNodeParameter('requireAdminApproval', i, '') as string;
+            const requireAdminApproval = this.getNodeParameter(
+              'requireAdminApproval',
+              i,
+              '',
+            ) as string;
             const adminOnlyAddMember = this.getNodeParameter('adminOnlyAddMember', i, '') as string;
             if (adminOnlyMessage !== '') {
               body.adminOnlyMessage = adminOnlyMessage === 'true';
@@ -1785,12 +2037,16 @@ export class Wafly implements INodeType {
         }
 
         // Make the API request — the Client-Token header is injected by the credential's authenticate config
-        const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'waflyApi', {
-          method,
-          url: `${baseUrl}${endpoint}`,
-          body: Object.keys(body).length > 0 ? body : undefined,
-          json: true,
-        });
+        const responseData = await this.helpers.httpRequestWithAuthentication.call(
+          this,
+          'waflyApi',
+          {
+            method,
+            url: `${baseUrl}${endpoint}`,
+            body: Object.keys(body).length > 0 ? body : undefined,
+            json: true,
+          },
+        );
         returnData.push(responseData as IDataObject);
       } catch (error) {
         if (this.continueOnFail()) {

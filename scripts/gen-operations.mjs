@@ -22,6 +22,10 @@ const SCHEMA_PATH = process.env.WAFLY_SCHEMA_PATH
   : resolve(__dirname, '../../frontend/src/data/endpoints-schema.ts');
 const OUT_PATH = resolve(__dirname, '../nodes/Wafly/GeneratedOperations.ts');
 const NODE_PATH = resolve(__dirname, '../nodes/Wafly/Wafly.node.ts');
+const RESOURCE_OPTIONS_START = '// GENERATED_RESOURCE_OPTIONS:START';
+const RESOURCE_OPTIONS_END = '// GENERATED_RESOURCE_OPTIONS:END';
+const NODE_PROPERTIES_START = '// GENERATED_NODE_PROPERTIES:START';
+const NODE_PROPERTIES_END = '// GENERATED_NODE_PROPERTIES:END';
 
 if (!existsSync(SCHEMA_PATH)) {
   // This is NOT an error: the schema lives in the frontend repository, which is
@@ -115,6 +119,13 @@ const RESOURCE_BY_SECTION = {
   webhooks: { value: 'webhookExtra', label: 'Webhook (More)' },
   parceiros: { value: 'partner', label: 'Partner' },
 };
+
+const BASE_RESOURCES = [
+  { value: 'instance', label: 'Instance' },
+  { value: 'message', label: 'Message' },
+  { value: 'group', label: 'Group' },
+  { value: 'webhook', label: 'Webhook' },
+];
 
 
 // --- English labels ----------------------------------------------------------
@@ -240,6 +251,10 @@ function jsStr(s) {
 // --- emission ----------------------------------------------------------------
 const resourceList = [...resources.values()];
 
+for (const resource of resourceList) {
+  resource.ops.sort((a, b) => a.display.localeCompare(b.display, 'en'));
+}
+
 const opDefs = [];
 const props = [];
 
@@ -253,7 +268,7 @@ for (const res of resourceList) {
     options: [
 ${res.ops
   .map(
-    (o) => `      { name: ${jsStr(o.display)}, value: ${jsStr(o.name)}, action: ${jsStr(o.display)} },`
+    (o) => `      { name: ${jsStr(o.display)}, value: ${jsStr(o.name)}, action: ${jsStr(sentenceCase(o.display))} },`
   )
   .join('\n')}
     ],
@@ -291,11 +306,7 @@ ${res.ops
     type: 'json',
     default: '{}',
     displayOptions: { show: { resource: [${jsStr(res.value)}], operation: [${withBody.map((o) => jsStr(o.name)).join(', ')}] } },
-    description: 'Request body. Fields expected per operation: ${withBody
-      .filter((o) => o.bodyFields.length)
-      .map((o) => `${o.name} → ${o.bodyFields.map((f) => f.name + (f.required ? '*' : '')).join(', ')}`)
-      .join(' | ')
-      .replace(/'/g, '')}',
+    description: '${bodyDescription(withBody)}',
   },`);
   }
 
@@ -307,7 +318,43 @@ ${res.ops
 }
 
 function humanize(s) {
-  return s.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()).trim();
+  return s
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (c) => c.toUpperCase())
+    .replace(/\bId\b/g, 'ID')
+    .replace(/\bUrl\b/g, 'URL')
+    .trim();
+}
+
+function sentenceCase(value) {
+  const withoutDescriptiveParentheses = value.replace(/\(([^)]+)\)/g, (_, content) =>
+    content === content.toUpperCase() ? `(${content})` : content,
+  );
+  const words = withoutDescriptiveParentheses.split(/\s+/);
+  return words
+    .map((word, index) => {
+      if (word === word.toUpperCase()) return word;
+      const normalized = word.toLowerCase();
+      return index === 0 ? normalized.charAt(0).toUpperCase() + normalized.slice(1) : normalized;
+    })
+    .join(' ');
+}
+
+function bodyDescription(operations) {
+  const fields = operations
+    .filter((operation) => operation.bodyFields.length)
+    .map(
+      (operation) =>
+        `${operation.name} → ${operation.bodyFields
+          .map((field) => field.name + (field.required ? '*' : ''))
+          .join(', ')}`,
+    )
+    .join(' | ')
+    .replace(/'/g, '');
+
+  return fields
+    ? `Request body. Fields expected per operation: ${fields}.`
+    : 'Request body for this operation';
 }
 
 const out = `// ⚠️ GENERATED FILE — do not edit by hand.
@@ -323,8 +370,6 @@ const out = `// ⚠️ GENERATED FILE — do not edit by hand.
 //
 // Endpoints covered here: ${generatedCount}
 
-import type { INodeProperties } from 'n8n-workflow';
-
 export interface GeneratedOperation {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   path: string;
@@ -336,17 +381,50 @@ export interface GeneratedOperation {
 export const GENERATED_OPERATIONS: Record<string, GeneratedOperation> = {
 ${opDefs.join('\n')}
 };
-
-export const GENERATED_RESOURCES: Array<{ name: string; value: string }> = [
-${resourceList.map((r) => `  { name: ${jsStr(r.label)}, value: ${jsStr(r.value)} },`).join('\n')}
-];
-
-export const generatedProperties: INodeProperties[] = [
-${props.join('\n')}
-];
 `;
 
 writeFileSync(OUT_PATH, out);
+
+function replaceGeneratedBlock(source, startMarker, endMarker, body) {
+  const start = source.indexOf(startMarker);
+  const end = source.indexOf(endMarker);
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error(`Missing or invalid generated block: ${startMarker} ... ${endMarker}`);
+  }
+
+  const bodyStart = start + startMarker.length;
+  const markerLineStart = source.lastIndexOf('\n', start) + 1;
+  const markerIndent = source.slice(markerLineStart, start);
+  return `${source.slice(0, bodyStart)}\n${body}\n${markerIndent}${source.slice(end)}`;
+}
+
+const resourceOptions = [
+  '          // Hand-written and generated resources, kept alphabetized for n8n verification.',
+  ...[...BASE_RESOURCES, ...resourceList]
+    .sort((a, b) => a.label.localeCompare(b.label, 'en'))
+    .map((resource) =>
+      `          { name: ${jsStr(resource.label)}, value: ${jsStr(resource.value)} },`,
+    ),
+].join('\n');
+const nodeProperties = [
+  '      // Additional operations generated from the central endpoint schema.',
+  props.join('\n').replace(/^  /gm, '      '),
+].join('\n');
+
+let nextNodeSrc = replaceGeneratedBlock(
+  nodeSrc,
+  RESOURCE_OPTIONS_START,
+  RESOURCE_OPTIONS_END,
+  resourceOptions,
+);
+nextNodeSrc = replaceGeneratedBlock(
+  nextNodeSrc,
+  NODE_PROPERTIES_START,
+  NODE_PROPERTIES_END,
+  nodeProperties,
+);
+writeFileSync(NODE_PATH, nextNodeSrc);
+
 console.log(`✅ ${generatedCount} operations generated across ${resourceList.length} resources`);
 for (const r of resourceList) console.log(`   ${r.label}: ${r.ops.length}`);
 console.log(`   → ${OUT_PATH}`);

@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-wafly",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "n8n community node for the Wafly WhatsApp Bridge API — send messages, manage groups and configure webhooks",
   "keywords": [
     "n8n-community-node-package",
@@ -11,7 +11,7 @@
     "messaging"
   ],
   "license": "MIT",
-  "homepage": "https://wafly.com.br",
+  "homepage": "https://wafly.io/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=package_homepage",
   "author": {
     "name": "Wafly",
     "email": "contato@wafly.com.br"
