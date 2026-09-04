@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f9fbf9"/><stop offset="1" stop-color="#edf7f1"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#163c28" flood-opacity=".12"/></filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1060" cy="70" r="170" fill="#2f7a52" opacity=".07"/>
+  <text x="60" y="58" font-family="Arial, sans-serif" font-size="18" font-weight="800" fill="#2f7a52">WAFLY × n8n</text>
+  <text x="60" y="96" font-family="Arial, sans-serif" font-size="27" font-weight="750" fill="#17211b">Approve join requests and remove link spam in WhatsApp groups</text>
+  <g fill="none" stroke="#99aaa0" stroke-width="2.5" stroke-linecap="round"><path d="M146,286.5853658536586 C161.25,286.5853658536586 161.25,286.5853658536586 176.5,286.5853658536586"/><path d="M308.5,286.5853658536586 C323.75,286.5853658536586 323.75,286.5853658536586 339,286.5853658536586"/><path d="M471,286.5853658536586 C498.75,286.5853658536586 498.75,150 526.5,150"/><path d="M471,286.5853658536586 C498.75,286.5853658536586 498.75,286.5853658536586 526.5,286.5853658536586"/><path d="M471,286.5853658536586 C498.75,286.5853658536586 498.75,423.1707317073171 526.5,423.1707317073171"/><path d="M658.5,423.1707317073171 C673.75,423.1707317073171 673.75,423.1707317073171 689,423.1707317073171"/><path d="M821,423.1707317073171 C836.25,423.1707317073171 836.25,389.0243902439024 851.5,389.0243902439024"/><path d="M821,423.1707317073171 C836.25,423.1707317073171 836.25,500 851.5,500"/><path d="M983.5,389.0243902439024 C998.75,389.0243902439024 998.75,389.0243902439024 1014,389.0243902439024"/></g>
+  <g filter="url(#shadow)" font-family="Arial, sans-serif"><g transform="translate(14 256.5853658536586)">
+      <rect width="132" height="60" rx="12" fill="#fff" stroke="#d7ddd9"/>
+      <rect width="8" height="60" rx="4" fill="#7c3aed"/>
+      <circle cx="27" cy="22" r="9" fill="#7c3aed" opacity=".16"/>
+      <circle cx="27" cy="22" r="4" fill="#7c3aed"/>
+      <text x="18" y="46" font-size="10.5" font-weight="650" fill="#26312b">Wafly Group Events</text>
+    </g><g transform="translate(176.5 256.5853658536586)">
+      <rect width="132" height="60" rx="12" fill="#fff" stroke="#d7ddd9"/>
+      <rect width="8" height="60" rx="4" fill="#64748b"/>
+      <circle cx="27" cy="22" r="9" fill="#64748b" opacity=".16"/>
+      <circle cx="27" cy="22" r="4" fill="#64748b"/>
+      <text x="18" y="46" font-size="10.5" font-weight="650" fill="#26312b">Config</text>
+    </g><g transform="translate(339 256.5853658536586)">
+      <rect width="132" height="60" rx="12" fill="#fff" stroke="#d7ddd9"/>
+      <rect width="8" height="60" rx="4" fill="#d97706"/>
+      <circle cx="27" cy="22" r="9" fill="#d97706" opacity=".16"/>
+      <circle cx="27" cy="22" r="4" fill="#d97706"/>
+      <text x="18" y="46" font-size="10.5" font-weight="650" fill="#26312b">Which event is it?</text>
+    </g><g transform="translate(526.5 120)">
+      <rect width="132" height="60" rx="12" fill="#fff" stroke="#d7ddd9"/>
+      <rect width="8" height="60" rx="4" fill="#2f7a52"/>
+      <circle cx="27" cy="22" r="9" fill="#2f7a52" opacity=".16"/>
+      <circle cx="27" cy="22" r="4" fill="#2f7a52"/>
+      <text x="18" y="46" font-size="10.5" font-weight="650" fill="#26312b">Approve join request</text>
+    </g><g transform="translate(526.5 256.5853658536586)">
+      <rect width="132" height="60" rx="12" fill="#fff" stroke="#d7ddd9"/>
+      <rect width="8" height="60" rx="4" fill="#2f7a52"/>
+      <circle cx="27" cy="22" r="9" fill="#2f7a52" opacity=".16"/>
+      <circle cx="27" cy="22" r="4" fill="#2f7a52"/>
+      <text x="18" y="46" font-size="10.5" font-weight="650" fill="#26312b">Welcome the new member</text>
+    </g><g transform="translate(526.5 393.1707317073171)">
+      <rect width="132" height="60" rx="12" fill="#fff" stroke="#d7ddd9"/>
+      <rect width="8" height="60" rx="4" fill="#475569"/>
+      <circle cx="27" cy="22" r="9" fill="#475569" opacity=".16"/>
+      <circle cx="27" cy="22" r="4" fill="#475569"/>
+      <text x="18" y="46" font-size="10.5" font-weight="650" fill="#26312b">Detect link spam</text>
+    </g><g transform="translate(689 393.1707317073171)">
+      <rect width="132" height="60" rx="12" fill="#fff" stroke="#d7ddd9"/>
+      <rect width="8" height="60" rx="4" fill="#d97706"/>
+      <circle cx="27" cy="22" r="9" fill="#d97706" opacity=".16"/>
+      <circle cx="27" cy="22" r="4" fill="#d97706"/>
+      <text x="18" y="46" font-size="10.5" font-weight="650" fill="#26312b">Moderate?</text>
+    </g><g transform="translate(851.5 359.0243902439024)">
+      <rect width="132" height="60" rx="12" fill="#fff" stroke="#d7ddd9"/>
+      <rect width="8" height="60" rx="4" fill="#2f7a52"/>
+      <circle cx="27" cy="22" r="9" fill="#2f7a52" opacity=".16"/>
+      <circle cx="27" cy="22" r="4" fill="#2f7a52"/>
+      <text x="18" y="46" font-size="10.5" font-weight="650" fill="#26312b">Apagar group_message</text>
+    </g><g transform="translate(1014 359.0243902439024)">
+      <rect width="132" height="60" rx="12" fill="#fff" stroke="#d7ddd9"/>
+      <rect width="8" height="60" rx="4" fill="#2f7a52"/>
+      <circle cx="27" cy="22" r="9" fill="#2f7a52" opacity=".16"/>
+      <circle cx="27" cy="22" r="4" fill="#2f7a52"/>
+      <text x="18" y="46" font-size="10.5" font-weight="650" fill="#26312b">Tell the group why</text>
+    </g><g transform="translate(851.5 470)">
+      <rect width="132" height="60" rx="12" fill="#fff" stroke="#d7ddd9"/>
+      <rect width="8" height="60" rx="4" fill="#64748b"/>
+      <circle cx="27" cy="22" r="9" fill="#64748b" opacity=".16"/>
+      <circle cx="27" cy="22" r="4" fill="#64748b"/>
+      <text x="18" y="46" font-size="10.5" font-weight="650" fill="#26312b">Legitimate message</text>
+    </g></g>
+  <rect x="60" y="568" width="250" height="34" rx="17" fill="#e2f2e8"/>
+  <text x="77" y="590" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#2f7a52">FREE TEMPLATE · SELF-HOSTED n8n</text>
+  <text x="1135" y="591" text-anchor="end" font-family="Arial, sans-serif" font-size="13" fill="#627067">wafly.io</text>
+</svg>
