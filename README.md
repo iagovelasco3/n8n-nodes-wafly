@@ -115,7 +115,7 @@ Before using the node, create a credential of type **Wafly API** with the follow
 - **Client Token**: Client-Token provided by Wafly
 - **Instance**: Name of your WhatsApp instance
 - **Token**: Token of the instance
-- **Base URL**: `https://wafly.com.br/api-bridge-whats` (default)
+- **Base URL**: `https://wafly.com.br/api-bridge-whats` (default; the same base URL serves accounts created on wafly.io, so keep it unchanged for international accounts)
 
 ### How to get your credentials
 
@@ -377,7 +377,7 @@ This workflow sends an automatic message every day at 9am:
 For more information about the available endpoints and their parameters, see the full API documentation:
 
 - [Wafly API documentation](https://wafly.io/api-docs?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=api_documentation)
-- Base URL: `https://wafly.com.br/api-bridge-whats`
+- Base URL: `https://wafly.com.br/api-bridge-whats` (one base URL for wafly.com.br and wafly.io accounts)
 
 ## 🛠️ Development
 
