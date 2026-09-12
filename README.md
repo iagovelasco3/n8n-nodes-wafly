@@ -71,9 +71,34 @@ Portuguese versions of these flows are in [`examples/templates`](examples/templa
 - Update group settings
 
 ### 🔔 Webhooks
-- Set the webhook URL
-- Get the webhook configuration
-- Delete the webhook
+- Set the received-message webhook URL
+- Read the stored received-message webhook URL
+- Clear the received-message webhook URL
+
+Use an n8n **Webhook** node with method **POST**, activate the workflow, and copy
+its **Production URL** into **Webhook → Set Webhook**. The Wafly node uses
+`PUT /update-webhook-received` with `{ "value": "YOUR_URL" }`. A successful
+update returns HTTP 204, shown as one empty JSON item in n8n. **Get Webhook** reads
+the stored URL as `webhookUrl` and `value`; **Delete Webhook** clears that callback.
+These operations do not change connected, disconnected or delivery callbacks.
+
+Incoming events are available under `$json.body` in the native Webhook node.
+A received video keeps `body.type = "ReceivedCallback"`; its downloadable URL
+is `body.video.videoUrl`. Receiving this event does not require a separate Wafly
+trigger node.
+
+### Connecting a number
+
+Use **Instance → Get QR Code** or **Instance (More) → Get QR Code Image** when
+the customer is ready to connect. Read the response's `value`; the image operation
+returns base64 PNG (add `data:image/png;base64,` only if it has no data prefix).
+QR codes expire: request a fresh one when reopening the pairing screen and keep
+checking **Get Status** until `connected` is `true`.
+
+For phone pairing, choose **Instance (More) → Get Pairing Code (GET)** or **(POST)**
+and fill **Phone** with country code, such as `5511999999999`. Both send the number
+as `?phone=...` and return `code`/`message`. The old POST operation identifier is
+preserved, including support for saved JSON bodies containing `phone`.
 
 ## 📦 Installation
 

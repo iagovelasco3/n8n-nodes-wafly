@@ -15,6 +15,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_PATH = process.env.WAFLY_SCHEMA_PATH
@@ -45,45 +46,52 @@ const schema = readFileSync(SCHEMA_PATH, 'utf8');
 const nodeSrc = readFileSync(NODE_PATH, 'utf8');
 
 // --- schema parsing ----------------------------------------------------------
-// Regex instead of an AST on purpose: the file is generated/edited by humans in
-// a stable, predictable format, and pulling in a TS parser here would add a
-// heavy dependency for little gain. If the format changes, the generator fails
-// loudly (zero count) instead of silently emitting garbage.
-
+// Parse literal endpoint objects without evaluating the frontend module. A
+// fixed-size text window can accidentally read the next endpoint's body and
+// misses inline fields. TypeScript is already a build dependency of this node.
 const sections = [];
-const sectionRe = /id:\s*'([^']+)',\s*\n\s*name:\s*'([^']+)',\s*\n\s*description:/g;
-let sm;
-while ((sm = sectionRe.exec(schema)) !== null) {
-  sections.push({ id: sm[1], name: sm[2], index: sm.index, endpoints: [] });
+const sourceFile = ts.createSourceFile(SCHEMA_PATH, schema, ts.ScriptTarget.Latest, true);
+function property(object, key) {
+  return object.properties.find((p) => ts.isPropertyAssignment(p) && p.name.getText(sourceFile).replace(/^['"]|['"]$/g, '') === key)?.initializer;
 }
-
-const epRe =
-  /\{\s*\n\s*id:\s*'([^']+)',\s*\n\s*method:\s*'(GET|POST|PUT|DELETE)',\s*\n\s*path:\s*'([^']+)',\s*\n\s*summary:\s*'((?:[^'\\]|\\.)*)'/g;
-let em;
-const allEndpoints = [];
-while ((em = epRe.exec(schema)) !== null) {
-  const ep = {
-    id: em[1],
-    method: em[2],
-    path: em[3],
-    summary: em[4].replace(/\\'/g, "'"),
-    index: em.index,
-  };
-  // requestBody: field names, used to generate node inputs
-  const after = schema.slice(em.index, em.index + 6000);
-  const bodyBlock = after.match(/requestBody:\s*\[([\s\S]*?)\n\s{6}\]/);
-  ep.bodyFields = bodyBlock
-    ? [...bodyBlock[1].matchAll(/name:\s*'([^']+)',\s*\n\s*type:\s*'([^']+)',\s*\n\s*required:\s*(true|false)/g)].map(
-        (b) => ({ name: b[1], type: b[2], required: b[3] === 'true' })
-      )
-    : [];
-  allEndpoints.push(ep);
+function literal(object, key) {
+  const value = property(object, key);
+  return value && (ts.isStringLiteral(value) || ts.isNoSubstitutionTemplateLiteral(value)) ? value.text : undefined;
 }
-
-for (const ep of allEndpoints) {
-  let owner = sections[0];
-  for (const s of sections) if (s.index < ep.index) owner = s;
-  owner?.endpoints.push(ep);
+function fields(object, key) {
+  const array = property(object, key);
+  if (!array || !ts.isArrayLiteralExpression(array)) return [];
+  return array.elements.filter(ts.isObjectLiteralExpression).map((field) => ({
+    name: literal(field, 'name'),
+    type: literal(field, 'type'),
+    required: property(field, 'required')?.kind === ts.SyntaxKind.TrueKeyword,
+  })).filter((field) => field.name);
+}
+function visit(node) {
+  if (ts.isVariableDeclaration(node) && node.initializer && ts.isObjectLiteralExpression(node.initializer)) {
+    const section = node.initializer;
+    const endpoints = property(section, 'endpoints');
+    if (endpoints && ts.isArrayLiteralExpression(endpoints)) {
+      sections.push({
+        id: literal(section, 'id'),
+        name: literal(section, 'name'),
+        endpoints: endpoints.elements.filter(ts.isObjectLiteralExpression).map((endpoint) => ({
+          id: literal(endpoint, 'id'),
+          method: literal(endpoint, 'method'),
+          path: literal(endpoint, 'path'),
+          summary: literal(endpoint, 'summary'),
+          bodyFields: fields(endpoint, 'requestBody'),
+          queryParams: fields(endpoint, 'queryParams'),
+          hasBody: !!property(endpoint, 'requestBody') || !!property(endpoint, 'requestBodyExample'),
+        })),
+      });
+    }
+  }
+  ts.forEachChild(node, visit);
+}
+visit(sourceFile);
+if (!sections.length || sections.some((s) => s.endpoints.some((ep) => !ep.id || !ep.method || !ep.path || !ep.summary))) {
+  throw new Error('Cannot generate operations: the endpoint schema contains missing or unsupported literal fields.');
 }
 
 // --- what the node already covers --------------------------------------------
@@ -157,11 +165,9 @@ const EN_LABEL = {
   'Criar comunidade': 'Create Community',
   'Criar instância (parceiro)': 'Create Instance (Partner)',
   'Criar newsletter': 'Create Newsletter',
-  // "(GET)" and "(POST)" described the HTTP method instead of the real
-  // difference: one reads the phone from the query string, the other from the
-  // body. The label now says that.
-  'Código de emparelhamento (GET)': 'Get Pairing Code (Phone in Query)',
-  'Código de emparelhamento (POST)': 'Get Pairing Code (Phone in Body)',
+  // The public bridge reads phone from the query string for both methods.
+  'Código de emparelhamento (GET)': 'Get Pairing Code (GET)',
+  'Código de emparelhamento (POST)': 'Get Pairing Code (POST)',
   'Deixar de seguir newsletter': 'Unfollow Newsletter',
   'Deletar newsletter': 'Delete Newsletter',
   'Desafio de passkey (WebAuthn)': 'Get Passkey Challenge (WebAuthn)',
@@ -233,7 +239,12 @@ for (const section of sections) {
       method: ep.method,
       path: rel,
       pathParams,
+      queryParams: ep.queryParams,
       bodyFields: ep.bodyFields,
+      // Preserve the generic JSON input on existing write operations, including
+      // endpoints whose schema has not detailed the body yet. Query-only pairing
+      // is the exception: its phone must not be sent as a JSON body.
+      hasBody: ep.method !== 'GET' && ep.method !== 'DELETE' && (ep.hasBody || !ep.queryParams.length),
       isPartner: section.id === 'parceiros',
     });
     generatedCount++;
@@ -295,10 +306,30 @@ ${res.ops
   },`);
   }
 
+  const queryFields = new Map();
+  for (const o of res.ops) {
+    for (const param of o.queryParams) {
+      const key = `${param.name}:${param.required}`;
+      if (!queryFields.has(key)) queryFields.set(key, { ...param, operations: [] });
+      queryFields.get(key).operations.push(o.name);
+    }
+  }
+  for (const param of queryFields.values()) {
+    props.push(`  {
+    displayName: ${jsStr(humanize(param.name))},
+    name: ${jsStr('gq_' + param.name)},
+    type: 'string',
+    default: '',
+    required: ${param.required},
+    displayOptions: { show: { resource: [${jsStr(res.value)}], operation: [${param.operations.map(jsStr).join(', ')}] } },
+    description: ${jsStr(param.name === 'phone' ? 'WhatsApp phone number in international format, including country code (e.g. 5511999999999)' : `Value for ${param.name} in the request query`)},
+  },`);
+  }
+
   // JSON body. A field-by-field form for 60 endpoints would produce a UI that is
   // impossible to maintain; JSON keeps the operation usable and the example of
   // the expected fields goes into the description.
-  const withBody = res.ops.filter((o) => o.method !== 'GET' && o.method !== 'DELETE');
+  const withBody = res.ops.filter((o) => o.hasBody);
   if (withBody.length) {
     props.push(`  {
     displayName: 'Body (JSON)',
@@ -312,7 +343,7 @@ ${res.ops
 
   for (const o of res.ops) {
     opDefs.push(
-      `  ${jsStr(res.value + ':' + o.name)}: { method: ${jsStr(o.method)}, path: ${jsStr(o.path)}, pathParams: [${o.pathParams.map(jsStr).join(', ')}], hasBody: ${o.method !== 'GET' && o.method !== 'DELETE'}, isPartner: ${o.isPartner} },`
+      `  ${jsStr(res.value + ':' + o.name)}: { method: ${jsStr(o.method)}, path: ${jsStr(o.path)}, pathParams: [${o.pathParams.map(jsStr).join(', ')}], queryParams: [${o.queryParams.map((param) => `{ name: ${jsStr(param.name)}, required: ${param.required} }`).join(', ')}], hasBody: ${o.hasBody}, isPartner: ${o.isPartner} },`
     );
   }
 }
@@ -374,6 +405,7 @@ export interface GeneratedOperation {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   path: string;
   pathParams: string[];
+  queryParams: { name: string; required: boolean }[];
   hasBody: boolean;
   isPartner: boolean;
 }

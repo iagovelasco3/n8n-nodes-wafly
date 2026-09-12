@@ -6,6 +6,7 @@ import {
   IDataObject,
   JsonObject,
   NodeApiError,
+  NodeOperationError,
   NodeConnectionType,
   NodeConnectionTypes,
 } from 'n8n-workflow';
@@ -1200,19 +1201,19 @@ export class Wafly implements INodeType {
           {
             name: 'Set Webhook',
             value: 'setWebhook',
-            description: 'Set the webhook URL',
+            description: 'Set the URL for received-message callbacks',
             action: 'Set webhook',
           },
           {
             name: 'Get Webhook',
             value: 'getWebhook',
-            description: 'Get the webhook configuration',
+            description: 'Get the stored received-message webhook URL',
             action: 'Get webhook',
           },
           {
             name: 'Delete Webhook',
             value: 'deleteWebhook',
-            description: 'Delete the webhook',
+            description: 'Clear the received-message webhook URL',
             action: 'Delete webhook',
           },
         ],
@@ -1232,7 +1233,7 @@ export class Wafly implements INodeType {
             operation: ['setWebhook'],
           },
         },
-        description: 'URL that will receive the events',
+        description: 'Production URL that will receive incoming-message callbacks',
       },
 
       // Check Phones Fields (Instance)
@@ -1400,7 +1401,7 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['messageExtra'], operation: ['pinMessage', 'sendContacts', 'sendDocument', 'sendEvent', 'sendGif', 'sendOptionList', 'sendPtv'] } },
-        description: 'Request body. Fields expected per operation: pinMessage → phone*, messageId*, messageAction*, pinMessageDuration*, sender | sendContacts → contacts | sendEvent → event* | sendOptionList → optionList*.',
+        description: 'Request body. Fields expected per operation: pinMessage → phone*, messageId*, messageAction*, pinMessageDuration*, sender | sendContacts → phone*, contactPhone, contactName, contacts | sendDocument → phone*, document*, fileName, caption, messageId | sendEvent → phone*, event*, messageId, editMessageId, fromMe, mentioned | sendGif → phone*, gif*, caption, messageId, fromMe, mentioned | sendOptionList → phone*, message*, optionList*, messageId, mentioned | sendPtv → phone*, ptv*, messageId, fromMe, mentioned.',
       },
       {
         displayName: 'Operation',
@@ -1415,12 +1416,21 @@ export class Wafly implements INodeType {
         default: 'groupInviteLink',
       },
       {
+        displayName: 'Group_id',
+        name: 'gq_group_id',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['groupExtra'], operation: ['groupInviteLink'] } },
+        description: 'Value for group_id in the request query',
+      },
+      {
         displayName: 'Body (JSON)',
         name: 'gp_body',
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['groupExtra'], operation: ['groupPhotoUrl'] } },
-        description: 'Request body for this operation',
+        description: 'Request body. Fields expected per operation: groupPhotoUrl → groupId*, photoUrl, image.',
       },
       {
         displayName: 'Operation',
@@ -1464,7 +1474,7 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['newsletter'], operation: ['newsletterAcceptAdminInvite', 'createNewsletter', 'followNewsletter', 'muteNewsletter', 'newsletterRemoveAdmin', 'newsletterRevokeAdminInvite', 'searchNewsletter', 'newsletterTransferOwnership', 'unfollowNewsletter', 'unmuteNewsletter', 'updateNewsletterDescription', 'updateNewsletterName', 'updateNewsletterPicture', 'newsletterSettings'] } },
-        description: 'Request body. Fields expected per operation: searchNewsletter → view, filters | newsletterSettings → reactionCodes.',
+        description: 'Request body. Fields expected per operation: createNewsletter → name*, description | followNewsletter → id* | muteNewsletter → id* | newsletterRemoveAdmin → phone* | newsletterRevokeAdminInvite → phone* | searchNewsletter → limit, view, searchText, filters | newsletterTransferOwnership → phone* | unfollowNewsletter → id* | unmuteNewsletter → id* | updateNewsletterDescription → id*, description* | updateNewsletterName → id*, name* | updateNewsletterPicture → id*, pictureUrl* | newsletterSettings → reactionCodes.',
       },
       {
         displayName: 'Operation',
@@ -1473,22 +1483,31 @@ export class Wafly implements INodeType {
         noDataExpression: true,
         displayOptions: { show: { resource: ['instanceExtra'] } },
         options: [
-          { name: 'Get Pairing Code (Phone in Body)', value: 'pairingCodePost', action: 'Get pairing code phone in body' },
-          { name: 'Get Pairing Code (Phone in Query)', value: 'pairingCode', action: 'Get pairing code phone in query' },
+          { name: 'Get Pairing Code (GET)', value: 'pairingCode', action: 'Get pairing code (GET)' },
+          { name: 'Get Pairing Code (POST)', value: 'pairingCodePost', action: 'Get pairing code (POST)' },
           { name: 'Get Passkey Challenge (WebAuthn)', value: 'passkeyChallenge', action: 'Get passkey challenge webauthn' },
           { name: 'Get QR Code Image', value: 'getQrCode', action: 'Get QR code image' },
           { name: 'Restart With Disconnect', value: 'restartWithDisconnect', action: 'Restart with disconnect' },
           { name: 'Send Passkey Assertion', value: 'passkeyResponse', action: 'Send passkey assertion' },
         ],
-        default: 'pairingCodePost',
+        default: 'pairingCode',
+      },
+      {
+        displayName: 'Phone',
+        name: 'gq_phone',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['instanceExtra'], operation: ['pairingCode', 'pairingCodePost'] } },
+        description: 'WhatsApp phone number in international format, including country code (e.g. 5511999999999)',
       },
       {
         displayName: 'Body (JSON)',
         name: 'gp_body',
         type: 'json',
         default: '{}',
-        displayOptions: { show: { resource: ['instanceExtra'], operation: ['pairingCodePost', 'restartWithDisconnect', 'passkeyResponse'] } },
-        description: 'Request body. Fields expected per operation: pairingCodePost → connected | restartWithDisconnect → connected | passkeyResponse → phones*.',
+        displayOptions: { show: { resource: ['instanceExtra'], operation: ['restartWithDisconnect', 'passkeyResponse'] } },
+        description: 'Request body. Fields expected per operation: restartWithDisconnect → connected.',
       },
       {
         displayName: 'Operation',
@@ -1511,6 +1530,24 @@ export class Wafly implements INodeType {
         required: true,
         displayOptions: { show: { resource: ['chat'], operation: ['chatMetadata'] } },
         description: 'Value for {phone} in the request path',
+      },
+      {
+        displayName: 'Page',
+        name: 'gq_page',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['chat'], operation: ['listChats'] } },
+        description: 'Value for page in the request query',
+      },
+      {
+        displayName: 'Page Size',
+        name: 'gq_pageSize',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['chat'], operation: ['listChats'] } },
+        description: 'Value for pageSize in the request query',
       },
       {
         displayName: 'Body (JSON)',
@@ -1552,7 +1589,7 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['community'], operation: ['createCommunity', 'linkCommunity', 'unlinkCommunity', 'communitySettings'] } },
-        description: 'Request body. Fields expected per operation: communitySettings → whoCanAddNewGroups*.',
+        description: 'Request body. Fields expected per operation: createCommunity → name*, description, participants | linkCommunity → communityId*, groupsPhones* | unlinkCommunity → communityId*, groupsPhones* | communitySettings → communityId*, whoCanAddNewGroups*.',
       },
       {
         displayName: 'Operation',
@@ -1612,7 +1649,7 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['call'], operation: ['callAccept', 'callTranscriptPost', 'callPlay', 'callReject', 'callConfigSet', 'callSay', 'callStart', 'callRecordStart', 'callRecordStop', 'callTerminate', 'callWebrtc'] } },
-        description: 'Request body. Fields expected per operation: callTranscriptPost → segments* | callPlay → base64, hangupAfter | callConfigSet → onIncoming*, mp3, ai, human | callSay → voiceId, hangupAfter | callStart → phone*, video, mp3Url, mp3Base64, hangupAfter | callRecordStart → segments* | callRecordStop → segments*.',
+        description: 'Request body. Fields expected per operation: callAccept → callId* | callTranscriptPost → segments* | callPlay → callId*, url, base64, hangupAfter | callReject → callId* | callConfigSet → onIncoming*, mp3, ai, human | callSay → callId*, text*, voiceId, hangupAfter | callStart → phone*, video, mp3Url, mp3Base64, hangupAfter | callTerminate → callId* | callWebrtc → callId*, sdpOffer*.',
       },
       // GENERATED_NODE_PROPERTIES:END
     ],
@@ -1636,6 +1673,7 @@ export class Wafly implements INodeType {
         let endpoint = '';
         let method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET';
         let body: IDataObject = {};
+        const query: IDataObject = {};
 
         // =====================================
         // INSTANCE OPERATIONS
@@ -1999,16 +2037,20 @@ export class Wafly implements INodeType {
           const basePath = `/instances/${instance}/token/${token}`;
 
           if (operation === 'setWebhook') {
-            endpoint = `${basePath}/webhook`;
-            method = 'POST';
-            const webhookUrl = this.getNodeParameter('webhookUrl', i) as string;
-            body = { webhookUrl };
+            endpoint = `${basePath}/update-webhook-received`;
+            method = 'PUT';
+            const webhookUrl = (this.getNodeParameter('webhookUrl', i) as string).trim();
+            if (!webhookUrl) {
+              throw new NodeOperationError(this.getNode(), 'Enter the production webhook URL. To remove it, use Delete Webhook.');
+            }
+            body = { value: webhookUrl };
           } else if (operation === 'getWebhook') {
             endpoint = `${basePath}/webhook`;
             method = 'GET';
           } else if (operation === 'deleteWebhook') {
-            endpoint = `${basePath}/webhook`;
-            method = 'DELETE';
+            endpoint = `${basePath}/update-webhook-received`;
+            method = 'PUT';
+            body = { value: '' };
           }
         }
 
@@ -2027,6 +2069,22 @@ export class Wafly implements INodeType {
             ? genPath
             : `/instances/${instance}/token/${token}${genPath}`;
           method = generated.method;
+          for (const param of generated.queryParams) {
+            let value = String(this.getNodeParameter(`gq_${param.name}`, i, '') ?? '').trim();
+            // Workflows saved before 1.5.5 may still store the pairing phone in
+            // gp_body. Keep accepting it, but send it where the bridge expects it.
+            if (!value && generated.path === '/pairing-code' && param.name === 'phone') {
+              const previousBody = this.getNodeParameter('gp_body', i, '{}');
+              const parsed = typeof previousBody === 'string' ? JSON.parse(previousBody || '{}') : previousBody;
+              if (parsed && typeof parsed === 'object' && 'phone' in parsed) {
+                value = String(parsed.phone ?? '').trim();
+              }
+            }
+            if (!value && param.required) {
+              throw new NodeOperationError(this.getNode(), `The ${param.name} field is required for this operation.`);
+            }
+            if (value) query[param.name] = value;
+          }
           if (generated.hasBody) {
             const raw = this.getNodeParameter('gp_body', i, '{}');
             body =
@@ -2044,16 +2102,20 @@ export class Wafly implements INodeType {
             method,
             url: `${baseUrl}${endpoint}`,
             body: Object.keys(body).length > 0 ? body : undefined,
+            qs: Object.keys(query).length > 0 ? query : undefined,
             json: true,
           },
         );
-        returnData.push(responseData as IDataObject);
+        // Callback updates return HTTP 204. Keep one valid n8n output item for
+        // that successful empty response without inventing an API success flag.
+        returnData.push(responseData == null || responseData === '' ? {} : responseData as IDataObject);
       } catch (error) {
         if (this.continueOnFail()) {
           // Do not echo error.message here — it contains the request URL with instance/token
           returnData.push({ error: 'Request failed. Check node credentials and configuration.' });
           continue;
         }
+        if (error instanceof NodeOperationError) throw error;
         throw new NodeApiError(this.getNode(), error as JsonObject);
       }
     }

@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-wafly",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "n8n community node for the Wafly WhatsApp Bridge API — send messages, manage groups and configure webhooks",
   "keywords": [
     "n8n-community-node-package",
@@ -27,7 +27,8 @@
     "format": "prettier nodes credentials --write",
     "lint": "eslint --ext .ts,.json nodes credentials package.json",
     "lintfix": "eslint --ext .ts,.json nodes credentials package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint",
+    "test": "npm run build && node --test tests/*.test.cjs",
+    "prepublishOnly": "npm run build && npm run lint && node --test tests/*.test.cjs",
     "gen:ops": "node scripts/gen-operations.mjs",
     "prebuild": "node scripts/gen-operations.mjs"
   },

@@ -18,7 +18,7 @@
     },
     {
       "parameters": {
-        "content": "## Setup\n\n1. **Wafly API** credential (Client-Token, instance, token) and an **OpenAI** credential.\n2. Set `salesPhone` in the **Config** node. Use the international format, digits only.\n3. Activate the workflow, copy the Webhook **Production URL** and register it once:\n\n```\ncurl -X PUT \\\n  \"https://wafly.com.br/api-bridge-whats/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received\" \\\n  -H \"Client-Token: YOUR_CLIENT_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"value\":\"PASTE_THE_PRODUCTION_URL\"}'\n```\n\n> Do not use the node's `Webhook > Set Webhook` operation: it calls a route that returns 404.\n\nThe inbound payload is Z-API shaped: `body.type`, `body.phone`, `body.text.message`, `body.fromMe`, `body.isGroup`.",
+        "content": "## Setup\n\n1. **Wafly API** credential (Client-Token, instance, token) and an **OpenAI** credential.\n2. Set `salesPhone` in the **Config** node. Use the international format, digits only.\n3. Activate the workflow, copy the Webhook **Production URL** and register it once:\n\n```\ncurl -X PUT \\\n  \"https://wafly.com.br/api-bridge-whats/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received\" \\\n  -H \"Client-Token: YOUR_CLIENT_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"value\":\"PASTE_THE_PRODUCTION_URL\"}'\n```\n\n> With n8n-nodes-wafly 1.5.5 or newer, you can also register this URL with `Webhook > Set Webhook`.\n\nThe inbound payload is Z-API shaped: `body.type`, `body.phone`, `body.text.message`, `body.fromMe`, `body.isGroup`.",
         "height": 1500,
         "width": 560,
         "color": 6

@@ -5,6 +5,25 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.5.5] - 2026-09-12
+
+### Fixed
+- Pairing by phone now has a required **Phone** field for both GET and POST.
+  Both send `phone` in the query string expected by the public API; saved POST
+  workflows with `gp_body.phone` remain supported.
+- **Set Webhook** and **Delete Webhook** now update the received-message callback
+  with `PUT /update-webhook-received` and `{ "value": "URL or empty string" }`.
+  HTTP 204 responses produce one empty JSON item, and HTTP failures remain errors.
+- **Get Webhook** reads the stored callback from the bridge compatibility endpoint.
+- Generated operations include query parameters and parse fields within their
+  own endpoint, avoiding incorrect body hints copied from subsequent endpoints.
+- Added offline execution tests for pairing, webhook configuration, HTTP errors,
+  and the existing QR/status/connect/disconnect contracts.
+
+Operation identifiers and credential fields are unchanged. Existing 1.5.4
+installations also benefit from the bridge's legacy webhook compatibility routes;
+upgrade to 1.5.5 for the corrected phone fields and canonical webhook requests.
+
 ## [1.5.1] - 2026-07-30
 
 ### Fixed
