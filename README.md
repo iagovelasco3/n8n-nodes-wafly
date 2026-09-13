@@ -238,6 +238,7 @@ charges nothing for it. It is stored encrypted and never returned by the API.
         "resource": "instance",
         "operation": "setTranscription",
         "transcriptionApiKey": "sk-proj-...",
+        "transcriptionMirrorToText": true,
         "transcriptionMaxAudioSeconds": 300,
         "transcriptionMonthlyCap": 500
       },

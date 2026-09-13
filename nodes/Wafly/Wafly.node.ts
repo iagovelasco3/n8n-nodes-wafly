@@ -1357,6 +1357,17 @@ export class Wafly implements INodeType {
         description: 'Spend limit. Once reached, transcription stops until the month rolls over.',
       },
       {
+        displayName: 'Also Send Transcript as Text',
+        name: 'transcriptionMirrorToText',
+        type: 'boolean',
+        default: false,
+        displayOptions: {
+          show: { resource: ['instance'], operation: ['setTranscription'] },
+        },
+        description:
+          'Adds the successful transcript to text.message while keeping audio and transcription in the same webhook. Useful for existing text-only AI flows.',
+      },
+      {
         displayName: 'Include Groups',
         name: 'bufferIncludeGroups',
         type: 'boolean',
@@ -1739,6 +1750,7 @@ export class Wafly implements INodeType {
               ...(key ? { api_key: key } : {}),
               transcription: {
                 enabled: true,
+                mirror_to_text: this.getNodeParameter('transcriptionMirrorToText', i) as boolean,
                 max_audio_seconds: this.getNodeParameter(
                   'transcriptionMaxAudioSeconds',
                   i,
