@@ -35,6 +35,10 @@ for (const filename of templates) {
   const maxX = Math.max(...xs);
   const minY = Math.min(...ys);
   const maxY = Math.max(...ys);
+  const footerLabel = filename.startsWith('08-')
+    ? 'TEMPLATE GRÁTIS · n8n SELF-HOSTED'
+    : 'FREE TEMPLATE · SELF-HOSTED n8n';
+  const footerWidth = filename.startsWith('08-') ? 278 : 250;
   const scaleX = (value) => 80 + ((value - minX) / Math.max(1, maxX - minX)) * 1000;
   const scaleY = (value) => 150 + ((value - minY) / Math.max(1, maxY - minY)) * 350;
 
@@ -84,8 +88,8 @@ for (const filename of templates) {
   <text x="60" y="96" font-family="Arial, sans-serif" font-size="27" font-weight="750" fill="#17211b">${esc(workflow.name)}</text>
   <g fill="none" stroke="#99aaa0" stroke-width="2.5" stroke-linecap="round">${edges.join('')}</g>
   <g filter="url(#shadow)" font-family="Arial, sans-serif">${cards.join('')}</g>
-  <rect x="60" y="568" width="250" height="34" rx="17" fill="#e2f2e8"/>
-  <text x="77" y="590" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#2f7a52">FREE TEMPLATE · SELF-HOSTED n8n</text>
+  <rect x="60" y="568" width="${footerWidth}" height="34" rx="17" fill="#e2f2e8"/>
+  <text x="77" y="590" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#2f7a52">${footerLabel}</text>
   <text x="1135" y="591" text-anchor="end" font-family="Arial, sans-serif" font-size="13" fill="#627067">wafly.io</text>
 </svg>`;
 
