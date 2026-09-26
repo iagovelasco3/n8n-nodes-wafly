@@ -26,7 +26,7 @@ Five workflows you can import and run, instead of starting from a blank canvas. 
 | [Alert on disconnect](examples/templates/07-alert-when-whatsapp-number-disconnects.json) | Checks the connection on a schedule and alerts when the number drops |
 
 Import the JSON, create the **Wafly API** credential and activate. All of them run on
-self-hosted n8n, since community nodes are not available on n8n Cloud.
+self-hosted n8n. n8n Cloud accepts verified community nodes, but the Wafly node is not verified there yet; use HTTP Request nodes on Cloud.
 
 See the [template index and setup notes](examples/templates/README.md). To run the PT-BR flagship, [start a free 3-day Wafly trial](https://wafly.com.br/signup?utm_source=github&utm_medium=repository&utm_campaign=qualificacao_leads_whatsapp&utm_content=readme_template_08&template_id=n8n-08-qualificar-leads).
 
