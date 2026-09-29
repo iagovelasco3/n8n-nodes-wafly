@@ -30,6 +30,12 @@ self-hosted n8n. n8n Cloud accepts verified community nodes, but the Wafly node 
 
 See the [template index and setup notes](examples/templates/README.md). To run the PT-BR flagship, [start a free 3-day Wafly trial](https://wafly.com.br/signup?utm_source=github&utm_medium=repository&utm_campaign=qualificacao_leads_whatsapp&utm_content=readme_template_08&template_id=n8n-08-qualificar-leads).
 
+For a step-by-step Brazilian Portuguese walkthrough, see
+[qualifying WhatsApp leads with AI and n8n](https://wafly.com.br/solucoes/qualificar-leads-whatsapp-ia-n8n/?utm_source=github&utm_medium=community_node&utm_campaign=n8n_flagship_202609&utm_content=readme_qualificar_leads).
+It covers import, credentials, the incoming-message webhook and human handoff.
+This workflow requires self-hosted n8n; Wafly Flex connects by QR Code and is
+not Meta's Official WhatsApp API.
+
 ## 🚀 Features
 
 ### 📱 Instance
