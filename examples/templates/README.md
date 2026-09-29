@@ -19,5 +19,6 @@ Identificador de atribuição: `n8n-08-qualificar-leads`.
 | [06 — Enviar OTP com fallback para SMS](06-send-otp-over-whatsapp.json) | EN | Verificar o número e entregar código de uso único |
 | [07 — Alertar desconexão](07-alert-when-whatsapp-number-disconnects.json) | EN | Monitorar o número e alertar somente em mudança de estado |
 | [08 — Qualificar leads e fazer handoff](08-qualify-whatsapp-leads-and-hand-off.json) | PT-BR | Responder contatos e encaminhar leads quentes ao comercial |
+| [08 — Qualify leads and hand off](08-qualify-whatsapp-leads-and-hand-off.en.json) | EN | Reply to contacts and alert a person only for hot leads |
 
 Os arquivos `01`, `02` e `03` são as versões anteriores em português dos casos `04`, `05` e `06`.
