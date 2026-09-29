@@ -1,14 +1,14 @@
 {
-  "name": "Qualify inbound WhatsApp leads with AI and hand hot ones to a human",
+  "name": "Qualificar leads do WhatsApp com IA e encaminhar os mais quentes para uma pessoa",
   "nodes": [
     {
       "parameters": {
-        "content": "[![Workflow overview](https://raw.githubusercontent.com/iagovelasco3/n8n-nodes-wafly/main/assets/template-previews/08-qualify-whatsapp-leads-and-hand-off.png)](https://wafly.io/signup?utm_source=n8n&utm_medium=workflow_template&utm_campaign=lead_qualification&utm_content=workflow_preview)\n\n## Qualify inbound WhatsApp leads with AI and hand hot ones to a human\n\n> **Community node - self-hosted n8n only.** This template uses `n8n-nodes-wafly`, which cannot be installed on n8n Cloud.\n\n### Who's it for\n\nSmall sales teams that get inbound on WhatsApp and cannot answer everything. The goal is not to let a bot close the deal, it is to make sure a human never misses the two messages a week that are worth answering.\n\n### How it works\n\nAn inbound message arrives on the webhook. Non-customer traffic is filtered out first: your own echoes, group chats and empty messages.\n\nAn LLM then reads the message and returns a small JSON object: intent, whether the person named a budget or a deadline, and a temperature of hot, warm or cold. The parser is deliberately defensive, so a malformed answer becomes a warm lead instead of a crashed run. A model that fails should never drop a lead on the floor.\n\nHot leads get a short holding reply and your sales number gets a WhatsApp message with the lead's number and what they asked for. Warm and cold leads receive a brief reply without paging sales.\n\nMemory is keyed by phone number, so a person who writes three times is one conversation rather than three cold starts.\n\n### How to set up\n\n1. Create the Wafly API credential and an OpenAI credential.\n2. Put the phone number that should receive handoffs into the Config node.\n3. Activate the workflow and register the Webhook production URL on your instance with the curl in the grey note.\n\n### Requirements\n\nSelf-hosted n8n, a Wafly account, an OpenAI API key, and a phone number to receive handoffs.\n\n### How to customize\n\nEdit the qualification prompt to match how you actually score leads, change the temperature thresholds, or send the handoff to a CRM instead of a phone.",
+        "content": "[![Visão geral do workflow](https://raw.githubusercontent.com/iagovelasco3/n8n-nodes-wafly/main/assets/template-previews/08-qualify-whatsapp-leads-and-hand-off.png)](https://wafly.com.br/signup?utm_source=n8n&utm_medium=workflow_template&utm_campaign=qualificacao_leads_whatsapp&utm_content=template_08_preview&template_id=n8n-08-qualificar-leads)\n\n## Qualifique leads do WhatsApp com IA e avise uma pessoa na hora certa\n\n> **Template gratuito para n8n self-hosted.** Ele usa o community node `n8n-nodes-wafly` 1.5.5 ou mais recente e não funciona no n8n Cloud.\n\n### Para quem serve\n\nEquipes pequenas que recebem contatos comerciais pelo WhatsApp e precisam responder rápido sem transformar todo contato em alerta manual.\n\n### O que acontece\n\n1. O webhook recebe uma mensagem da Wafly.\n2. Ecos do próprio número, grupos e eventos sem texto são ignorados.\n3. A IA identifica intenção, orçamento, prazo e classifica o lead como `quente`, `morno` ou `frio`.\n4. Toda pessoa recebe uma resposta curta no mesmo idioma.\n5. Somente leads quentes geram um segundo WhatsApp para o número comercial configurado.\n\nO parser é defensivo: se o modelo devolver JSON inválido, o contato vira `morno` e recebe uma pergunta neutra em vez de a execução quebrar. A memória usa o telefone como chave para manter o contexto entre mensagens.\n\n### Requisitos\n\n- n8n self-hosted com acesso aos community nodes;\n- `n8n-nodes-wafly` 1.5.5+;\n- uma conta Wafly e uma instância conectada;\n- uma credencial OpenAI;\n- um número com DDI para receber os handoffs.\n\n### Resultado esperado\n\nUm lead quente recebe a confirmação e o comercial recebe outro WhatsApp com nome, telefone, intenção, orçamento, prazo e mensagem original. Leads mornos ou frios recebem resposta sem interromper a equipe.\n\n[Crie uma conta Wafly e teste por 3 dias, sem cartão](https://wafly.com.br/signup?utm_source=n8n&utm_medium=workflow_template&utm_campaign=qualificacao_leads_whatsapp&utm_content=template_08_cta&template_id=n8n-08-qualificar-leads)",
         "height": 1500,
         "width": 520
       },
       "id": "sticky-description",
-      "name": "Template description",
+      "name": "Descrição do template",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -18,13 +18,13 @@
     },
     {
       "parameters": {
-        "content": "## Setup\n\n1. **Wafly API** credential (Client-Token, instance, token) and an **OpenAI** credential.\n2. Set `salesPhone` in the **Config** node. Use the international format, digits only.\n3. Activate the workflow, copy the Webhook **Production URL** and register it once:\n\n```\ncurl -X PUT \\\n  \"https://wafly.com.br/api-bridge-whats/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received\" \\\n  -H \"Client-Token: YOUR_CLIENT_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"value\":\"PASTE_THE_PRODUCTION_URL\"}'\n```\n\n> With n8n-nodes-wafly 1.5.5 or newer, you can also register this URL with `Webhook > Set Webhook`.\n\nThe inbound payload is Z-API shaped: `body.type`, `body.phone`, `body.text.message`, `body.fromMe`, `body.isGroup`.",
+        "content": "## Instalação (5 passos)\n\n1. Em **Settings > Community Nodes**, instale `n8n-nodes-wafly` 1.5.5 ou mais recente.\n2. Importe este JSON e selecione suas credenciais nos nós **Modelo OpenAI**, **Responder lead** e **Avisar equipe comercial**.\n3. Em **Configuração**, substitua `SEU_NUMERO_COM_DDI` pelo número que receberá os handoffs, somente com dígitos.\n4. Abra **Webhook Wafly**, copie a **Production URL**, ative o workflow e registre essa URL uma única vez:\n\n```\ncurl -X PUT \\\n  \"https://wafly.com.br/api-bridge-whats/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-received\" \\\n  -H \"Client-Token: SEU_CLIENT_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"value\":\"COLE_A_PRODUCTION_URL\"}'\n```\n\n5. Confira o webhook com **Webhook > Get Webhook** no node Wafly ou faça o teste abaixo.\n\n## Teste verificável\n\nClique em **Listen for test event** no Webhook, troque a URL e os telefones de teste e execute:\n\n```\ncurl -X POST \"COLE_A_TEST_URL_DO_WEBHOOK\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"type\":\"ReceivedCallback\",\"phone\":\"5511988888888\",\"fromMe\":false,\"isGroup\":false,\"senderName\":\"Lead teste\",\"text\":{\"message\":\"Preciso de 3 números ainda este mês e quero falar com alguém.\"}}'\n```\n\n**Esperado:** 1 mensagem para o telefone do lead e 1 alerta para `salesPhone`. Este teste envia WhatsApp real; use números seus. Eventos de grupo, mensagens próprias e payloads sem telefone ou texto devem terminar em **Ignorar evento**.",
         "height": 1500,
         "width": 560,
         "color": 6
       },
       "id": "sticky-setup",
-      "name": "Setup",
+      "name": "Instalação e teste",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -35,12 +35,12 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "wafly-lead-qualifier",
+        "path": "wafly-qualificar-leads",
         "responseMode": "onReceived",
         "options": {}
       },
       "id": "webhook-inbound",
-      "name": "Wafly Inbound",
+      "name": "Webhook Wafly",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
@@ -56,7 +56,7 @@
             {
               "id": "s1",
               "name": "salesPhone",
-              "value": "5511999999999",
+              "value": "SEU_NUMERO_COM_DDI",
               "type": "string"
             }
           ]
@@ -65,7 +65,7 @@
         "options": {}
       },
       "id": "config",
-      "name": "Config",
+      "name": "Configuração",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
@@ -121,6 +121,16 @@
                 "operation": "notEmpty",
                 "singleValue": true
               }
+            },
+            {
+              "id": "c-phone",
+              "leftValue": "={{ $json.body.phone }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -128,7 +138,7 @@
         "options": {}
       },
       "id": "if-customer",
-      "name": "A customer wrote in?",
+      "name": "Mensagem válida?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
@@ -141,11 +151,11 @@
         "promptType": "define",
         "text": "={{ $json.body.text.message }}",
         "options": {
-          "systemMessage": "You qualify inbound sales leads that arrive over WhatsApp.\n\nReturn ONLY a JSON object, no prose and no markdown fence, with exactly these keys:\n{\"intent\": string, \"budget_mentioned\": boolean, \"deadline_mentioned\": boolean, \"temperature\": \"hot\" | \"warm\" | \"cold\", \"reply\": string}\n\nRules for temperature:\n- hot: they describe a concrete need AND mention a budget, a deadline, or ask to talk to someone.\n- warm: a real question about the product with no urgency signal.\n- cold: greeting only, wrong number, spam, or unrelated.\n\n\"reply\" is what we send back to the person: at most 2 short sentences, no markdown, in the same language they used. For a hot lead, say a human will follow up shortly. Never invent prices, deadlines or policies."
+          "systemMessage": "Você qualifica leads comerciais recebidos pelo WhatsApp.\n\nRetorne SOMENTE um objeto JSON, sem prosa e sem bloco markdown, exatamente com estas chaves:\n{\"intencao\": string, \"orcamento_mencionado\": boolean, \"prazo_mencionado\": boolean, \"temperatura\": \"quente\" | \"morno\" | \"frio\", \"resposta\": string}\n\nCritérios de temperatura:\n- quente: descreve uma necessidade concreta E menciona orçamento, prazo ou pede para falar com uma pessoa;\n- morno: faz uma pergunta real sobre o produto, mas sem sinal de urgência;\n- frio: somente cumprimento, número errado, spam ou assunto sem relação.\n\n`resposta` será enviada à pessoa. Use no máximo 2 frases curtas, sem markdown e no mesmo idioma da mensagem recebida. Para lead quente, diga que uma pessoa da equipe continuará o atendimento em breve. Nunca invente preço, prazo, política ou capacidade do produto."
         }
       },
       "id": "qualifier",
-      "name": "Qualify the lead",
+      "name": "Qualificar lead com IA",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
       "position": [
@@ -162,7 +172,7 @@
         }
       },
       "id": "llm",
-      "name": "OpenAI Chat Model",
+      "name": "Modelo OpenAI",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1,
       "position": [
@@ -179,11 +189,11 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $('Wafly Inbound').item.json.body.phone }}",
+        "sessionKey": "={{ $('Webhook Wafly').first().json.body.phone }}",
         "contextWindowLength": 8
       },
       "id": "memory",
-      "name": "Memory per phone number",
+      "name": "Memória por telefone",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
@@ -193,10 +203,10 @@
     },
     {
       "parameters": {
-        "jsCode": "// Parse the model's JSON defensively.\n//\n// A model that answers badly must not cost a lead, so anything unparseable\n// degrades to a warm lead with a neutral reply instead of throwing. Warm is\n// the safe default: it answers the person without paging a human at 2am.\nconst raw = String($input.first().json.output ?? '').trim();\nconst lead = $('Wafly Inbound').first().json.body || {};\nconst cfg = $('Config').first().json;\n\nconst fallback = {\n  intent: 'unparsed',\n  budget_mentioned: false,\n  deadline_mentioned: false,\n  temperature: 'warm',\n  reply: 'Thanks for reaching out. Someone from the team will get back to you shortly.',\n};\n\nlet parsed = fallback;\ntry {\n  // Models still wrap JSON in a fence now and then even when told not to.\n  const cleaned = raw.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();\n  const candidate = JSON.parse(cleaned);\n  if (candidate && typeof candidate === 'object') {\n    parsed = { ...fallback, ...candidate };\n  }\n} catch (e) {\n  // keep the fallback\n}\n\nif (!['hot', 'warm', 'cold'].includes(parsed.temperature)) parsed.temperature = 'warm';\nif (!String(parsed.reply || '').trim()) parsed.reply = fallback.reply;\n\nreturn [{\n  json: {\n    ...parsed,\n    leadPhone: lead.phone,\n    leadName: lead.senderName || lead.chatName || 'unknown',\n    leadMessage: lead.text?.message || '',\n    salesPhone: cfg.salesPhone,\n    parsedOk: parsed.intent !== 'unparsed',\n  },\n}];"
+        "jsCode": "// Aceita apenas o contrato JSON esperado e usa um fallback seguro.\n// Um modelo que responda mal não deve derrubar nem perder o lead.\nconst raw = String($input.first().json.output ?? '').trim();\nconst lead = $('Webhook Wafly').first().json.body || {};\nconst cfg = $('Configuração').first().json;\n\nconst fallback = {\n  intencao: 'nao_classificada',\n  orcamento_mencionado: false,\n  prazo_mencionado: false,\n  temperatura: 'morno',\n  resposta: 'Obrigado pela mensagem. Pode contar um pouco mais sobre o que você precisa?',\n};\n\nlet parsed = { ...fallback };\ntry {\n  const cleaned = raw.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();\n  const candidate = JSON.parse(cleaned);\n  if (candidate && typeof candidate === 'object' && !Array.isArray(candidate)) {\n    parsed = { ...fallback, ...candidate };\n  }\n} catch (error) {\n  // Mantém o fallback.\n}\n\nparsed.temperatura = String(parsed.temperatura || '').toLowerCase();\nif (!['quente', 'morno', 'frio'].includes(parsed.temperatura)) parsed.temperatura = 'morno';\nparsed.intencao = String(parsed.intencao || fallback.intencao).trim().slice(0, 240);\nparsed.resposta = String(parsed.resposta || fallback.resposta).trim().slice(0, 500) || fallback.resposta;\nparsed.orcamento_mencionado = parsed.orcamento_mencionado === true;\nparsed.prazo_mencionado = parsed.prazo_mencionado === true;\n\nconst salesPhone = String(cfg.salesPhone || '').replace(/\\D/g, '');\nif (salesPhone.length < 10) {\n  throw new Error('Configure salesPhone no nó Configuração usando somente números e incluindo o DDI.');\n}\nconst leadPhone = String(lead.phone || '').replace(/\\D/g, '');\nif (leadPhone.length < 10) {\n  throw new Error('O webhook recebido não contém um telefone válido em body.phone.');\n}\n\nreturn [{\n  json: {\n    ...parsed,\n    leadPhone,\n    leadName: lead.senderName || lead.chatName || 'Não informado',\n    leadMessage: lead.text?.message || '',\n    salesPhone,\n    parsedOk: parsed.intencao !== fallback.intencao,\n    templateId: 'n8n-08-qualificar-leads',\n  },\n}];"
       },
       "id": "parse",
-      "name": "Parse the qualification",
+      "name": "Validar qualificação",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -209,10 +219,10 @@
         "resource": "message",
         "operation": "sendText",
         "phone": "={{ $json.leadPhone }}",
-        "message": "={{ $json.reply }}"
+        "message": "={{ $json.resposta }}"
       },
       "id": "wafly-reply",
-      "name": "Reply to the lead",
+      "name": "Responder lead",
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
       "position": [
@@ -241,8 +251,8 @@
           "conditions": [
             {
               "id": "hot",
-              "leftValue": "={{ $('Parse the qualification').first().json.temperature }}",
-              "rightValue": "hot",
+              "leftValue": "={{ $('Validar qualificação').first().json.temperatura }}",
+              "rightValue": "quente",
               "operator": {
                 "type": "string",
                 "operation": "equals"
@@ -254,7 +264,7 @@
         "options": {}
       },
       "id": "if-hot",
-      "name": "Hot lead?",
+      "name": "Lead quente?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
@@ -266,11 +276,11 @@
       "parameters": {
         "resource": "message",
         "operation": "sendText",
-        "phone": "={{ $('Parse the qualification').first().json.salesPhone }}",
-        "message": "=Hot lead on WhatsApp\n\nFrom: {{ $('Parse the qualification').first().json.leadName }} (+{{ $('Parse the qualification').first().json.leadPhone }})\nIntent: {{ $('Parse the qualification').first().json.intent }}\nBudget mentioned: {{ $('Parse the qualification').first().json.budget_mentioned }}\nDeadline mentioned: {{ $('Parse the qualification').first().json.deadline_mentioned }}\n\nWhat they said:\n{{ $('Parse the qualification').first().json.leadMessage }}"
+        "phone": "={{ $('Validar qualificação').first().json.salesPhone }}",
+        "message": "=🔥 Lead quente no WhatsApp\n\nNome: {{ $('Validar qualificação').first().json.leadName }}\nTelefone: +{{ $('Validar qualificação').first().json.leadPhone }}\nIntenção: {{ $('Validar qualificação').first().json.intencao }}\nMencionou orçamento: {{ $('Validar qualificação').first().json.orcamento_mencionado ? 'sim' : 'não' }}\nMencionou prazo: {{ $('Validar qualificação').first().json.prazo_mencionado ? 'sim' : 'não' }}\n\nMensagem original:\n{{ $('Validar qualificação').first().json.leadMessage }}"
       },
       "id": "wafly-handoff",
-      "name": "Page the sales number",
+      "name": "Avisar equipe comercial",
       "type": "n8n-nodes-wafly.wafly",
       "typeVersion": 1,
       "position": [
@@ -290,7 +300,7 @@
     {
       "parameters": {},
       "id": "noop-nurture",
-      "name": "Warm or cold, no handoff",
+      "name": "Sem handoff",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
@@ -301,7 +311,7 @@
     {
       "parameters": {},
       "id": "noop-ignore",
-      "name": "Ignore (group, echo, no text)",
+      "name": "Ignorar evento",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
@@ -311,113 +321,113 @@
     }
   ],
   "connections": {
-    "Wafly Inbound": {
+    "Webhook Wafly": {
       "main": [
         [
           {
-            "node": "Config",
+            "node": "Configuração",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Config": {
+    "Configuração": {
       "main": [
         [
           {
-            "node": "A customer wrote in?",
+            "node": "Mensagem válida?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "A customer wrote in?": {
+    "Mensagem válida?": {
       "main": [
         [
           {
-            "node": "Qualify the lead",
+            "node": "Qualificar lead com IA",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Ignore (group, echo, no text)",
+            "node": "Ignorar evento",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "OpenAI Chat Model": {
+    "Modelo OpenAI": {
       "ai_languageModel": [
         [
           {
-            "node": "Qualify the lead",
+            "node": "Qualificar lead com IA",
             "type": "ai_languageModel",
             "index": 0
           }
         ]
       ]
     },
-    "Memory per phone number": {
+    "Memória por telefone": {
       "ai_memory": [
         [
           {
-            "node": "Qualify the lead",
+            "node": "Qualificar lead com IA",
             "type": "ai_memory",
             "index": 0
           }
         ]
       ]
     },
-    "Qualify the lead": {
+    "Qualificar lead com IA": {
       "main": [
         [
           {
-            "node": "Parse the qualification",
+            "node": "Validar qualificação",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Parse the qualification": {
+    "Validar qualificação": {
       "main": [
         [
           {
-            "node": "Reply to the lead",
+            "node": "Responder lead",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Reply to the lead": {
+    "Responder lead": {
       "main": [
         [
           {
-            "node": "Hot lead?",
+            "node": "Lead quente?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Hot lead?": {
+    "Lead quente?": {
       "main": [
         [
           {
-            "node": "Page the sales number",
+            "node": "Avisar equipe comercial",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Warm or cold, no handoff",
+            "node": "Sem handoff",
             "type": "main",
             "index": 0
           }
