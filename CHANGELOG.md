@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Reworked template 08 as the PT-BR flagship for inbound lead qualification,
+  with step-by-step installation, a reproducible webhook test, tracked CTAs and
+  safer validation of the model output and commercial phone number.
+
+### Fixed
+- Template 08 now reads the lead temperature from the qualification result
+  after sending the reply. Previously the handoff condition inspected the Wafly
+  send response, so a hot lead could silently skip the commercial alert.
+
 ## [1.5.5] - 2026-09-12
 
 ### Fixed
