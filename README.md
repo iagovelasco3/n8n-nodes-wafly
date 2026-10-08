@@ -40,6 +40,15 @@ not Meta's Official WhatsApp API.
 
 ## 🚀 Features
 
+### REST backend example — no n8n required
+
+Building your own system, SaaS or AI agent? The independent
+[Node.js REST + webhooks example (PT-BR)](examples/backend-rest/README.md)
+keeps credentials server-side and demonstrates a test-only text sender plus
+a persistent, deduplicating receiver. It has no external dependencies and
+does not require n8n. Local tests are included; real WhatsApp delivery is a
+separate validation step. Wafly Flex is not Meta's Official WhatsApp API.
+
 ### 📱 Instance
 - Get the QR Code to connect
 - Check the connection status
