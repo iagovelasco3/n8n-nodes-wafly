@@ -85,4 +85,4 @@ São possibilidades de arquitetura, não conectores prontos nem promessa de comp
 
 ## Próximo passo
 
-[Conheça a API Wafly e teste por 3 dias, sem cartão](https://wafly.com.br/preco-api-whatsapp/?utm_source=github&utm_medium=repository&utm_campaign=wafly_api_sistemas_202610&utm_content=backend_rest). Flex: R$59,90 por número/mês. Consulte condições atuais no site. Este exemplo não muda preços, trial ou sua conta.
+[Conheça a API Wafly e teste por 3 dias, sem cartão](https://wafly.com.br/comparativos/quanto-custa-api-whatsapp/?utm_source=github&utm_medium=repository&utm_campaign=wafly_api_sistemas_202610&utm_content=backend_rest). Flex: R$59,90 por número/mês. Consulte condições atuais no site. Este exemplo não muda preços, trial ou sua conta.
