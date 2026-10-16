@@ -11,13 +11,13 @@ async function execute(parameters, respond = () => ({}), continueOnFail = false)
   const calls = [];
   const context = {
     getInputData: () => [{ json: {} }],
-    getCredentials: async () => ({ baseUrl, instance: 'TEST_INSTANCE', token: 'TEST_TOKEN' }),
+    getCredentials: async () => ({ baseUrl, clientToken: 'ACCOUNT_KEY', instance: 'TEST_INSTANCE', token: 'TEST_TOKEN' }),
     getNodeParameter: (name, _index, fallback) => parameters[name] ?? fallback,
     getNode: () => ({ name: 'Wafly', type: 'n8n-nodes-wafly.wafly', typeVersion: 1, position: [0, 0], parameters }),
     continueOnFail: () => continueOnFail,
     helpers: {
-      async httpRequestWithAuthentication(credential, request) {
-        assert.equal(credential, 'waflyApi');
+      async httpRequest(request) {
+        assert.equal(request.headers['Client-Token'], 'ACCOUNT_KEY');
         calls.push(request);
         return respond(request);
       },
@@ -31,14 +31,18 @@ async function execute(parameters, respond = () => ({}), continueOnFail = false)
     },
   };
   const output = await node.execute.call(context);
-  return { calls, output };
+  // These legacy assertions compare public JSON payloads. Item linking is
+  // validated separately, so metadata additions do not change their contract.
+  return { calls, output: output.map(items => items.map(({ json }) => ({ json }))) };
 }
 
 test('pairing GET and POST send a required phone in the query, with no JSON body', async () => {
   for (const [operation, method] of [['pairingCode', 'GET'], ['pairingCodePost', 'POST']]) {
     const field = node.description.properties.find((property) =>
       property.name === 'gq_phone' && property.displayOptions.show.operation.includes(operation));
-    assert.equal(field.required, true);
+    // POST keeps its UI field optional so saved gp_body.phone workflows pass
+    // n8n's pre-execution validation. execute still requires a phone from either source.
+    assert.equal(field.required, method === 'GET');
     const result = await execute({ resource: 'instanceExtra', operation, gq_phone: ' 5511999999999 ' }, (request) => {
       assert.equal(request.method, method);
       assert.equal(request.url, `${baseUrl}${basePath}/pairing-code`);

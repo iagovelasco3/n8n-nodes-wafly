@@ -127,37 +127,40 @@ preserved, including support for saved JSON bodies containing `phone`.
 4. Enter: `n8n-nodes-wafly`
 5. Click **Install**
 
-### Manual installation
+### Manual installation (self-hosted, including Docker)
 
-If you run n8n locally, you can install the package via npm:
+Install in the n8n user's persistent community-node directory:
 
 ```bash
-npm install n8n-nodes-wafly
+mkdir -p ~/.n8n/nodes
+cd ~/.n8n/nodes
+npm install n8n-nodes-wafly@1.6.0
 ```
 
-If you run n8n via Docker, add it to your `docker-compose.yml`:
+For Docker, run those commands inside the container as the n8n user, under
+`/home/node/.n8n/nodes`, and persist `/home/node/.n8n` in a volume. Restart the
+n8n process after a manual installation when it is safe for your workflows.
+In queue mode, install the same version on every worker that executes the node.
+See the [n8n installation guide](https://docs.n8n.io/integrations/community-nodes/installation/manual-install/).
 
-```yaml
-version: '3'
-services:
-  n8n:
-    image: n8nio/n8n
-    ports:
-      - "5678:5678"
-    environment:
-      - N8N_COMMUNITY_PACKAGES=n8n-nodes-wafly
-    volumes:
-      - ~/.n8n:/home/node/.n8n
-```
+The community node is for self-hosted n8n. On n8n Cloud, use the native
+HTTP Request and Webhook nodes as shown in the
+[Wafly guide](https://wafly.com.br/tutoriais/whatsapp-api-n8n/).
 
 ## 🔑 Credentials
 
 Before using the node, create a credential of type **Wafly API** with the following fields:
 
 - **Client Token**: Client-Token provided by Wafly
-- **Instance**: Name of your WhatsApp instance
-- **Token**: Token of the instance
+- **Instance**: Public code/ID of your WhatsApp instance, not its display name
+- **Token**: Token of that same instance
 - **Base URL**: `https://wafly.com.br/api-bridge-whats` (default; the same base URL serves accounts created on wafly.io, so keep it unchanged for international accounts)
+
+- **Management Base URL**: Optional override for `/api-managment`. Normally derived from Base URL on the same host; set it explicitly for a custom management service.
+
+Existing credentials keep working without editing them. For account management
+only, you may omit Instance and Token: the credential test then uses a read-only
+instance list. Messaging and session operations still require both fields.
 
 ### How to get your credentials
 
@@ -165,6 +168,46 @@ Before using the node, create a credential of type **Wafly API** with the follow
 2. Complete the free 3-day trial setup
 3. Go to **Instances** and create or select an instance
 4. Copy the **Client-Token**, **Instance** and **Token**
+
+## What's new in 1.6.0
+
+- The 104 existing operation IDs and their defaults are preserved; no workflow conversion is required.
+- Fifteen additional actions cover WhatsApp Status, external instance management, queue clearing and the three other webhook callbacks.
+- **Delete Message** sends query parameters; **Delete for Everyone** defaults to false. Newsletter deletion sends its required JSON body.
+- Call recordings return an MP3 in `binary.data`. List responses return one valid n8n item per result, linked to the corresponding input. Object responses keep their existing JSON payload.
+- **Also Send Transcript as Text** defaults to false, preserving existing transcription workflows.
+
+### WhatsApp Status
+
+Use **WhatsApp Status → Get Status Publication Capabilities** before publishing.
+**Publish Image or Video Status** accepts the JSON fields documented in the API:
+`requestId`, `type`, `content` (raw base64), and an explicit audience mode with its
+corresponding fields. Keep the same requestId and payload for the same attempt.
+Use **Get Status Publication Receipt** after an uncertain result; `unknown` is
+not a reason to generate a new ID and automatically publish again. Availability
+and media/audience limits are determined by the connected service.
+
+### Account / instance management
+
+The **Partner** resource uses `/api-managment`, with the same Client Token.
+**Create Instance or Preview** defaults to an empty JSON object: a `created:false`
+preview is not a provisioned instance and its example credentials do not work.
+Card creation requires explicit `acceptAutomaticBilling:true` and eligibility.
+Extra Pix creation uses `creationPolicy: "extra_instance_72h_v1"` and the
+**Idempotency Key** field. Keep the same valid key and body for one logical
+creation. The node does not add billing consent, generate keys, or retry calls.
+
+Before **Cancel Instance**, use **Get Cancellation Preview**. Stop on
+`billing_review_required` or an uncertain result. `scheduled:true` preserves
+access until the API's effective date. Disconnecting WhatsApp does not cancel
+billing. Refer to the [current API contract](https://wafly.com.br/api-docs).
+
+### Additional webhooks
+
+**Webhook (More)** sets delivery, connected and disconnected callbacks separately
+using `{ "value": "https://your-production-webhook" }`. The original **Webhook**
+operations still manage only the received-message callback. Use an explicit empty
+value only when you intend to remove the corresponding callback.
 
 ## 💡 Usage examples
 

@@ -1,0 +1,39 @@
+name: Validate node
+on:
+  pull_request:
+  push:
+    branches: [main, 'release/**']
+  workflow_dispatch:
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run lint && npm run check:generated
+      - run: git diff --exit-code -- nodes credentials schema
+  runtime:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        n8n: ['1.120.4', '2.43.7']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci && npm run build && npm pack
+      - run: docker pull n8nio/n8n:${{ matrix.n8n }}
+      - run: python3 tests/runtime/run.py --image n8nio/n8n:${{ matrix.n8n }} --tarball n8n-nodes-wafly-1.6.0.tgz --out /tmp/wafly-runtime
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime-${{ matrix.n8n }}
+          path: /tmp/wafly-runtime/*.log

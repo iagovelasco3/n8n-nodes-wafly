@@ -63,6 +63,8 @@ export class Wafly implements INodeType {
           { name: 'Newsletter / Channel', value: 'newsletter' },
           { name: 'Partner', value: 'partner' },
           { name: 'Webhook', value: 'webhook' },
+          { name: 'Webhook (More)', value: 'webhookExtra' },
+          { name: 'WhatsApp Status', value: 'statusPublication' },
           // GENERATED_RESOURCE_OPTIONS:END
         ],
         default: 'message',
@@ -868,6 +870,23 @@ export class Wafly implements INodeType {
         description: 'ID of the message to delete',
       },
 
+      {
+        displayName: 'Delete for Everyone',
+        name: 'deleteForEveryone',
+        type: 'boolean',
+        default: false,
+        displayOptions: { show: { resource: ['message'], operation: ['deleteMessage'] } },
+        description: 'Whether to delete for everyone (owner=true). Disabled deletes only for you.',
+      },
+      {
+        displayName: 'Participant Phone',
+        name: 'deleteParticipantPhone',
+        type: 'string',
+        default: '',
+        displayOptions: { show: { resource: ['message'], operation: ['deleteMessage'] } },
+        description: 'Optional sender phone for a message in a group',
+      },
+
       // =====================================
       // GROUP OPERATIONS
       // =====================================
@@ -1385,6 +1404,158 @@ export class Wafly implements INodeType {
         name: 'operation',
         type: 'options',
         noDataExpression: true,
+        displayOptions: { show: { resource: ['statusPublication'] } },
+        options: [
+          { name: 'Get Status Publication Capabilities', value: 'statusPublicationCapabilities', action: 'Get status publication capabilities' },
+          { name: 'Get Status Publication Receipt', value: 'statusPublicationReceipt', action: 'Get status publication receipt' },
+          { name: 'Publish Image or Video Status', value: 'publishStatus', action: 'Publish image or video status' },
+        ],
+        default: 'statusPublicationCapabilities',
+      },
+      {
+        displayName: 'Request ID',
+        name: 'gp_requestId',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['statusPublication'], operation: ['statusPublicationReceipt'] } },
+        description: 'Value for {requestId} in the request path',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['statusPublication'], operation: ['publishStatus'] } },
+        description: 'Request body. Fields expected per operation: publishStatus → requestId*, type*, content*, caption, audienceMode, audience, excluded.',
+      },
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['partner'] } },
+        options: [
+          { name: 'Cancel Instance', value: 'externalCancelInstance', action: 'Cancel instance' },
+          { name: 'Create Instance or Preview', value: 'partnerCreateInstance', action: 'Create instance or preview' },
+          { name: 'Get Cancellation Preview', value: 'externalCancellationPreview', action: 'Get cancellation preview' },
+          { name: 'Get Extra Pix Trial Policy', value: 'externalPixExtraPolicy', action: 'Get extra pix trial policy' },
+          { name: 'Get Instance', value: 'externalGetInstance', action: 'Get instance' },
+          { name: 'Get Instance Credentials', value: 'externalInstanceCredentials', action: 'Get instance credentials' },
+          { name: 'List My Instances', value: 'externalListInstances', action: 'List my instances' },
+          { name: 'Rename Instance', value: 'externalRenameInstance', action: 'Rename instance' },
+          { name: 'Restart Instance', value: 'externalRestartInstance', action: 'Restart instance' },
+        ],
+        default: 'partnerCreateInstance',
+      },
+      {
+        displayName: 'Instance',
+        name: 'gp_instance',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['partner'], operation: ['externalCancelInstance', 'externalCancellationPreview', 'externalGetInstance', 'externalInstanceCredentials', 'externalRenameInstance', 'externalRestartInstance'] } },
+        description: 'Value for {instance} in the request path',
+      },
+      {
+        displayName: 'Page',
+        name: 'gq_page',
+        type: 'string',
+        default: '',
+        required: false,
+        displayOptions: { show: { resource: ['partner'], operation: ['externalListInstances'] } },
+        description: 'Value for page in the request query',
+      },
+      {
+        displayName: 'Limit',
+        name: 'gq_limit',
+        type: 'string',
+        default: '',
+        required: false,
+        displayOptions: { show: { resource: ['partner'], operation: ['externalListInstances'] } },
+        description: 'Value for limit in the request query',
+      },
+      {
+        displayName: 'Idempotency  Key',
+        name: 'gh_idempotencyKey',
+        type: 'string',
+        default: '',
+        required: false,
+        displayOptions: { show: { resource: ['partner'], operation: ['partnerCreateInstance'] } },
+        description: 'Required for extra_instance_72h_v1. Keep the same key and body for the same logical creation; do not change the key after an uncertain result.',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['partner'], operation: ['partnerCreateInstance', 'externalRenameInstance', 'externalRestartInstance'] } },
+        description: 'Request body. Fields expected per operation: partnerCreateInstance → acceptAutomaticBilling, creationPolicy, receivedCallbackUrl, deliveryCallbackUrl, disconnectedCallbackUrl, messageStatusCallbackUrl | externalRenameInstance → name*.',
+      },
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['instanceExtra'] } },
+        options: [
+          { name: 'Clear Message Queue', value: 'purgeMessageQueue', action: 'Clear message queue' },
+          { name: 'Get Pairing Code (GET)', value: 'pairingCode', action: 'Get pairing code (GET)' },
+          { name: 'Get Pairing Code (POST)', value: 'pairingCodePost', action: 'Get pairing code (POST)' },
+          { name: 'Get Passkey Challenge (WebAuthn)', value: 'passkeyChallenge', action: 'Get passkey challenge webauthn' },
+          { name: 'Get QR Code Image', value: 'getQrCode', action: 'Get QR code image' },
+          { name: 'Restart With Disconnect', value: 'restartWithDisconnect', action: 'Restart with disconnect' },
+          { name: 'Send Passkey Assertion', value: 'passkeyResponse', action: 'Send passkey assertion' },
+        ],
+        default: 'pairingCode',
+      },
+      {
+        displayName: 'Confirm',
+        name: 'gq_confirm',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['instanceExtra'], operation: ['purgeMessageQueue'] } },
+        description: 'Value for confirm in the request query',
+      },
+      {
+        displayName: 'Phone',
+        name: 'gq_phone',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['instanceExtra'], operation: ['pairingCode'] } },
+        description: 'WhatsApp phone number in international format, including country code (e.g. 5511999999999)',
+      },
+      {
+        displayName: 'Phone',
+        name: 'gq_phone',
+        type: 'string',
+        default: '',
+        required: false,
+        displayOptions: { show: { resource: ['instanceExtra'], operation: ['pairingCodePost'] } },
+        description: 'WhatsApp phone number in international format, including country code (e.g. 5511999999999)',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['instanceExtra'], operation: ['restartWithDisconnect', 'passkeyResponse'] } },
+        description: 'Request body. Fields expected per operation: restartWithDisconnect → connected.',
+      },
+      {
+        displayName: 'Legacy Phone Body',
+        name: 'gp_body',
+        type: 'hidden',
+        default: '{}',
+        displayOptions: { show: { resource: ['instanceExtra'], operation: ['pairingCodePost'] } },
+      },
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
         displayOptions: { show: { resource: ['messageExtra'] } },
         options: [
           { name: 'Pin Message', value: 'pinMessage', action: 'Pin message' },
@@ -1484,41 +1655,8 @@ export class Wafly implements INodeType {
         name: 'gp_body',
         type: 'json',
         default: '{}',
-        displayOptions: { show: { resource: ['newsletter'], operation: ['newsletterAcceptAdminInvite', 'createNewsletter', 'followNewsletter', 'muteNewsletter', 'newsletterRemoveAdmin', 'newsletterRevokeAdminInvite', 'searchNewsletter', 'newsletterTransferOwnership', 'unfollowNewsletter', 'unmuteNewsletter', 'updateNewsletterDescription', 'updateNewsletterName', 'updateNewsletterPicture', 'newsletterSettings'] } },
-        description: 'Request body. Fields expected per operation: createNewsletter → name*, description | followNewsletter → id* | muteNewsletter → id* | newsletterRemoveAdmin → phone* | newsletterRevokeAdminInvite → phone* | searchNewsletter → limit, view, searchText, filters | newsletterTransferOwnership → phone* | unfollowNewsletter → id* | unmuteNewsletter → id* | updateNewsletterDescription → id*, description* | updateNewsletterName → id*, name* | updateNewsletterPicture → id*, pictureUrl* | newsletterSettings → reactionCodes.',
-      },
-      {
-        displayName: 'Operation',
-        name: 'operation',
-        type: 'options',
-        noDataExpression: true,
-        displayOptions: { show: { resource: ['instanceExtra'] } },
-        options: [
-          { name: 'Get Pairing Code (GET)', value: 'pairingCode', action: 'Get pairing code (GET)' },
-          { name: 'Get Pairing Code (POST)', value: 'pairingCodePost', action: 'Get pairing code (POST)' },
-          { name: 'Get Passkey Challenge (WebAuthn)', value: 'passkeyChallenge', action: 'Get passkey challenge webauthn' },
-          { name: 'Get QR Code Image', value: 'getQrCode', action: 'Get QR code image' },
-          { name: 'Restart With Disconnect', value: 'restartWithDisconnect', action: 'Restart with disconnect' },
-          { name: 'Send Passkey Assertion', value: 'passkeyResponse', action: 'Send passkey assertion' },
-        ],
-        default: 'pairingCode',
-      },
-      {
-        displayName: 'Phone',
-        name: 'gq_phone',
-        type: 'string',
-        default: '',
-        required: true,
-        displayOptions: { show: { resource: ['instanceExtra'], operation: ['pairingCode', 'pairingCodePost'] } },
-        description: 'WhatsApp phone number in international format, including country code (e.g. 5511999999999)',
-      },
-      {
-        displayName: 'Body (JSON)',
-        name: 'gp_body',
-        type: 'json',
-        default: '{}',
-        displayOptions: { show: { resource: ['instanceExtra'], operation: ['restartWithDisconnect', 'passkeyResponse'] } },
-        description: 'Request body. Fields expected per operation: restartWithDisconnect → connected.',
+        displayOptions: { show: { resource: ['newsletter'], operation: ['newsletterAcceptAdminInvite', 'createNewsletter', 'deleteNewsletter', 'followNewsletter', 'muteNewsletter', 'newsletterRemoveAdmin', 'newsletterRevokeAdminInvite', 'searchNewsletter', 'newsletterTransferOwnership', 'unfollowNewsletter', 'unmuteNewsletter', 'updateNewsletterDescription', 'updateNewsletterName', 'updateNewsletterPicture', 'newsletterSettings'] } },
+        description: 'Request body. Fields expected per operation: createNewsletter → name*, description | deleteNewsletter → id* | followNewsletter → id* | muteNewsletter → id* | newsletterRemoveAdmin → phone* | newsletterRevokeAdminInvite → phone* | searchNewsletter → limit, view, searchText, filters | newsletterTransferOwnership → phone* | unfollowNewsletter → id* | unmuteNewsletter → id* | updateNewsletterDescription → id*, description* | updateNewsletterName → id*, name* | updateNewsletterPicture → id*, pictureUrl* | newsletterSettings → reactionCodes.',
       },
       {
         displayName: 'Operation',
@@ -1573,6 +1711,27 @@ export class Wafly implements INodeType {
         name: 'operation',
         type: 'options',
         noDataExpression: true,
+        displayOptions: { show: { resource: ['webhookExtra'] } },
+        options: [
+          { name: 'Set Connected Webhook', value: 'updateWebhookConnected', action: 'Set connected webhook' },
+          { name: 'Set Delivery Webhook', value: 'updateWebhookDelivery', action: 'Set delivery webhook' },
+          { name: 'Set Disconnected Webhook', value: 'updateWebhookDisconnected', action: 'Set disconnected webhook' },
+        ],
+        default: 'updateWebhookConnected',
+      },
+      {
+        displayName: 'Body (JSON)',
+        name: 'gp_body',
+        type: 'json',
+        default: '{}',
+        displayOptions: { show: { resource: ['webhookExtra'], operation: ['updateWebhookConnected', 'updateWebhookDelivery', 'updateWebhookDisconnected'] } },
+        description: 'Request body. Fields expected per operation: updateWebhookConnected → value* | updateWebhookDelivery → value* | updateWebhookDisconnected → value*.',
+      },
+      {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
         displayOptions: { show: { resource: ['community'] } },
         options: [
           { name: 'Create Community', value: 'createCommunity', action: 'Create community' },
@@ -1601,25 +1760,6 @@ export class Wafly implements INodeType {
         default: '{}',
         displayOptions: { show: { resource: ['community'], operation: ['createCommunity', 'linkCommunity', 'unlinkCommunity', 'communitySettings'] } },
         description: 'Request body. Fields expected per operation: createCommunity → name*, description, participants | linkCommunity → communityId*, groupsPhones* | unlinkCommunity → communityId*, groupsPhones* | communitySettings → communityId*, whoCanAddNewGroups*.',
-      },
-      {
-        displayName: 'Operation',
-        name: 'operation',
-        type: 'options',
-        noDataExpression: true,
-        displayOptions: { show: { resource: ['partner'] } },
-        options: [
-          { name: 'Create Instance (Partner)', value: 'partnerCreateInstance', action: 'Create instance partner' },
-        ],
-        default: 'partnerCreateInstance',
-      },
-      {
-        displayName: 'Body (JSON)',
-        name: 'gp_body',
-        type: 'json',
-        default: '{}',
-        displayOptions: { show: { resource: ['partner'], operation: ['partnerCreateInstance'] } },
-        description: 'Request body. Fields expected per operation: partnerCreateInstance → receivedCallbackUrl, deliveryCallbackUrl, disconnectedCallbackUrl, messageStatusCallbackUrl.',
       },
       {
         displayName: 'Operation',
@@ -1669,10 +1809,10 @@ export class Wafly implements INodeType {
 
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     const items = this.getInputData();
-    const returnData: IDataObject[] = [];
+    const returnData: INodeExecutionData[] = [];
     const credentials = await this.getCredentials('waflyApi');
 
-    const baseUrl = credentials.baseUrl as string;
+    const baseUrl = String(credentials.baseUrl || 'https://wafly.com.br/api-bridge-whats').trim().replace(/\/+$/, '');
     const instance = credentials.instance as string;
     const token = credentials.token as string;
 
@@ -1682,15 +1822,18 @@ export class Wafly implements INodeType {
         const operation = this.getNodeParameter('operation', i) as string;
 
         let endpoint = '';
-        let method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET';
+        let method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'GET';
+        let requestBaseUrl = baseUrl;
+        let binaryResponse = false;
         let body: IDataObject = {};
         const query: IDataObject = {};
+        const headers: IDataObject = {};
 
         // =====================================
         // INSTANCE OPERATIONS
         // =====================================
         if (resource === 'instance') {
-          const basePath = `/instances/${instance}/token/${token}`;
+          const basePath = `/instances/${encodeURIComponent(instance)}/token/${encodeURIComponent(token)}`;
 
           if (operation === 'getQrCode') {
             endpoint = `${basePath}/qr-code`;
@@ -1750,7 +1893,7 @@ export class Wafly implements INodeType {
               ...(key ? { api_key: key } : {}),
               transcription: {
                 enabled: true,
-                mirror_to_text: this.getNodeParameter('transcriptionMirrorToText', i) as boolean,
+                mirror_to_text: this.getNodeParameter('transcriptionMirrorToText', i, false) as boolean,
                 max_audio_seconds: this.getNodeParameter(
                   'transcriptionMaxAudioSeconds',
                   i,
@@ -1771,7 +1914,7 @@ export class Wafly implements INodeType {
         // MESSAGE OPERATIONS
         // =====================================
         else if (resource === 'message') {
-          const basePath = `/instances/${instance}/token/${token}`;
+          const basePath = `/instances/${encodeURIComponent(instance)}/token/${encodeURIComponent(token)}`;
           const phone = this.getNodeParameter('phone', i) as string;
 
           if (operation === 'sendText') {
@@ -1891,7 +2034,11 @@ export class Wafly implements INodeType {
             endpoint = `${basePath}/delete-message`;
             method = 'DELETE';
             const messageId = this.getNodeParameter('messageId', i) as string;
-            body = { phone, messageId };
+            query.phone = phone;
+            query.messageId = messageId;
+            query.owner = this.getNodeParameter('deleteForEveryone', i, false) as boolean;
+            const participantPhone = this.getNodeParameter('deleteParticipantPhone', i, '') as string;
+            if (participantPhone) query.participantPhone = participantPhone;
           }
         }
 
@@ -1899,7 +2046,7 @@ export class Wafly implements INodeType {
         // GROUP OPERATIONS
         // =====================================
         else if (resource === 'group') {
-          const basePath = `/instances/${instance}/token/${token}`;
+          const basePath = `/instances/${encodeURIComponent(instance)}/token/${encodeURIComponent(token)}`;
 
           if (operation === 'createGroup') {
             endpoint = `${basePath}/create-group`;
@@ -2046,7 +2193,7 @@ export class Wafly implements INodeType {
         // WEBHOOK OPERATIONS
         // =====================================
         else if (resource === 'webhook') {
-          const basePath = `/instances/${instance}/token/${token}`;
+          const basePath = `/instances/${encodeURIComponent(instance)}/token/${encodeURIComponent(token)}`;
 
           if (operation === 'setWebhook') {
             endpoint = `${basePath}/update-webhook-received`;
@@ -2074,13 +2221,29 @@ export class Wafly implements INodeType {
           let genPath = generated.path;
           for (const param of generated.pathParams) {
             const value = this.getNodeParameter(`gp_${param}`, i) as string;
+            if (!String(value ?? '').trim()) {
+              throw new NodeOperationError(this.getNode(), `The ${param} field is required for this operation.`);
+            }
             genPath = genPath.replace(`{${param}}`, encodeURIComponent(value));
           }
           // Partner endpoints do not live under /instances/{instance}/token/{token}.
           endpoint = generated.isPartner
             ? genPath
-            : `/instances/${instance}/token/${token}${genPath}`;
+            : `/instances/${encodeURIComponent(instance)}/token/${encodeURIComponent(token)}${genPath}`;
           method = generated.method;
+          binaryResponse = generated.responseType === 'binary';
+          if (generated.isPartner) {
+            const configured = String(credentials.managementBaseUrl || '').trim();
+            if (!configured && !/\/api-bridge-whats$/.test(baseUrl)) {
+              throw new NodeOperationError(this.getNode(), 'Set Management Base URL in the Wafly API credential for this custom API URL.');
+            }
+            requestBaseUrl = (configured || baseUrl.replace(/\/api-bridge-whats$/, '/api-managment')).replace(/\/+$/, '');
+          }
+          for (const param of generated.headerParams) {
+            const value = String(this.getNodeParameter(param.field, i, '') ?? '').trim();
+            if (value) headers[param.name] = value;
+            else if (param.required) throw new NodeOperationError(this.getNode(), `The ${param.name} header is required.`);
+          }
           for (const param of generated.queryParams) {
             let value = String(this.getNodeParameter(`gq_${param.name}`, i, '') ?? '').trim();
             // Workflows saved before 1.5.5 may still store the pairing phone in
@@ -2092,39 +2255,65 @@ export class Wafly implements INodeType {
                 value = String(parsed.phone ?? '').trim();
               }
             }
-            if (!value && param.required) {
+            if (!value && (param.required || (generated.path === '/pairing-code' && param.name === 'phone'))) {
               throw new NodeOperationError(this.getNode(), `The ${param.name} field is required for this operation.`);
             }
             if (value) query[param.name] = value;
           }
           if (generated.hasBody) {
             const raw = this.getNodeParameter('gp_body', i, '{}');
-            body =
-              typeof raw === 'string'
-                ? (JSON.parse(raw || '{}') as IDataObject)
-                : (raw as IDataObject);
+            const parsed = typeof raw === 'string' ? JSON.parse(raw || '{}') : raw;
+            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+              throw new NodeOperationError(this.getNode(), 'Body (JSON) must be a JSON object.');
+            }
+            body = parsed as IDataObject;
           }
         }
 
-        // Make the API request — the Client-Token header is injected by the credential's authenticate config
-        const responseData = await this.helpers.httpRequestWithAuthentication.call(
-          this,
-          'waflyApi',
-          {
+        if (!endpoint) {
+          throw new NodeOperationError(this.getNode(), 'Unknown Wafly resource or operation.');
+        }
+        if (!generated?.isPartner && (!instance || !token)) {
+          throw new NodeOperationError(this.getNode(), 'Instance and Token are required for this operation.');
+        }
+        if (generated?.isPartner && operation === 'partnerCreateInstance' && body.creationPolicy === 'extra_instance_72h_v1') {
+          if (!/^[A-Za-z0-9._:-]{8,128}$/.test(String(headers['Idempotency-Key'] || ''))) {
+            throw new NodeOperationError(this.getNode(), 'Extra Pix creation requires an Idempotency-Key of 8 to 128 letters, digits, dots, hyphens, colons or underscores. Reuse the same key and body for the same creation.');
+          }
+        }
+
+        // Wafly uses a static token, not refreshable OAuth. The authenticated
+        // helper retries HTTP 401 even for generic credentials in n8n 1.x/2.x,
+        // which can repeat a mutation. Read the saved credential once and use
+        // the ordinary HTTP helper so each item makes exactly one API request.
+        const responseData = await this.helpers.httpRequest({
             method,
-            url: `${baseUrl}${endpoint}`,
+            url: `${requestBaseUrl}${endpoint}`,
             body: Object.keys(body).length > 0 ? body : undefined,
             qs: Object.keys(query).length > 0 ? query : undefined,
-            json: true,
-          },
-        );
+            headers: { ...headers, 'Client-Token': credentials.clientToken as string },
+            json: !binaryResponse,
+            ...(binaryResponse ? { encoding: 'arraybuffer' as const } : {}),
+        });
         // Callback updates return HTTP 204. Keep one valid n8n output item for
         // that successful empty response without inventing an API success flag.
-        returnData.push(responseData == null || responseData === '' ? {} : responseData as IDataObject);
+        if (binaryResponse) {
+          const callId = String(this.getNodeParameter('gp_callId', i)).replace(/[^a-zA-Z0-9_-]/g, '_');
+          const fileName = `recording-${callId}.mp3`;
+          const data = await this.helpers.prepareBinaryData(Buffer.from(responseData), fileName, 'audio/mpeg');
+          returnData.push({ json: { fileName, mimeType: 'audio/mpeg' }, binary: { data }, pairedItem: { item: i } });
+        } else {
+          const values = Array.isArray(responseData) ? responseData : [responseData];
+          for (const value of values) {
+            const json = value == null || value === '' ? {} :
+              (typeof value === 'object' && !Array.isArray(value) ? value : { value });
+            returnData.push({ json: json as IDataObject, pairedItem: { item: i } });
+          }
+        }
       } catch (error) {
         if (this.continueOnFail()) {
           // Do not echo error.message here — it contains the request URL with instance/token
-          returnData.push({ error: 'Request failed. Check node credentials and configuration.' });
+          returnData.push({ json: { error: 'Request failed. Check node credentials and configuration.' }, pairedItem: { item: i } });
           continue;
         }
         if (error instanceof NodeOperationError) throw error;
@@ -2132,6 +2321,6 @@ export class Wafly implements INodeType {
       }
     }
 
-    return [this.helpers.returnJsonArray(returnData)];
+    return [returnData];
   }
 }
