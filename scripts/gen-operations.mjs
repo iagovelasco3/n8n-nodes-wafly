@@ -1,118 +1,75 @@
 #!/usr/bin/env node
-// Generates the node operations from the frontend's central endpoint schema
-// (src/data/endpoints-schema.ts), which is already the source of truth for
-// /documentation, /api-docs, openapi.json, llms.txt and the Postman collection.
-//
-// WHY GENERATE INSTEAD OF HAND-WRITING: when we measured, the node covered 40 of
-// 100 endpoints. Writing the remaining 60 by hand would solve it today and
-// recreate the debt the next time the API grew — which is exactly how the gap
-// appeared in the first place. By generating, a new endpoint in the schema
-// becomes a node operation by running a single command.
-//
-// The hand-written operations still exist and take PRECEDENCE: they have better
-// UX (validated fields, converted units). The generator only fills in the gaps.
-
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+// Generate from a reviewed, committed OpenAPI snapshot. Builds never fetch the
+// network or depend on a neighboring frontend checkout. Refresh with sync:api.
+import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_PATH = process.env.WAFLY_SCHEMA_PATH
   ? resolve(process.env.WAFLY_SCHEMA_PATH)
-  : resolve(__dirname, '../../frontend/src/data/endpoints-schema.ts');
+  : resolve(__dirname, '../schema/openapi.json');
 const OUT_PATH = resolve(__dirname, '../nodes/Wafly/GeneratedOperations.ts');
 const NODE_PATH = resolve(__dirname, '../nodes/Wafly/Wafly.node.ts');
 const RESOURCE_OPTIONS_START = '// GENERATED_RESOURCE_OPTIONS:START';
 const RESOURCE_OPTIONS_END = '// GENERATED_RESOURCE_OPTIONS:END';
 const NODE_PROPERTIES_START = '// GENERATED_NODE_PROPERTIES:START';
 const NODE_PROPERTIES_END = '// GENERATED_NODE_PROPERTIES:END';
-
-if (!existsSync(SCHEMA_PATH)) {
-  // This is NOT an error: the schema lives in the frontend repository, which is
-  // not present on the CI runner nor on the machine of anyone who only cloned
-  // this package. That is precisely why the generated output
-  // (GeneratedOperations.ts) is COMMITTED, so the build proceeds normally with
-  // whatever is already checked in.
-  //
-  // Failing here broke the v1.5.0 publish: prebuild aborted on CI because it
-  // looked for ../frontend, which does not exist there.
-  console.warn(`ℹ️  schema not found at ${SCHEMA_PATH} — using the committed GeneratedOperations.ts.`);
-  console.warn('   To regenerate, run with the frontend repo alongside or set WAFLY_SCHEMA_PATH.');
-  process.exit(0);
-}
-
-const schema = readFileSync(SCHEMA_PATH, 'utf8');
+const spec = JSON.parse(readFileSync(SCHEMA_PATH, 'utf8'));
 const nodeSrc = readFileSync(NODE_PATH, 'utf8');
-
-// --- schema parsing ----------------------------------------------------------
-// Parse literal endpoint objects without evaluating the frontend module. A
-// fixed-size text window can accidentally read the next endpoint's body and
-// misses inline fields. TypeScript is already a build dependency of this node.
+const legacyKeys = new Set([...readFileSync(OUT_PATH, 'utf8').matchAll(/^  '([^']+)':/gm)].map(m => m[1]));
+const SECTION_BY_TAG = {
+  'Instância': 'instancia', 'Mensagens': 'mensagens', 'Grupos': 'grupos',
+  'Newsletter / Canais': 'newsletter', 'Chats': 'chats', 'Comunidades': 'comunidades',
+  'Chamadas (beta)': 'chamadas', 'Webhooks': 'webhook',
+  'Gerenciamento pela API': 'parceiros', 'Status do WhatsApp': 'status-publication',
+};
 const sections = [];
-const sourceFile = ts.createSourceFile(SCHEMA_PATH, schema, ts.ScriptTarget.Latest, true);
-function property(object, key) {
-  return object.properties.find((p) => ts.isPropertyAssignment(p) && p.name.getText(sourceFile).replace(/^['"]|['"]$/g, '') === key)?.initializer;
-}
-function literal(object, key) {
-  const value = property(object, key);
-  return value && (ts.isStringLiteral(value) || ts.isNoSubstitutionTemplateLiteral(value)) ? value.text : undefined;
-}
-function fields(object, key) {
-  const array = property(object, key);
-  if (!array || !ts.isArrayLiteralExpression(array)) return [];
-  return array.elements.filter(ts.isObjectLiteralExpression).map((field) => ({
-    name: literal(field, 'name'),
-    type: literal(field, 'type'),
-    required: property(field, 'required')?.kind === ts.SyntaxKind.TrueKeyword,
-  })).filter((field) => field.name);
-}
-function visit(node) {
-  if (ts.isVariableDeclaration(node) && node.initializer && ts.isObjectLiteralExpression(node.initializer)) {
-    const section = node.initializer;
-    const endpoints = property(section, 'endpoints');
-    if (endpoints && ts.isArrayLiteralExpression(endpoints)) {
-      sections.push({
-        id: literal(section, 'id'),
-        name: literal(section, 'name'),
-        endpoints: endpoints.elements.filter(ts.isObjectLiteralExpression).map((endpoint) => ({
-          id: literal(endpoint, 'id'),
-          method: literal(endpoint, 'method'),
-          path: literal(endpoint, 'path'),
-          summary: literal(endpoint, 'summary'),
-          bodyFields: fields(endpoint, 'requestBody'),
-          queryParams: fields(endpoint, 'queryParams'),
-          hasBody: !!property(endpoint, 'requestBody') || !!property(endpoint, 'requestBodyExample'),
-        })),
-      });
+const seenIds = new Set();
+for (const [path, methods] of Object.entries(spec.paths || {})) {
+  for (const [verb, operation] of Object.entries(methods)) {
+    if (!['get', 'post', 'put', 'patch', 'delete'].includes(verb)) continue;
+    const id = SECTION_BY_TAG[operation.tags?.[0]];
+    if (!id || !operation.operationId || !operation.summary || seenIds.has(operation.operationId)) {
+      throw new Error(`Unmapped or invalid API operation: ${verb} ${path}`);
     }
+    seenIds.add(operation.operationId);
+    let section = sections.find(s => s.id === id);
+    if (!section) { section = { id, endpoints: [] }; sections.push(section); }
+    const content = operation.requestBody?.content?.['application/json'];
+    const bodySchema = content?.schema || {};
+    const fields = Object.entries(bodySchema.properties || {}).map(([name, field]) => ({
+      name, type: field.type, required: (bodySchema.required || []).includes(name),
+    }));
+    section.endpoints.push({
+      id: operation.operationId, method: verb.toUpperCase(),
+      path: path.replace(/^\/api-(?:bridge-whats|managment)/, ''),
+      summary: operation.summary, bodyFields: fields,
+      queryParams: (operation.parameters || []).filter(p => p.in === 'query').map(p => ({
+        name: p.name, required: path.endsWith('/pairing-code') ? verb === 'get' : !!p.required,
+      })),
+      headerParams: (operation.parameters || []).filter(p => p.in === 'header').map(p => ({
+        name: p.name, required: !!p.required,
+        field: 'gh_' + p.name.replace(/-([a-z])/gi, (_, c) => c.toUpperCase()).replace(/^./, c => c.toLowerCase()),
+      })),
+      hasBody: !!content,
+      responseType: operation.operationId === 'call-recording' ? 'binary' : 'json',
+    });
   }
-  ts.forEachChild(node, visit);
 }
-visit(sourceFile);
-if (!sections.length || sections.some((s) => s.endpoints.some((ep) => !ep.id || !ep.method || !ep.path || !ep.summary))) {
-  throw new Error('Cannot generate operations: the endpoint schema contains missing or unsupported literal fields.');
-}
+if (!sections.length) throw new Error('The OpenAPI snapshot has no operations.');
 
-// --- what the node already covers --------------------------------------------
+// Compare methods as well as paths. Preserve already published generated IDs,
+// including aliases with an equivalent hand-written operation.
 const implementedPaths = new Set();
-for (const m of nodeSrc.matchAll(/endpoint = `\$\{basePath\}([^`]*)`/g)) {
-  implementedPaths.add(normalize(m[1]));
+for (const m of nodeSrc.matchAll(/endpoint = `([^`]*)`;\s*method = '(GET|POST|PUT|PATCH|DELETE)'/g)) {
+  implementedPaths.add(m[2] + ' ' + normalize(m[1].replace('${basePath}', '')));
 }
-for (const m of nodeSrc.matchAll(/endpoint = `([^`]*)`/g)) {
-  implementedPaths.add(normalize(m[1].replace('${basePath}', '')));
-}
-
 function normalize(p) {
-  return p
-    .replace(/\$\{[^}]+\}/g, '*')
-    .replace(/\{[^}]+\}/g, '*')
-    .replace(/\/+$/, '');
+  return p.replace(/\$\{[^}]+\}/g, '*').replace(/\{[^}]+\}/g, '*').split('?')[0].replace(/\/+$/, '');
 }
-
 function relPath(p) {
-  const rel = p.replace('/instances/{instance}/token/{token}', '');
-  return rel || '/';
+  return p.replace('/instances/{instance}/token/{token}', '') || '/';
 }
 
 // --- selection ---------------------------------------------------------------
@@ -124,8 +81,17 @@ const RESOURCE_BY_SECTION = {
   chats: { value: 'chat', label: 'Chat' },
   comunidades: { value: 'community', label: 'Community' },
   chamadas: { value: 'call', label: 'Call (Beta)' },
-  webhooks: { value: 'webhookExtra', label: 'Webhook (More)' },
+  webhook: { value: 'webhookExtra', label: 'Webhook (More)' },
+  'status-publication': { value: 'statusPublication', label: 'WhatsApp Status' },
   parceiros: { value: 'partner', label: 'Partner' },
+};
+
+// Keep defaults from saved v1 workflows even when new options sort first.
+const DEFAULT_OPERATION_BY_RESOURCE = {
+  instanceExtra: 'pairingCode', messageExtra: 'pinMessage', groupExtra: 'groupInviteLink',
+  newsletter: 'newsletterAcceptAdminInvite', chat: 'chatMetadata', community: 'createCommunity',
+  partner: 'partnerCreateInstance', call: 'callAccept',
+  statusPublication: 'statusPublicationCapabilities',
 };
 
 const BASE_RESOURCES = [
@@ -150,6 +116,23 @@ const BASE_RESOURCES = [
 // Any name without an entry here is reported at the end of the run, so
 // Portuguese never slips through silently.
 const EN_LABEL = {
+  'Limpar fila de mensagens': 'Clear Message Queue',
+  'Criar instância ou obter exemplo': 'Create Instance or Preview',
+  'Listar minhas instâncias': 'List My Instances',
+  'Consultar regra da extra Pix': 'Get Extra Pix Trial Policy',
+  'Consultar instância': 'Get Instance',
+  'Consultar credenciais': 'Get Instance Credentials',
+  'Renomear instância': 'Rename Instance',
+  'Reiniciar instância': 'Restart Instance',
+  'Consultar consequências do cancelamento': 'Get Cancellation Preview',
+  'Cancelar instância': 'Cancel Instance',
+  'Verificar publicação de status': 'Get Status Publication Capabilities',
+  'Publicar imagem ou vídeo no Status': 'Publish Image or Video Status',
+  'Consultar uma tentativa de publicação': 'Get Status Publication Receipt',
+  'Webhook — mensagem recebida': 'Set Received Message Webhook',
+  'Webhook — confirmação de entrega': 'Set Delivery Webhook',
+  'Webhook — instância conectada': 'Set Connected Webhook',
+  'Webhook — instância desconectada': 'Set Disconnected Webhook',
   'Aceitar convite de admin': 'Accept Admin Invite',
   'Alterar descrição da newsletter': 'Update Newsletter Description',
   'Alterar nome da newsletter': 'Update Newsletter Name',
@@ -227,7 +210,8 @@ for (const section of sections) {
 
   for (const ep of section.endpoints) {
     const rel = relPath(ep.path);
-    if (implementedPaths.has(normalize(rel))) continue; // already hand-written: do not duplicate
+    const key = res.value + ':' + toOperationName(ep.id);
+    if (!legacyKeys.has(key) && implementedPaths.has(ep.method + ' ' + normalize(rel))) continue;
 
     const pathParams = [...rel.matchAll(/\{([^}]+)\}/g)].map((m) => m[1]);
     const opName = toOperationName(ep.id);
@@ -240,11 +224,13 @@ for (const section of sections) {
       path: rel,
       pathParams,
       queryParams: ep.queryParams,
+      headerParams: ep.headerParams,
+      responseType: ep.responseType,
       bodyFields: ep.bodyFields,
       // Preserve the generic JSON input on existing write operations, including
       // endpoints whose schema has not detailed the body yet. Query-only pairing
       // is the exception: its phone must not be sent as a JSON body.
-      hasBody: ep.method !== 'GET' && ep.method !== 'DELETE' && (ep.hasBody || !ep.queryParams.length),
+      hasBody: rel !== '/pairing-code' && ep.method !== 'GET' && (ep.hasBody || (ep.method !== 'DELETE' && !ep.queryParams.length)),
       isPartner: section.id === 'parceiros',
     });
     generatedCount++;
@@ -258,6 +244,12 @@ function toOperationName(id) {
 function jsStr(s) {
   return `'${String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 }
+
+const generatedKeys = new Set([...resources.values()].flatMap(resource => resource.ops.map(operation => resource.value + ':' + operation.name)));
+for (const key of legacyKeys) {
+  if (!generatedKeys.has(key)) throw new Error(`Refusing to remove an existing generated operation: ${key}`);
+}
+if (missingLabels.size) throw new Error('Missing English labels: ' + [...missingLabels].join(', '));
 
 // --- emission ----------------------------------------------------------------
 const resourceList = [...resources.values()];
@@ -283,7 +275,7 @@ ${res.ops
   )
   .join('\n')}
     ],
-    default: ${jsStr(res.ops[0].name)},
+    default: ${jsStr(DEFAULT_OPERATION_BY_RESOURCE[res.value] || res.ops[0].name)},
   },`);
 
   // One field per path parameter, shown only on the operations that use it.
@@ -326,6 +318,25 @@ ${res.ops
   },`);
   }
 
+  const headerFields = new Map();
+  for (const o of res.ops) {
+    for (const param of o.headerParams) {
+      if (!headerFields.has(param.name)) headerFields.set(param.name, { ...param, operations: [] });
+      headerFields.get(param.name).operations.push(o.name);
+    }
+  }
+  for (const param of headerFields.values()) {
+    props.push(`  {
+    displayName: ${jsStr(humanize(param.name.replace(/-/g, ' ')))},
+    name: ${jsStr(param.field)},
+    type: 'string',
+    default: '',
+    required: ${param.required},
+    displayOptions: { show: { resource: [${jsStr(res.value)}], operation: [${param.operations.map(jsStr).join(', ')}] } },
+    description: 'Required for extra_instance_72h_v1. Keep the same key and body for the same logical creation; do not change the key after an uncertain result.',
+  },`);
+  }
+
   // JSON body. A field-by-field form for 60 endpoints would produce a UI that is
   // impossible to maintain; JSON keeps the operation usable and the example of
   // the expected fields goes into the description.
@@ -341,9 +352,22 @@ ${res.ops
   },`);
   }
 
+  if (res.value === 'instanceExtra') {
+    // n8n ignores parameters whose display conditions do not match. Keep this
+    // legacy parameter registered for POST pairing so saved JSON expressions
+    // can still be resolved by getNodeParameter before moving phone to query.
+    props.push(`  {
+    displayName: 'Legacy Phone Body',
+    name: 'gp_body',
+    type: 'hidden',
+    default: '{}',
+    displayOptions: { show: { resource: ['instanceExtra'], operation: ['pairingCodePost'] } },
+  },`);
+  }
+
   for (const o of res.ops) {
     opDefs.push(
-      `  ${jsStr(res.value + ':' + o.name)}: { method: ${jsStr(o.method)}, path: ${jsStr(o.path)}, pathParams: [${o.pathParams.map(jsStr).join(', ')}], queryParams: [${o.queryParams.map((param) => `{ name: ${jsStr(param.name)}, required: ${param.required} }`).join(', ')}], hasBody: ${o.hasBody}, isPartner: ${o.isPartner} },`
+      `  ${jsStr(res.value + ':' + o.name)}: { method: ${jsStr(o.method)}, path: ${jsStr(o.path)}, pathParams: [${o.pathParams.map(jsStr).join(', ')}], queryParams: [${o.queryParams.map((param) => `{ name: ${jsStr(param.name)}, required: ${param.required} }`).join(', ')}], headerParams: ${JSON.stringify(o.headerParams)}, hasBody: ${o.hasBody}, isPartner: ${o.isPartner}, responseType: ${jsStr(o.responseType)} },`
     );
   }
 }
@@ -389,9 +413,8 @@ function bodyDescription(operations) {
 }
 
 const out = `// ⚠️ GENERATED FILE — do not edit by hand.
-// Generated by scripts/gen-operations.mjs from the central endpoint schema
-// (frontend/src/data/endpoints-schema.ts), the same source behind
-// /documentation, /api-docs, openapi.json, llms.txt and the Postman collection.
+// Generated by scripts/gen-operations.mjs from schema/openapi.json.
+// Refresh the reviewed production snapshot explicitly with npm run sync:api.
 //
 // To regenerate:  npm run gen:ops
 //
@@ -402,10 +425,12 @@ const out = `// ⚠️ GENERATED FILE — do not edit by hand.
 // Endpoints covered here: ${generatedCount}
 
 export interface GeneratedOperation {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
   pathParams: string[];
   queryParams: { name: string; required: boolean }[];
+  headerParams: { name: string; required: boolean; field: string }[];
+  responseType: 'json' | 'binary';
   hasBody: boolean;
   isPartner: boolean;
 }
@@ -415,7 +440,7 @@ ${opDefs.join('\n')}
 };
 `;
 
-writeFileSync(OUT_PATH, out);
+
 
 function replaceGeneratedBlock(source, startMarker, endMarker, body) {
   const start = source.indexOf(startMarker);
@@ -455,7 +480,14 @@ nextNodeSrc = replaceGeneratedBlock(
   NODE_PROPERTIES_END,
   nodeProperties,
 );
-writeFileSync(NODE_PATH, nextNodeSrc);
+if (process.argv.includes('--check')) {
+  if (readFileSync(OUT_PATH, 'utf8') !== out || nodeSrc !== nextNodeSrc) {
+    throw new Error('Generated operations are stale. Run npm run gen:ops and commit both generated files.');
+  }
+} else {
+  writeFileSync(OUT_PATH, out);
+  writeFileSync(NODE_PATH, nextNodeSrc);
+}
 
 console.log(`✅ ${generatedCount} operations generated across ${resourceList.length} resources`);
 for (const r of resourceList) console.log(`   ${r.label}: ${r.ops.length}`);

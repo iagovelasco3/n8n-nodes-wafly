@@ -29,8 +29,8 @@ export class WaflyApi implements ICredentialType {
       name: 'instance',
       type: 'string',
       default: '',
-      required: true,
-      description: 'Name of the WhatsApp instance',
+      required: false,
+      description: 'Public instance code/ID, not its display name. Required for messaging and session operations.',
     },
     {
       displayName: 'Token',
@@ -40,8 +40,8 @@ export class WaflyApi implements ICredentialType {
         password: true,
       },
       default: '',
-      required: true,
-      description: 'Token of the instance',
+      required: false,
+      description: 'Token of the instance. Required for messaging and session operations.',
     },
     {
       displayName: 'Base URL',
@@ -50,6 +50,13 @@ export class WaflyApi implements ICredentialType {
       default: 'https://wafly.com.br/api-bridge-whats',
       required: true,
       description: 'Base URL of the API',
+    },
+    {
+      displayName: 'Management Base URL',
+      name: 'managementBaseUrl',
+      type: 'string',
+      default: '',
+      description: 'Optional. Automatically derived from Base URL by replacing /api-bridge-whats with /api-managment. Set this for a custom management service.',
     },
   ];
 
@@ -64,8 +71,8 @@ export class WaflyApi implements ICredentialType {
 
   test: ICredentialTestRequest = {
     request: {
-      baseURL: '={{$credentials.baseUrl}}',
-      url: '=/instances/{{$credentials.instance}}/token/{{$credentials.token}}/status',
+      baseURL: '={{ $credentials.instance && $credentials.token ? $credentials.baseUrl.replace(/\\/+$/, "") : ($credentials.managementBaseUrl || $credentials.baseUrl.replace(/\\/api-bridge-whats\\/?$/, "/api-managment")).replace(/\\/+$/, "") }}',
+      url: '={{ $credentials.instance && $credentials.token ? "/instances/" + encodeURIComponent($credentials.instance) + "/token/" + encodeURIComponent($credentials.token) + "/status" : "/external/instances?limit=1" }}',
       method: 'GET',
     },
   };

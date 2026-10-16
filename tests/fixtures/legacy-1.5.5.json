@@ -1,0 +1,438 @@
+{
+  "packageVersion": "1.5.5",
+  "nodeName": "wafly",
+  "nodeVersion": 1,
+  "credentialName": "waflyApi",
+  "operations": [
+    {
+      "resource": "instance",
+      "operation": "checkPhones"
+    },
+    {
+      "resource": "instance",
+      "operation": "connect"
+    },
+    {
+      "resource": "instance",
+      "operation": "deleteAiConfig"
+    },
+    {
+      "resource": "instance",
+      "operation": "deleteInboundConfig"
+    },
+    {
+      "resource": "instance",
+      "operation": "disconnect"
+    },
+    {
+      "resource": "instance",
+      "operation": "getAiConfig"
+    },
+    {
+      "resource": "instance",
+      "operation": "getDevice"
+    },
+    {
+      "resource": "instance",
+      "operation": "getInboundConfig"
+    },
+    {
+      "resource": "instance",
+      "operation": "getQrCode"
+    },
+    {
+      "resource": "instance",
+      "operation": "getStatus"
+    },
+    {
+      "resource": "instance",
+      "operation": "restart"
+    },
+    {
+      "resource": "instance",
+      "operation": "setTranscription"
+    },
+    {
+      "resource": "instance",
+      "operation": "setMessageBuffer"
+    },
+    {
+      "resource": "message",
+      "operation": "deleteMessage"
+    },
+    {
+      "resource": "message",
+      "operation": "sendAudio"
+    },
+    {
+      "resource": "message",
+      "operation": "sendButtonActions"
+    },
+    {
+      "resource": "message",
+      "operation": "sendButtonList"
+    },
+    {
+      "resource": "message",
+      "operation": "sendCarousel"
+    },
+    {
+      "resource": "message",
+      "operation": "sendContact"
+    },
+    {
+      "resource": "message",
+      "operation": "sendDocument"
+    },
+    {
+      "resource": "message",
+      "operation": "sendImage"
+    },
+    {
+      "resource": "message",
+      "operation": "sendLink"
+    },
+    {
+      "resource": "message",
+      "operation": "sendLocation"
+    },
+    {
+      "resource": "message",
+      "operation": "sendButtonOtp"
+    },
+    {
+      "resource": "message",
+      "operation": "sendButtonPix"
+    },
+    {
+      "resource": "message",
+      "operation": "sendPoll"
+    },
+    {
+      "resource": "message",
+      "operation": "sendText"
+    },
+    {
+      "resource": "message",
+      "operation": "sendVideo"
+    },
+    {
+      "resource": "group",
+      "operation": "addParticipant"
+    },
+    {
+      "resource": "group",
+      "operation": "approveParticipant"
+    },
+    {
+      "resource": "group",
+      "operation": "createGroup"
+    },
+    {
+      "resource": "group",
+      "operation": "removeAdmin"
+    },
+    {
+      "resource": "group",
+      "operation": "getInviteLink"
+    },
+    {
+      "resource": "group",
+      "operation": "getMetadata"
+    },
+    {
+      "resource": "group",
+      "operation": "leaveGroup"
+    },
+    {
+      "resource": "group",
+      "operation": "listGroups"
+    },
+    {
+      "resource": "group",
+      "operation": "addAdmin"
+    },
+    {
+      "resource": "group",
+      "operation": "redefineInviteLink"
+    },
+    {
+      "resource": "group",
+      "operation": "rejectParticipant"
+    },
+    {
+      "resource": "group",
+      "operation": "removeParticipant"
+    },
+    {
+      "resource": "group",
+      "operation": "updateDescription"
+    },
+    {
+      "resource": "group",
+      "operation": "updateName"
+    },
+    {
+      "resource": "group",
+      "operation": "updatePhoto"
+    },
+    {
+      "resource": "group",
+      "operation": "updateSettings"
+    },
+    {
+      "resource": "webhook",
+      "operation": "setWebhook"
+    },
+    {
+      "resource": "webhook",
+      "operation": "getWebhook"
+    },
+    {
+      "resource": "webhook",
+      "operation": "deleteWebhook"
+    },
+    {
+      "resource": "messageExtra",
+      "operation": "pinMessage"
+    },
+    {
+      "resource": "messageExtra",
+      "operation": "sendContacts"
+    },
+    {
+      "resource": "messageExtra",
+      "operation": "sendDocument"
+    },
+    {
+      "resource": "messageExtra",
+      "operation": "sendEvent"
+    },
+    {
+      "resource": "messageExtra",
+      "operation": "sendGif"
+    },
+    {
+      "resource": "messageExtra",
+      "operation": "sendOptionList"
+    },
+    {
+      "resource": "messageExtra",
+      "operation": "sendPtv"
+    },
+    {
+      "resource": "groupExtra",
+      "operation": "groupInviteLink"
+    },
+    {
+      "resource": "groupExtra",
+      "operation": "groupPhotoUrl"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "newsletterAcceptAdminInvite"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "createNewsletter"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "deleteNewsletter"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "followNewsletter"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "newsletterMetadata"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "listNewsletters"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "muteNewsletter"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "newsletterRemoveAdmin"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "newsletterRevokeAdminInvite"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "searchNewsletter"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "newsletterTransferOwnership"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "unfollowNewsletter"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "unmuteNewsletter"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "updateNewsletterDescription"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "updateNewsletterName"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "updateNewsletterPicture"
+    },
+    {
+      "resource": "newsletter",
+      "operation": "newsletterSettings"
+    },
+    {
+      "resource": "instanceExtra",
+      "operation": "pairingCode"
+    },
+    {
+      "resource": "instanceExtra",
+      "operation": "pairingCodePost"
+    },
+    {
+      "resource": "instanceExtra",
+      "operation": "passkeyChallenge"
+    },
+    {
+      "resource": "instanceExtra",
+      "operation": "getQrCode"
+    },
+    {
+      "resource": "instanceExtra",
+      "operation": "restartWithDisconnect"
+    },
+    {
+      "resource": "instanceExtra",
+      "operation": "passkeyResponse"
+    },
+    {
+      "resource": "chat",
+      "operation": "chatMetadata"
+    },
+    {
+      "resource": "chat",
+      "operation": "listChats"
+    },
+    {
+      "resource": "chat",
+      "operation": "modifyChat"
+    },
+    {
+      "resource": "community",
+      "operation": "createCommunity"
+    },
+    {
+      "resource": "community",
+      "operation": "deleteCommunity"
+    },
+    {
+      "resource": "community",
+      "operation": "communityMetadata"
+    },
+    {
+      "resource": "community",
+      "operation": "linkCommunity"
+    },
+    {
+      "resource": "community",
+      "operation": "listCommunities"
+    },
+    {
+      "resource": "community",
+      "operation": "unlinkCommunity"
+    },
+    {
+      "resource": "community",
+      "operation": "communitySettings"
+    },
+    {
+      "resource": "partner",
+      "operation": "partnerCreateInstance"
+    },
+    {
+      "resource": "call",
+      "operation": "callAccept"
+    },
+    {
+      "resource": "call",
+      "operation": "callTranscriptPost"
+    },
+    {
+      "resource": "call",
+      "operation": "callRecording"
+    },
+    {
+      "resource": "call",
+      "operation": "callConfigGet"
+    },
+    {
+      "resource": "call",
+      "operation": "callTranscriptGet"
+    },
+    {
+      "resource": "call",
+      "operation": "callPlay"
+    },
+    {
+      "resource": "call",
+      "operation": "callReject"
+    },
+    {
+      "resource": "call",
+      "operation": "callConfigSet"
+    },
+    {
+      "resource": "call",
+      "operation": "callSay"
+    },
+    {
+      "resource": "call",
+      "operation": "callStart"
+    },
+    {
+      "resource": "call",
+      "operation": "callRecordStart"
+    },
+    {
+      "resource": "call",
+      "operation": "callRecordStop"
+    },
+    {
+      "resource": "call",
+      "operation": "callTerminate"
+    },
+    {
+      "resource": "call",
+      "operation": "callWebrtc"
+    }
+  ],
+  "operationDefaults": {
+    "instance": "getStatus",
+    "message": "sendText",
+    "group": "listGroups",
+    "webhook": "getWebhook",
+    "messageExtra": "pinMessage",
+    "groupExtra": "groupInviteLink",
+    "newsletter": "newsletterAcceptAdminInvite",
+    "instanceExtra": "pairingCode",
+    "chat": "chatMetadata",
+    "community": "createCommunity",
+    "partner": "partnerCreateInstance",
+    "call": "callAccept"
+  }
+}

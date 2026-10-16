@@ -5,17 +5,36 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.6.0] - 2026-10-16
+
+### Added
+- Fifteen operations: Status capabilities/publication/receipt; external instance list, Pix extra policy, detail, credentials, rename, restart, cancellation preview and cancellation; message queue clearing; delivery, connected and disconnected webhooks.
+- Optional Management Base URL and account-only credentials using a read-only credential test.
+- Explicit Pix Idempotency Key header, with local validation for extra-instance creation.
+- Audio transcription mirror-to-text option, disabled by default.
+- A committed production OpenAPI snapshot, explicit `sync:api`, deterministic generation checks, and real n8n 1.x/2.x runtime tests against an isolated HTTP fixture.
+
+### Fixed
+- Delete Message sends phone/messageId/owner as query parameters; delete-for-everyone defaults to false.
+- Newsletter DELETE retains the required JSON body.
+- Partner creation uses the management service instead of the bridge base URL; custom service URLs remain configurable.
+- Call recordings are returned as MP3 binary data instead of parsed as JSON.
+- Array responses emit valid JSON items with input pairing; object payloads remain unchanged.
+- Static Client-Token requests bypass the authenticated helper's implicit HTTP 401 retry, preventing hidden duplicate mutations.
+- Legacy POST pairing workflows using `gp_body.phone` pass n8n preflight validation and still send the phone in query.
+- Generator supports PATCH, service routing, the webhook and Status sections, and preserves every published operation ID and default.
+
+- Template 08 now reads the lead temperature after sending the reply, preserving
+  the commercial handoff for hot leads.
+
+No automatic billing consent, idempotency-key generation or retry was added.
+The node remains typeVersion 1 and existing credential field names are unchanged.
+
 
 ### Changed
 - Reworked template 08 as the PT-BR flagship for inbound lead qualification,
   with step-by-step installation, a reproducible webhook test, tracked CTAs and
   safer validation of the model output and commercial phone number.
-
-### Fixed
-- Template 08 now reads the lead temperature from the qualification result
-  after sending the reply. Previously the handoff condition inspected the Wafly
-  send response, so a hot lead could silently skip the commercial alert.
 
 ## [1.5.5] - 2026-09-12
 
