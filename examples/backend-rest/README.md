@@ -4,6 +4,12 @@ Um exemplo independente em Node.js 22+ para quem cria **sistemas, SaaS ou agente
 
 Não é um agente pronto nem uma implementação de produção. Funciona sem instalar dependências e sem usar o node n8n deste repositório.
 
+## Comece com sua própria instância
+
+Ainda não tem credenciais? **[Criar meu teste Wafly de 3 dias, sem cartão](https://wafly.com.br/signup?utm_source=github&utm_medium=repository&utm_campaign=rest_quickstart_20261022&utm_content=backend_rest_start)**. Crie uma instância, conecte um número seu e copie o Client-Token, o ID público e o token da instância para o ambiente privado abaixo. Depois do teste, R$59,90 por número/mês na faixa de até 10 instâncias; consulte as condições no site. Este exemplo usa a API Flex **não oficial**, com risco de restrição do número.
+
+Já tem uma instância? Comece pelos testes locais e pela configuração abaixo. Você não precisa cadastrar outra conta, migrar a operação atual ou enviar mensagens para clientes para experimentar o exemplo. Prefere comparar antes? [Veja preço e condições da Wafly](https://wafly.com.br/comparativos/quanto-custa-api-whatsapp/?utm_source=github&utm_medium=repository&utm_campaign=rest_quickstart_20261022&utm_content=backend_rest_compare).
+
 ## O que você vai testar
 
 - Enviar um texto somente ao número próprio configurado.
