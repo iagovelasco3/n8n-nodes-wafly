@@ -20,16 +20,16 @@ Five workflows you can import and run, instead of starting from a blank canvas. 
 | Template | What it does |
 |---|---|
 | [AI agent replies once](examples/templates/04-whatsapp-ai-agent-replies-once.json) | Buffers messages that arrive in a burst so your agent answers once instead of three times |
-| [Qualificar leads do WhatsApp (PT-BR)](examples/templates/08-qualify-whatsapp-leads-and-hand-off.json) | Classifica a conversa com IA, responde o contato e entrega leads quentes para uma pessoa |
+| [Qualify WhatsApp leads with AI (pt-BR version)](examples/templates/08-qualify-whatsapp-leads-and-hand-off.json) | Same flow as the English template, with Portuguese node names and messages |
 | [Qualify WhatsApp leads with AI (English)](examples/templates/08-qualify-whatsapp-leads-and-hand-off.en.json) | Filters inbound messages, qualifies contacts and hands hot leads to a person |
 | [Moderate a group](examples/templates/05-moderate-whatsapp-group.json) | Approves join requests, welcomes members and removes link spam |
 | [Send OTP with SMS fallback](examples/templates/06-send-otp-over-whatsapp.json) | Validates the number first, falls back to SMS when WhatsApp is unreachable |
 | [Alert on disconnect](examples/templates/07-alert-when-whatsapp-number-disconnects.json) | Checks the connection on a schedule and alerts when the number drops |
 
 Import the JSON, create the **Wafly API** credential and activate. All of them run on
-self-hosted n8n. n8n Cloud accepts verified community nodes, but the Wafly node is not verified there yet; use HTTP Request nodes on Cloud.
+self-hosted n8n. n8n Cloud offers the verified version of this node from the nodes panel; while a newer release is under n8n review, use HTTP Request nodes on Cloud for the operations it adds.
 
-See the [template index and setup notes](examples/templates/README.md). To run the PT-BR flagship, [start a free 3-day Wafly trial](https://wafly.com.br/signup?utm_source=github&utm_medium=repository&utm_campaign=qualificacao_leads_whatsapp&utm_content=readme_template_08&template_id=n8n-08-qualificar-leads).
+See the [template index and setup notes](examples/templates/README.md). To run the Portuguese template, [start a free 3-day Wafly trial](https://wafly.com.br/signup?utm_source=github&utm_medium=repository&utm_campaign=qualificacao_leads_whatsapp&utm_content=readme_template_08&template_id=n8n-08-qualificar-leads).
 For the English workflow, [try Wafly on wafly.io](https://wafly.io/signup?utm_source=github&utm_medium=repository&utm_campaign=lead_qualification&utm_content=readme_template_08_en&template_id=n8n-08-qualificar-leads).
 
 For a step-by-step Brazilian Portuguese walkthrough, see
@@ -43,7 +43,7 @@ not Meta's Official WhatsApp API.
 ### REST backend example — no n8n required
 
 Building your own system, SaaS or AI agent? The independent
-[Node.js REST + webhooks example (PT-BR)](examples/backend-rest/README.md)
+[Node.js REST + webhooks example](examples/backend-rest/README.md)
 keeps credentials server-side and demonstrates a test-only text sender plus
 a persistent, deduplicating receiver. It has no external dependencies and
 does not require n8n. Local tests are included; real WhatsApp delivery is a

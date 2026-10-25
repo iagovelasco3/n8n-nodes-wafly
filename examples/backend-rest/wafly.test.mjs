@@ -15,7 +15,7 @@ const event = () => ({ type: 'ReceivedCallback', instanceId: env.WAFLY_INSTANCE,
   fromMe: false, isGroup: false });
 const secret = 'a'.repeat(48);
 
-test('configuração aceita somente hosts Wafly e credenciais não-placeholder', () => {
+test('configuration accepts only Wafly hosts and non-placeholder credentials', () => {
   assert.equal(configFromEnv(env).baseUrl, 'https://wafly.com.br/api-bridge-whats');
   for (const base of ['http://wafly.com.br/api-bridge-whats', 'https://evil.example/api-bridge-whats',
     'https://wafly.com.br/api-bridge-whats?token=x', 'https://user@wafly.com.br/api-bridge-whats']) {
@@ -24,7 +24,7 @@ test('configuração aceita somente hosts Wafly e credenciais não-placeholder',
   assert.throws(() => configFromEnv({ ...env, WAFLY_INSTANCE_TOKEN: 'SEU_TOKEN' }));
 });
 
-test('envio preserva contrato, bloqueia redirect e não confunde aceite com entrega', async () => {
+test('send keeps the contract, blocks redirects and does not confuse acceptance with delivery', async () => {
   let calls = 0;
   const result = await sendTestText(configFromEnv(env), env.WAFLY_TEST_PHONE, ' Olá ', async (url, options) => {
     calls++;
@@ -38,13 +38,13 @@ test('envio preserva contrato, bloqueia redirect e não confunde aceite com entr
   assert.equal(calls, 1);
 });
 
-test('envio recusa destinatário diferente e mensagem vazia sem chamada externa', async () => {
-  const forbidden = () => { throw new Error('não deveria chamar'); };
+test('send refuses a different recipient and an empty message without an external call', async () => {
+  const forbidden = () => { throw new Error('should not be called'); };
   await assert.rejects(sendTestText(configFromEnv(env), '5511888888888', 'Olá', forbidden), /número próprio/);
   await assert.rejects(sendTestText(configFromEnv(env), env.WAFLY_TEST_PHONE, '', forbidden), /Mensagem/);
 });
 
-test('falhas de envio são sanitizadas, inconclusivas quando necessário e sem retry', async () => {
+test('send failures are sanitized, inconclusive when needed and never retried', async () => {
   let calls = 0;
   await assert.rejects(sendTestText(configFromEnv(env), env.WAFLY_TEST_PHONE, 'Olá', async () => {
     calls++; throw new Error('fixture-token fixture-client');
@@ -54,7 +54,7 @@ test('falhas de envio são sanitizadas, inconclusivas quando necessário e sem r
     new Response('fixture-token', { status: 401 })), /HTTP 401/);
 });
 
-test('normalização ignora grupo, eco, outra instância e eventos sem texto', () => {
+test('normalization ignores groups, echoes, other instances and events without text', () => {
   assert.equal(normalizeReceived(event(), env.WAFLY_INSTANCE).text, 'Olá');
   for (const change of [{ fromMe: true }, { isGroup: true }, { instanceId: 'other' },
     { type: 'DeliveryCallback' }, { text: undefined }, { messageId: '' }, { isEdit: true },
@@ -63,7 +63,7 @@ test('normalização ignora grupo, eco, outra instância e eventos sem texto', (
   }
 });
 
-test('journal persiste antes do ACK e deduplica concorrência e reinício', async t => {
+test('journal persists before the ACK and deduplicates concurrency and restarts', async t => {
   const dir = await mkdtemp(join(tmpdir(), 'wafly-rest-test-'));
   t.after(() => rm(dir, { recursive: true }));
   const filename = join(dir, 'inbox.ndjson');
@@ -86,7 +86,7 @@ async function receiver(t, record = async () => true) {
     { method: 'POST', headers: { 'Content-Type': contentType }, body: typeof body === 'string' ? body : JSON.stringify(body) }) };
 }
 
-test('receiver testa HTTP real local: segredo, JSON, payload e saúde', async t => {
+test('receiver over real local HTTP: secret, JSON, payload and health', async t => {
   let writes = 0;
   const { base, post } = await receiver(t, async () => { writes++; return true; });
   assert.equal((await fetch(`${base}/health`)).status, 200);
@@ -101,13 +101,13 @@ test('receiver testa HTTP real local: segredo, JSON, payload e saúde', async t 
   assert.equal(writes, 1);
 });
 
-test('receiver confirma duplicata e recusa ACK de persistência falha', async t => {
+test('receiver acknowledges duplicates and refuses the ACK when persistence fails', async t => {
   const duplicate = await receiver(t, async () => false);
   assert.deepEqual(await (await duplicate.post(event())).json(), { accepted: true, duplicate: true });
   const failed = await receiver(t, async () => { throw new Error('private storage'); });
   assert.equal((await failed.post(event())).status, 503);
 });
 
-test('receiver exige segredo forte', () => {
+test('receiver requires a strong secret', () => {
   assert.throws(() => createReceiver({ instance: env.WAFLY_INSTANCE, secret: 'short', record: async () => true }));
 });

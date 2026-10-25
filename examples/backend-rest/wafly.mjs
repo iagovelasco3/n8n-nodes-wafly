@@ -41,7 +41,7 @@ export async function sendTestText(config, phone, message, fetchImpl = fetch) {
       body: JSON.stringify({ phone, message: message.trim() }),
     });
   } catch {
-    // Um timeout pode ocorrer depois do aceite. Não reenviar automaticamente.
+    // A timeout can happen after acceptance. Do not resend automatically.
     throw new Error('Resposta inconclusiva; reconcilie antes de repetir o envio');
   }
   if (!response.ok) throw new Error(`API recusou o envio: HTTP ${response.status}`);
@@ -105,7 +105,7 @@ function sameSecret(actual, expected) {
 
 export function createReceiver({ instance, secret, record }) {
   if (!instance || !secret || secret.length < 48 || /^(SEU_|GERAR_)/.test(secret)) {
-    throw new Error('Instância e segredo próprio de pelo menos 48 caracteres são obrigatórios');
+    throw new Error('An instance and an own secret of at least 48 characters are required');
   }
   return createServer(async (req, res) => {
     const reply = (status, body) => {
@@ -113,7 +113,7 @@ export function createReceiver({ instance, secret, record }) {
       res.end(JSON.stringify(body));
     };
     if (req.method === 'GET' && req.url === '/health') return reply(200, { ok: true });
-    // Não logue a URL: o caminho secreto não é uma assinatura do provedor.
+    // Do not log the URL: the secret path is not a provider signature.
     const suffix = req.url?.startsWith('/webhooks/wafly/')
       ? req.url.slice('/webhooks/wafly/'.length) : '';
     if (req.method !== 'POST' || !sameSecret(suffix, secret)) return reply(404, { error: 'not_found' });
@@ -132,7 +132,7 @@ export function createReceiver({ instance, secret, record }) {
       catch { return reply(400, { error: 'invalid_json' }); }
       const event = normalizeReceived(body, instance);
       if (!event) return reply(200, { accepted: false, ignored: true });
-      // Persistência confirmada antes do ACK. Não executa IA nem responde ao WhatsApp.
+      // Persistence is confirmed before the ACK. No AI runs and nothing is sent to WhatsApp.
       const inserted = await record(event);
       return reply(200, { accepted: true, duplicate: !inserted });
     } catch { return reply(503, { error: 'storage_unavailable' }); }

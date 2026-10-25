@@ -1,88 +1,88 @@
-# WhatsApp no seu backend: REST + webhooks, sem n8n
+# WhatsApp in your backend: REST + webhooks, without n8n
 
-Um exemplo independente em Node.js 22+ para quem cria **sistemas, SaaS ou agentes de IA**. A Wafly faz a ponte com WhatsApp; seu backend mantém regras, banco e, se houver, modelo de IA. Lovable pode construir a interface, mas **tokens e chamadas da API ficam no servidor**, nunca no navegador.
+A standalone Node.js 22+ example for people building **systems, SaaS products or AI agents**. Wafly bridges WhatsApp; your backend keeps the rules, the database and, if any, the AI model. Lovable can build the interface, but **tokens and API calls stay on the server**, never in the browser.
 
-Não é um agente pronto nem uma implementação de produção. Funciona sem instalar dependências e sem usar o node n8n deste repositório.
+It is neither a ready-made agent nor a production implementation. It runs without installing dependencies and without the n8n node from this repository.
 
-## O que você vai testar
+## What you will test
 
-- Enviar um texto somente ao número próprio configurado.
-- Receber texto individual, persistir antes de confirmar o webhook e ignorar duplicatas.
-- Ignorar grupos, mensagens enviadas por você, edições e outros tipos de callback.
-- Separar aceite da API de entrega/leitura: HTTP 2xx **não comprova entrega**.
+- Send a text only to the configured number of your own.
+- Receive an individual text, persist it before acknowledging the webhook and ignore duplicates.
+- Ignore groups, messages sent by you, edits and other callback types.
+- Separate API acceptance from delivery/read: HTTP 2xx **does not prove delivery**.
 
-O teste automatizado é totalmente local, com resposta simulada de envio e HTTP real em localhost para recebimento. Ele **não comprova entrega WhatsApp de ponta a ponta**. Um teste real exige conta/instância Flex própria, número destinatário autorizado e webhook acessível por HTTPS.
+The automated test is fully local, with a simulated send response and real HTTP on localhost for receiving. It **does not prove end-to-end WhatsApp delivery**. A real test requires your own Flex account/instance, an authorized recipient number and a webhook reachable over HTTPS.
 
-## 1. Rodar os testes sem credenciais
+## 1. Run the tests without credentials
 
-Na raiz do repositório:
+From the repository root:
 
 ```sh
 node --test examples/backend-rest/wafly.test.mjs
 ```
 
-## 2. Configurar seu ambiente privado
+## 2. Configure your private environment
 
-Copie `.env.example` para `.env` dentro desta pasta e preencha com os dados **da sua própria instância**. O arquivo é ignorado pelo Git. Gere um segredo exclusivo:
+Copy `.env.example` to `.env` inside this folder and fill it with the data **of your own instance**. The file is ignored by Git. Generate a unique secret:
 
 ```sh
 node -e "console.log(require('node:crypto').randomBytes(24).toString('hex'))"
 ```
 
-`Client-Token` é o token do cliente Wafly; `WAFLY_INSTANCE_TOKEN` pertence à instância. Não são credenciais de IA ou Supabase. Não coloque nenhum deles no frontend, em screenshots, logs ou commits. O contrato REST atual inclui o token da instância no caminho: evite logs completos de URLs.
+`Client-Token` is the Wafly client token; `WAFLY_INSTANCE_TOKEN` belongs to the instance. They are not AI or Supabase credentials. Do not put any of them in the frontend, in screenshots, logs or commits. The current REST contract includes the instance token in the path: avoid logging full URLs.
 
-## 3. Enviar um texto de teste
+## 3. Send a test text
 
-Execute **dentro desta pasta**, somente com destinatário próprio/autorizado:
+Run **inside this folder**, only to your own/authorized recipient:
 
 ```sh
-node --env-file=.env wafly.mjs send --confirm "Teste próprio da integração REST Wafly."
+node --env-file=.env wafly.mjs send --confirm "Own test of the Wafly REST integration."
 ```
 
-O comando faz uma única chamada `POST /instances/{instance}/token/{token}/send-text`, com header `Client-Token` e corpo `{phone,message}`. Não há retry automático: um timeout pode ocorrer depois do aceite. Confira o resultado na instância e no destinatário antes de tentar novamente.
+The command makes a single `POST /instances/{instance}/token/{token}/send-text` call, with the `Client-Token` header and a `{phone,message}` body. There is no automatic retry: a timeout can happen after acceptance. Check the result on the instance and on the recipient before trying again.
 
-## 4. Receber webhooks
+## 4. Receive webhooks
 
 ```sh
 node --env-file=.env wafly.mjs receive
 ```
 
-O receiver escuta somente em `127.0.0.1:3000`. Saúde: `GET /health`. Callback: `POST /webhooks/wafly/SEU_SEGREDO`, JSON de até 64 KiB.
+The receiver listens only on `127.0.0.1:3000`. Health: `GET /health`. Callback: `POST /webhooks/wafly/YOUR_SECRET`, JSON up to 64 KiB.
 
-Para testar recebimento real, publique **seu receiver** atrás de HTTPS e configure esse destino na **sua instância própria**, preservando o webhook anterior para rollback. Este exemplo não muda configurações da Wafly automaticamente. Não sobrescreva o callback de uma instância de cliente.
+To test real reception, publish **your receiver** behind HTTPS and configure that destination on **your own instance**, keeping the previous webhook for rollback. This example does not change Wafly settings automatically. Do not overwrite the callback of a customer's instance.
 
-Payload ilustrativo, não um recebimento real:
+Illustrative payload, not a real reception:
 
 ```json
 {
   "type": "ReceivedCallback",
-  "instanceId": "SUA_INSTANCIA",
-  "messageId": "ID_UNICO",
-  "phone": "SEU_NUMERO_COM_DDI",
+  "instanceId": "YOUR_INSTANCE",
+  "messageId": "UNIQUE_ID",
+  "phone": "YOUR_NUMBER_WITH_COUNTRY_CODE",
   "fromMe": false,
   "isGroup": false,
-  "text": { "message": "Olá" }
+  "text": { "message": "Hello" }
 }
 ```
 
-Após validar a instância e o tipo, o receiver grava em `data/inbox.ndjson` com permissões restritas. Duplicatas de `(instanceId,messageId)` são ignoradas, inclusive após reiniciar. Ele **não responde ao contato**, não chama IA nem dispara cobranças. O arquivo contém dados pessoais: não publique, faça retenção adequada e restrinja acesso.
+After validating the instance and the type, the receiver writes to `data/inbox.ndjson` with restricted permissions. Duplicates of `(instanceId,messageId)` are ignored, including after a restart. It **does not reply to the contact**, does not call AI and does not trigger charges. The file contains personal data: do not publish it, apply proper retention and restrict access.
 
-## Onde entram Supabase, Lovable e IA?
+## Where do Supabase, Lovable and AI fit?
 
-1. A interface chama **seu backend autenticado**, não a API com tokens expostos.
-2. O backend usa REST para envio e recebe callbacks.
-3. Você pode substituir o journal local por transação no seu banco, com índice único para deduplicação.
-4. Depois, aplique a lógica do seu produto: notificações, agendamento, suporte, aprovação, consulta ou um agente de IA. O custo e a segurança do modelo continuam sob seu controle.
+1. The interface calls **your authenticated backend**, not the API with exposed tokens.
+2. The backend uses REST to send and receives callbacks.
+3. You can replace the local journal with a transaction in your database, with a unique index for deduplication.
+4. Then apply your product logic: notifications, scheduling, support, approval, lookup or an AI agent. Model cost and security stay under your control.
 
-São possibilidades de arquitetura, não conectores prontos nem promessa de compatibilidade validada com essas plataformas.
+These are architecture possibilities, not ready connectors nor a promise of validated compatibility with those platforms.
 
-## Limites e segurança antes de produção
+## Limits and security before production
 
-- O segredo no caminho é uma barreira compartilhada, **não uma assinatura criptográfica do provedor**. Não há autenticação de origem comprovada. Não publique esse endpoint sem HTTPS, proteção de borda e avaliação do seu modelo de ameaça; desative/redija logs de URLs e corpos.
-- A deduplicação local é para **um processo**, com histórico em memória. Para escalar, use banco durável, índice único e política de retenção. Não rode vários workers sobre o mesmo journal.
-- Não há fila de envio, mídia, status de entrega/leitura, controle de consentimento, rate limit, métricas ou integração de pagamento. São partes separadas de um produto real.
-- Não use para disparos sem consentimento. A modalidade Flex é **não oficial**, com riscos inerentes; este exemplo não usa a Cloud API da Meta.
+- The secret in the path is a shared barrier, **not a cryptographic signature from the provider**. There is no proven origin authentication. Do not publish that endpoint without HTTPS, edge protection and an assessment of your threat model; disable or redact URL and body logs.
+- Local deduplication is for **one process**, with in-memory history. To scale, use a durable database, a unique index and a retention policy. Do not run several workers over the same journal.
+- There is no send queue, media, delivery/read status, consent control, rate limit, metrics or payment integration. Those are separate parts of a real product.
+- Do not use it for messaging without consent. Flex is an **unofficial** integration with inherent risks; this example does not use Meta's Cloud API.
 
-## Próximo passo
+## Next step
 
-[Conheça a API Wafly e teste por 3 dias, sem cartão](https://wafly.com.br/comparativos/quanto-custa-api-whatsapp/?utm_source=github&utm_medium=repository&utm_campaign=wafly_api_sistemas_202610&utm_content=backend_rest). Flex: R$59,90 por número/mês. Consulte condições atuais no site. Este exemplo não muda preços, trial ou sua conta.
+[Learn about the Wafly API and try it for 3 days, no card](https://wafly.com.br/comparativos/quanto-custa-api-whatsapp/?utm_source=github&utm_medium=repository&utm_campaign=wafly_api_sistemas_202610&utm_content=backend_rest). Flex: BRL 59.90 per number/month in Brazil. Check current conditions on the website. This example does not change prices, trial or your account.
