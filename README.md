@@ -134,7 +134,7 @@ Install in the n8n user's persistent community-node directory:
 ```bash
 mkdir -p ~/.n8n/nodes
 cd ~/.n8n/nodes
-npm install n8n-nodes-wafly@1.6.0
+npm install n8n-nodes-wafly@1.6.1
 ```
 
 For Docker, run those commands inside the container as the n8n user, under
@@ -168,6 +168,13 @@ instance list. Messaging and session operations still require both fields.
 2. Complete the free 3-day trial setup
 3. Go to **Instances** and create or select an instance
 4. Copy the **Client-Token**, **Instance** and **Token**
+
+## What's new in 1.6.1
+
+- Passes `n8n-node lint` (the ruleset n8n's verification scanner applies) with zero errors; the project now uses `@n8n/node-cli` for linting.
+- Requests go through n8n's authenticated HTTP helper; the Client-Token header is injected from the credential's `authenticate` block, so request options never carry the secret.
+- Generated JSON body fields describe the expected fields in the parameter hint; optional query/header fields no longer declare `required: false`.
+- No operation, parameter name or default changed; existing workflows keep working.
 
 ## What's new in 1.6.0
 

@@ -16,8 +16,8 @@ release GitHub é publicada. Não exige login npm nem token de publicação loca
 6. Execute o tarball em n8n isolado usando o fixture local:
 
 ```bash
-python3 tests/runtime/run.py --image n8nio/n8n:1.120.4 --tarball n8n-nodes-wafly-1.6.0.tgz --out /tmp/wafly-n8n1
-python3 tests/runtime/run.py --image n8nio/n8n:2.43.7 --tarball n8n-nodes-wafly-1.6.0.tgz --out /tmp/wafly-n8n2
+python3 tests/runtime/run.py --image n8nio/n8n:1.120.4 --tarball n8n-nodes-wafly-1.6.1.tgz --out /tmp/wafly-n8n1
+python3 tests/runtime/run.py --image n8nio/n8n:2.43.7 --tarball n8n-nodes-wafly-1.6.1.tgz --out /tmp/wafly-n8n2
 ```
 
 O laboratório usa somente HTTP simulado e recursos Docker próprios, removidos

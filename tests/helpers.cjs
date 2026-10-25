@@ -46,8 +46,13 @@ async function execute(params, options = {}) {
     getNode: () => ({ name: 'Wafly', type: 'n8n-nodes-wafly.wafly', typeVersion: 1, position: [0, 0], parameters: params }),
     continueOnFail: () => !!options.continueOnFail,
     helpers: {
-      async httpRequest(request) {
-        assert.equal(request.headers['Client-Token'], credentials.clientToken);
+      async httpRequest() {
+        throw new Error('httpRequest must not be used: the node authenticates through httpRequestWithAuthentication');
+      },
+      async httpRequestWithAuthentication(credentialType, request) {
+        // n8n injects Client-Token from the credential's `authenticate` block.
+        assert.equal(credentialType, 'waflyApi');
+        assert.equal(request.headers['Client-Token'], undefined);
         calls.push(request);
         return options.respond ? options.respond(request, calls.length - 1) : {};
       },

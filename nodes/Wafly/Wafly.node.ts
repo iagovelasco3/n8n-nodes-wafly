@@ -1384,7 +1384,7 @@ export class Wafly implements INodeType {
           show: { resource: ['instance'], operation: ['setTranscription'] },
         },
         description:
-          'Adds the successful transcript to text.message while keeping audio and transcription in the same webhook. Useful for existing text-only AI flows.',
+          'Whether to add the successful transcript to text.message while keeping audio and transcription in the same webhook. Useful for existing text-only AI flows.',
       },
       {
         displayName: 'Include Groups',
@@ -1427,7 +1427,8 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['statusPublication'], operation: ['publishStatus'] } },
-        description: 'Request body. Fields expected per operation: publishStatus → requestId*, type*, content*, caption, audienceMode, audience, excluded.',
+        description: 'Request body as JSON. The hint below lists the fields each operation expects; required fields are marked with *.',
+        hint: 'Fields expected per operation: publishStatus → requestId*, type*, content*, caption, audienceMode, audience, excluded.',
       },
       {
         displayName: 'Operation',
@@ -1462,7 +1463,6 @@ export class Wafly implements INodeType {
         name: 'gq_page',
         type: 'string',
         default: '',
-        required: false,
         displayOptions: { show: { resource: ['partner'], operation: ['externalListInstances'] } },
         description: 'Value for page in the request query',
       },
@@ -1471,16 +1471,14 @@ export class Wafly implements INodeType {
         name: 'gq_limit',
         type: 'string',
         default: '',
-        required: false,
         displayOptions: { show: { resource: ['partner'], operation: ['externalListInstances'] } },
         description: 'Value for limit in the request query',
       },
       {
-        displayName: 'Idempotency  Key',
+        displayName: 'Idempotency Key',
         name: 'gh_idempotencyKey',
         type: 'string',
         default: '',
-        required: false,
         displayOptions: { show: { resource: ['partner'], operation: ['partnerCreateInstance'] } },
         description: 'Required for extra_instance_72h_v1. Keep the same key and body for the same logical creation; do not change the key after an uncertain result.',
       },
@@ -1490,7 +1488,8 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['partner'], operation: ['partnerCreateInstance', 'externalRenameInstance', 'externalRestartInstance'] } },
-        description: 'Request body. Fields expected per operation: partnerCreateInstance → acceptAutomaticBilling, creationPolicy, receivedCallbackUrl, deliveryCallbackUrl, disconnectedCallbackUrl, messageStatusCallbackUrl | externalRenameInstance → name*.',
+        description: 'Request body as JSON. The hint below lists the fields each operation expects; required fields are marked with *.',
+        hint: 'Fields expected per operation: partnerCreateInstance → acceptAutomaticBilling, creationPolicy, receivedCallbackUrl, deliveryCallbackUrl, disconnectedCallbackUrl, messageStatusCallbackUrl | externalRenameInstance → name*.',
       },
       {
         displayName: 'Operation',
@@ -1532,7 +1531,6 @@ export class Wafly implements INodeType {
         name: 'gq_phone',
         type: 'string',
         default: '',
-        required: false,
         displayOptions: { show: { resource: ['instanceExtra'], operation: ['pairingCodePost'] } },
         description: 'WhatsApp phone number in international format, including country code (e.g. 5511999999999)',
       },
@@ -1542,7 +1540,8 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['instanceExtra'], operation: ['restartWithDisconnect', 'passkeyResponse'] } },
-        description: 'Request body. Fields expected per operation: restartWithDisconnect → connected.',
+        description: 'Request body as JSON. The hint below lists the fields each operation expects; required fields are marked with *.',
+        hint: 'Fields expected per operation: restartWithDisconnect → connected.',
       },
       {
         displayName: 'Legacy Phone Body',
@@ -1583,7 +1582,8 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['messageExtra'], operation: ['pinMessage', 'sendContacts', 'sendDocument', 'sendEvent', 'sendGif', 'sendOptionList', 'sendPtv'] } },
-        description: 'Request body. Fields expected per operation: pinMessage → phone*, messageId*, messageAction*, pinMessageDuration*, sender | sendContacts → phone*, contactPhone, contactName, contacts | sendDocument → phone*, document*, fileName, caption, messageId | sendEvent → phone*, event*, messageId, editMessageId, fromMe, mentioned | sendGif → phone*, gif*, caption, messageId, fromMe, mentioned | sendOptionList → phone*, message*, optionList*, messageId, mentioned | sendPtv → phone*, ptv*, messageId, fromMe, mentioned.',
+        description: 'Request body as JSON. The hint below lists the fields each operation expects; required fields are marked with *.',
+        hint: 'Fields expected per operation: pinMessage → phone*, messageId*, messageAction*, pinMessageDuration*, sender | sendContacts → phone*, contactPhone, contactName, contacts | sendDocument → phone*, document*, fileName, caption, messageId | sendEvent → phone*, event*, messageId, editMessageId, fromMe, mentioned | sendGif → phone*, gif*, caption, messageId, fromMe, mentioned | sendOptionList → phone*, message*, optionList*, messageId, mentioned | sendPtv → phone*, ptv*, messageId, fromMe, mentioned.',
       },
       {
         displayName: 'Operation',
@@ -1612,7 +1612,8 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['groupExtra'], operation: ['groupPhotoUrl'] } },
-        description: 'Request body. Fields expected per operation: groupPhotoUrl → groupId*, photoUrl, image.',
+        description: 'Request body as JSON. The hint below lists the fields each operation expects; required fields are marked with *.',
+        hint: 'Fields expected per operation: groupPhotoUrl → groupId*, photoUrl, image.',
       },
       {
         displayName: 'Operation',
@@ -1656,7 +1657,8 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['newsletter'], operation: ['newsletterAcceptAdminInvite', 'createNewsletter', 'deleteNewsletter', 'followNewsletter', 'muteNewsletter', 'newsletterRemoveAdmin', 'newsletterRevokeAdminInvite', 'searchNewsletter', 'newsletterTransferOwnership', 'unfollowNewsletter', 'unmuteNewsletter', 'updateNewsletterDescription', 'updateNewsletterName', 'updateNewsletterPicture', 'newsletterSettings'] } },
-        description: 'Request body. Fields expected per operation: createNewsletter → name*, description | deleteNewsletter → id* | followNewsletter → id* | muteNewsletter → id* | newsletterRemoveAdmin → phone* | newsletterRevokeAdminInvite → phone* | searchNewsletter → limit, view, searchText, filters | newsletterTransferOwnership → phone* | unfollowNewsletter → id* | unmuteNewsletter → id* | updateNewsletterDescription → id*, description* | updateNewsletterName → id*, name* | updateNewsletterPicture → id*, pictureUrl* | newsletterSettings → reactionCodes.',
+        description: 'Request body as JSON. The hint below lists the fields each operation expects; required fields are marked with *.',
+        hint: 'Fields expected per operation: createNewsletter → name*, description | deleteNewsletter → id* | followNewsletter → id* | muteNewsletter → id* | newsletterRemoveAdmin → phone* | newsletterRevokeAdminInvite → phone* | searchNewsletter → limit, view, searchText, filters | newsletterTransferOwnership → phone* | unfollowNewsletter → id* | unmuteNewsletter → id* | updateNewsletterDescription → id*, description* | updateNewsletterName → id*, name* | updateNewsletterPicture → id*, pictureUrl* | newsletterSettings → reactionCodes.',
       },
       {
         displayName: 'Operation',
@@ -1704,7 +1706,8 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['chat'], operation: ['modifyChat'] } },
-        description: 'Request body. Fields expected per operation: modifyChat → phone*, action*.',
+        description: 'Request body as JSON. The hint below lists the fields each operation expects; required fields are marked with *.',
+        hint: 'Fields expected per operation: modifyChat → phone*, action*.',
       },
       {
         displayName: 'Operation',
@@ -1725,7 +1728,8 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['webhookExtra'], operation: ['updateWebhookConnected', 'updateWebhookDelivery', 'updateWebhookDisconnected'] } },
-        description: 'Request body. Fields expected per operation: updateWebhookConnected → value* | updateWebhookDelivery → value* | updateWebhookDisconnected → value*.',
+        description: 'Request body as JSON. The hint below lists the fields each operation expects; required fields are marked with *.',
+        hint: 'Fields expected per operation: updateWebhookConnected → value* | updateWebhookDelivery → value* | updateWebhookDisconnected → value*.',
       },
       {
         displayName: 'Operation',
@@ -1759,7 +1763,8 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['community'], operation: ['createCommunity', 'linkCommunity', 'unlinkCommunity', 'communitySettings'] } },
-        description: 'Request body. Fields expected per operation: createCommunity → name*, description, participants | linkCommunity → communityId*, groupsPhones* | unlinkCommunity → communityId*, groupsPhones* | communitySettings → communityId*, whoCanAddNewGroups*.',
+        description: 'Request body as JSON. The hint below lists the fields each operation expects; required fields are marked with *.',
+        hint: 'Fields expected per operation: createCommunity → name*, description, participants | linkCommunity → communityId*, groupsPhones* | unlinkCommunity → communityId*, groupsPhones* | communitySettings → communityId*, whoCanAddNewGroups*.',
       },
       {
         displayName: 'Operation',
@@ -1800,7 +1805,8 @@ export class Wafly implements INodeType {
         type: 'json',
         default: '{}',
         displayOptions: { show: { resource: ['call'], operation: ['callAccept', 'callTranscriptPost', 'callPlay', 'callReject', 'callConfigSet', 'callSay', 'callStart', 'callRecordStart', 'callRecordStop', 'callTerminate', 'callWebrtc'] } },
-        description: 'Request body. Fields expected per operation: callAccept → callId* | callTranscriptPost → segments* | callPlay → callId*, url, base64, hangupAfter | callReject → callId* | callConfigSet → onIncoming*, mp3, ai, human | callSay → callId*, text*, voiceId, hangupAfter | callStart → phone*, video, mp3Url, mp3Base64, hangupAfter | callTerminate → callId* | callWebrtc → callId*, sdpOffer*.',
+        description: 'Request body as JSON. The hint below lists the fields each operation expects; required fields are marked with *.',
+        hint: 'Fields expected per operation: callAccept → callId* | callTranscriptPost → segments* | callPlay → callId*, url, base64, hangupAfter | callReject → callId* | callConfigSet → onIncoming*, mp3, ai, human | callSay → callId*, text*, voiceId, hangupAfter | callStart → phone*, video, mp3Url, mp3Base64, hangupAfter | callTerminate → callId* | callWebrtc → callId*, sdpOffer*.',
       },
       // GENERATED_NODE_PROPERTIES:END
     ],
@@ -2282,16 +2288,14 @@ export class Wafly implements INodeType {
           }
         }
 
-        // Wafly uses a static token, not refreshable OAuth. The authenticated
-        // helper retries HTTP 401 even for generic credentials in n8n 1.x/2.x,
-        // which can repeat a mutation. Read the saved credential once and use
-        // the ordinary HTTP helper so each item makes exactly one API request.
-        const responseData = await this.helpers.httpRequest({
+        // The Client-Token header is injected by the credential's `authenticate`
+        // block (generic header auth), so the request itself carries no secret.
+        const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'waflyApi', {
             method,
             url: `${requestBaseUrl}${endpoint}`,
             body: Object.keys(body).length > 0 ? body : undefined,
             qs: Object.keys(query).length > 0 ? query : undefined,
-            headers: { ...headers, 'Client-Token': credentials.clientToken as string },
+            headers,
             json: !binaryResponse,
             ...(binaryResponse ? { encoding: 'arraybuffer' as const } : {}),
         });
@@ -2316,8 +2320,9 @@ export class Wafly implements INodeType {
           returnData.push({ json: { error: 'Request failed. Check node credentials and configuration.' }, pairedItem: { item: i } });
           continue;
         }
-        if (error instanceof NodeOperationError) throw error;
-        throw new NodeApiError(this.getNode(), error as JsonObject);
+        throw error instanceof NodeOperationError
+          ? error
+          : new NodeApiError(this.getNode(), error as JsonObject);
       }
     }
 

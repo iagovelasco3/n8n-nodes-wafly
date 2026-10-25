@@ -16,8 +16,12 @@ async function execute(parameters, respond = () => ({}), continueOnFail = false)
     getNode: () => ({ name: 'Wafly', type: 'n8n-nodes-wafly.wafly', typeVersion: 1, position: [0, 0], parameters }),
     continueOnFail: () => continueOnFail,
     helpers: {
-      async httpRequest(request) {
-        assert.equal(request.headers['Client-Token'], 'ACCOUNT_KEY');
+      async httpRequest() {
+        throw new Error('httpRequest must not be used: the node authenticates through httpRequestWithAuthentication');
+      },
+      async httpRequestWithAuthentication(credentialType, request) {
+        assert.equal(credentialType, 'waflyApi');
+        assert.equal(request.headers['Client-Token'], undefined);
         calls.push(request);
         return respond(request);
       },
@@ -42,7 +46,8 @@ test('pairing GET and POST send a required phone in the query, with no JSON body
       property.name === 'gq_phone' && property.displayOptions.show.operation.includes(operation));
     // POST keeps its UI field optional so saved gp_body.phone workflows pass
     // n8n's pre-execution validation. execute still requires a phone from either source.
-    assert.equal(field.required, method === 'GET');
+    // n8n lint forbids `required: false`, so the optional field simply omits the property.
+    assert.equal(field.required === true, method === 'GET');
     const result = await execute({ resource: 'instanceExtra', operation, gq_phone: ' 5511999999999 ' }, (request) => {
       assert.equal(request.method, method);
       assert.equal(request.url, `${baseUrl}${basePath}/pairing-code`);

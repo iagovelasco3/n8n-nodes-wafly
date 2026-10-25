@@ -92,7 +92,7 @@ test('Pix creation requires a stable valid key and forwards the exact header and
     assert.equal(attempts, 0);
   }
   const { calls } = await execute({ resource: 'partner', operation: 'partnerCreateInstance', gp_body: body, gh_idempotencyKey: 'extra-pix-order-001' });
-  assert.deepEqual(calls[0].headers, { 'Idempotency-Key': 'extra-pix-order-001', 'Client-Token': credentials.clientToken });
+  assert.deepEqual(calls[0].headers, { 'Idempotency-Key': 'extra-pix-order-001' });
   assert.deepEqual(calls[0].body, body);
 });
 

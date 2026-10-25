@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.6.1] - 2026-10-25
+
+### Changed
+- Linting moved to `@n8n/node-cli` (`n8n-node lint`, ESLint 9, flat config). The package passes the ruleset used by `@n8n/scan-community-package` with zero errors, as required for n8n verified community nodes.
+- Requests use `this.helpers.httpRequestWithAuthentication` with the `waflyApi` credential; the Client-Token header comes from the credential's `authenticate` block instead of being set by the node. n8n retries a request once on HTTP 401; with a static token both attempts are rejected by the API before any mutation runs, so this does not reintroduce duplicate writes.
+- Generated JSON body parameters keep a short description and list the per-operation fields in `hint` (n8n lint forbids lowercase `id`/`url` words in descriptions). Optional generated query/header parameters omit `required` instead of declaring `required: false`. Header display names no longer contain double spaces.
+- "Also Send Transcript as Text" description now starts with "Whether", as n8n requires for booleans.
+- CI and publish workflows derive the tarball name from `package.json`.
+
+No operation ID, parameter name, default or endpoint changed.
+
 ## [1.6.0] - 2026-10-16
 
 ### Added

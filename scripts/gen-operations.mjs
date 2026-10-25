@@ -311,8 +311,7 @@ ${res.ops
     displayName: ${jsStr(humanize(param.name))},
     name: ${jsStr('gq_' + param.name)},
     type: 'string',
-    default: '',
-    required: ${param.required},
+    default: '',${param.required ? '\n    required: true,' : ''}
     displayOptions: { show: { resource: [${jsStr(res.value)}], operation: [${param.operations.map(jsStr).join(', ')}] } },
     description: ${jsStr(param.name === 'phone' ? 'WhatsApp phone number in international format, including country code (e.g. 5511999999999)' : `Value for ${param.name} in the request query`)},
   },`);
@@ -330,8 +329,7 @@ ${res.ops
     displayName: ${jsStr(humanize(param.name.replace(/-/g, ' ')))},
     name: ${jsStr(param.field)},
     type: 'string',
-    default: '',
-    required: ${param.required},
+    default: '',${param.required ? '\n    required: true,' : ''}
     displayOptions: { show: { resource: [${jsStr(res.value)}], operation: [${param.operations.map(jsStr).join(', ')}] } },
     description: 'Required for extra_instance_72h_v1. Keep the same key and body for the same logical creation; do not change the key after an uncertain result.',
   },`);
@@ -348,7 +346,8 @@ ${res.ops
     type: 'json',
     default: '{}',
     displayOptions: { show: { resource: [${jsStr(res.value)}], operation: [${withBody.map((o) => jsStr(o.name)).join(', ')}] } },
-    description: '${bodyDescription(withBody)}',
+    description: 'Request body as JSON. The hint below lists the fields each operation expects; required fields are marked with *.',
+    hint: '${bodyDescription(withBody)}',
   },`);
   }
 
@@ -378,6 +377,7 @@ function humanize(s) {
     .replace(/^./, (c) => c.toUpperCase())
     .replace(/\bId\b/g, 'ID')
     .replace(/\bUrl\b/g, 'URL')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
@@ -408,7 +408,7 @@ function bodyDescription(operations) {
     .replace(/'/g, '');
 
   return fields
-    ? `Request body. Fields expected per operation: ${fields}.`
+    ? `Fields expected per operation: ${fields}.`
     : 'Request body for this operation';
 }
 
