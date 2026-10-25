@@ -1,64 +1,66 @@
-# Instalação do n8n-nodes-wafly 1.6.0
+# Installing n8n-nodes-wafly 1.6.1
 
-Use este pacote em n8n self-hosted. No n8n Cloud, integre por HTTP Request e
-Webhook: https://wafly.com.br/tutoriais/whatsapp-api-n8n/
+Use this package on self-hosted n8n. n8n Cloud offers the verified version of the
+node from the nodes panel; for anything it does not cover yet, integrate through
+HTTP Request and Webhook nodes: https://wafly.com.br/tutoriais/whatsapp-api-n8n/
 
-## Pela interface
+## From the UI
 
-1. Entre como Owner/Admin e abra Settings → Community Nodes.
-2. Clique em Install a community node, informe `n8n-nodes-wafly` e confirme.
-3. Ao adicionar um node ao workflow, procure por Wafly WhatsApp.
+1. Sign in as Owner/Admin and open Settings → Community Nodes.
+2. Click Install a community node, enter `n8n-nodes-wafly` and confirm.
+3. When adding a node to a workflow, search for Wafly WhatsApp.
 
-Para atualizar, use a opção de atualização do pacote nessa mesma tela. Exporte
-seus workflows antes e teste os fluxos importantes após atualizar. Publicar no
-npm não atualiza automaticamente os n8n dos clientes.
+To update, use the package update option on that same screen. Export your
+workflows first and test the important flows after updating. Publishing to npm
+does not update your customers' n8n instances automatically.
 
-## Instalação manual e Docker
+## Manual installation and Docker
 
-No usuário que executa o n8n:
+As the user that runs n8n:
 
 ```bash
 mkdir -p ~/.n8n/nodes
 cd ~/.n8n/nodes
-npm install n8n-nodes-wafly@1.6.0
+npm install n8n-nodes-wafly@1.6.1
 ```
 
-Em Docker, entre no container com `docker exec -it NOME_DO_CONTAINER sh` e use
-`/home/node/.n8n/nodes`. Esse diretório deve estar em volume persistente.
-Após instalação manual, reinicie o processo do n8n numa janela adequada. Em
-queue mode, mantenha o mesmo pacote em todos os workers.
+With Docker, enter the container with `docker exec -it CONTAINER_NAME sh` and use
+`/home/node/.n8n/nodes`. That directory must live on a persistent volume.
+After a manual installation, restart the n8n process in a suitable maintenance
+window. In queue mode, keep the same package version on every worker.
 
-Fonte: https://docs.n8n.io/integrations/community-nodes/installation/manual-install/
+Source: https://docs.n8n.io/integrations/community-nodes/installation/manual-install/
 
-## Credenciais
+## Credentials
 
-Crie uma credencial Wafly API e copie do painel:
+Create a Wafly API credential and copy the values from the Wafly panel:
 
-- Client Token: Client-Token da conta.
-- Instance: código público/ID da instância; não é o nome de exibição.
-- Token: token dessa mesma instância.
+- Client Token: the account's Client-Token.
+- Instance: the public instance code/ID, not its display name.
+- Token: the token of that same instance.
 - Base URL: `https://wafly.com.br/api-bridge-whats`.
-- Management Base URL: deixe vazio na configuração padrão. Para um serviço
-  próprio, informe a URL de gerenciamento explicitamente.
+- Management Base URL: leave empty in the default setup. For a custom service,
+  enter the management URL explicitly.
 
-Salve e teste. O teste consulta o status da instância, sem enviar mensagens.
-Para gerenciar a conta sem uma instância existente, deixe Instance e Token
-vazios: o teste usa uma listagem somente leitura. Envio e conexão continuam
-exigindo Instance e Token.
+Save and test. The test reads the instance status without sending messages.
+To manage the account without an existing instance, leave Instance and Token
+empty: the test then uses a read-only listing. Sending and connecting still
+require Instance and Token.
 
-## Primeira validação
+## First validation
 
-Use Manual Trigger → Wafly, Message → Send Text. Informe um número próprio ou
-que autorizou o teste, com DDI e DDD. Execute e confirme o recebimento no aparelho.
-Para receber, crie um Webhook POST, ative/publique o workflow e configure sua
-Production URL na Wafly. Examine o evento real antes de mapear campos; filtre
-mensagens próprias e deduplique IDs para evitar loops.
+Use Manual Trigger → Wafly, Message → Send Text. Enter your own number, or one
+that authorized the test, with country and area codes. Run it and confirm the
+message arrived on the phone.
+To receive messages, create a POST Webhook, activate/publish the workflow and
+configure its Production URL in Wafly. Inspect the real event before mapping
+fields; filter out your own messages and deduplicate IDs to avoid loops.
 
-Nunca compartilhe tokens, exports ou prints com credenciais. Se ocorrer erro,
-confira método, credenciais, estado da instância e a resposta da API. Não repita
-automaticamente criação, cancelamento ou publicação de Status após resultado
-incerto.
+Never share tokens, exports or screenshots that contain credentials. If an error
+occurs, check the method, the credentials, the instance state and the API
+response. Do not automatically repeat instance creation, cancellation or Status
+publication after an uncertain result.
 
-Documentação: https://wafly.com.br/api-docs
+Documentation: https://wafly.com.br/api-docs
 Templates: https://wafly.com.br/templates/
-Código e issues: https://github.com/iagovelasco3/n8n-nodes-wafly
+Code and issues: https://github.com/iagovelasco3/n8n-nodes-wafly

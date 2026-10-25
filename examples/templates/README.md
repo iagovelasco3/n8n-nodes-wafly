@@ -1,24 +1,24 @@
-# Templates prontos da Wafly para n8n
+# Ready-made Wafly templates for n8n
 
-Todos os templates desta galeria usam o community node `n8n-nodes-wafly` e, por isso, precisam de um n8n self-hosted.
+Every template in this gallery uses the `n8n-nodes-wafly` community node and therefore needs a self-hosted n8n.
 
-## Destaque PT-BR: qualificação de leads
+## Featured: lead qualification
 
-[Baixe o workflow 08](08-qualify-whatsapp-leads-and-hand-off.json), importe o JSON no n8n e siga as notas **Instalação e teste** dentro do próprio canvas. O template recebe contatos do WhatsApp, classifica a intenção com IA, responde o lead e avisa uma pessoa somente quando o lead está quente.
+[Download workflow 08](08-qualify-whatsapp-leads-and-hand-off.en.json), import the JSON into n8n and follow the **Setup and test** notes inside the canvas. The template receives WhatsApp contacts, classifies the intent with AI, replies to the lead and alerts a person only when the lead is hot. A version with Portuguese node names and messages is available as [08-qualify-whatsapp-leads-and-hand-off.json](08-qualify-whatsapp-leads-and-hand-off.json).
 
-[Criar conta Wafly — 3 dias sem cartão](https://wafly.com.br/signup?utm_source=github&utm_medium=template_index&utm_campaign=qualificacao_leads_whatsapp&utm_content=template_08_cta&template_id=n8n-08-qualificar-leads)
+[Create a Wafly account — 3-day trial, no card](https://wafly.com.br/signup?utm_source=github&utm_medium=template_index&utm_campaign=qualificacao_leads_whatsapp&utm_content=template_08_cta&template_id=n8n-08-qualificar-leads)
 
-Identificador de atribuição: `n8n-08-qualificar-leads`.
+Attribution identifier: `n8n-08-qualificar-leads`.
 
-## Índice
+## Index
 
-| Workflow | Idioma | Uso principal |
+| Workflow | Language | Main use |
 |---|---|---|
-| [04 — Responder uma vez com agente de IA](04-whatsapp-ai-agent-replies-once.json) | EN | Agrupar mensagens em sequência antes de responder |
-| [05 — Moderar grupo](05-moderate-whatsapp-group.json) | EN | Aprovar entradas, permitir domínios e remover spam |
-| [06 — Enviar OTP com fallback para SMS](06-send-otp-over-whatsapp.json) | EN | Verificar o número e entregar código de uso único |
-| [07 — Alertar desconexão](07-alert-when-whatsapp-number-disconnects.json) | EN | Monitorar o número e alertar somente em mudança de estado |
-| [08 — Qualificar leads e fazer handoff](08-qualify-whatsapp-leads-and-hand-off.json) | PT-BR | Responder contatos e encaminhar leads quentes ao comercial |
+| [04 — Reply once with an AI agent](04-whatsapp-ai-agent-replies-once.json) | EN | Group messages that arrive in a burst before replying |
+| [05 — Moderate a group](05-moderate-whatsapp-group.json) | EN | Approve join requests, allow domains and remove spam |
+| [06 — Send OTP with SMS fallback](06-send-otp-over-whatsapp.json) | EN | Validate the number and deliver a one-time code |
+| [07 — Alert on disconnection](07-alert-when-whatsapp-number-disconnects.json) | EN | Monitor the number and alert only on a state change |
 | [08 — Qualify leads and hand off](08-qualify-whatsapp-leads-and-hand-off.en.json) | EN | Reply to contacts and alert a person only for hot leads |
+| [08 — Qualify leads and hand off (pt-BR)](08-qualify-whatsapp-leads-and-hand-off.json) | pt-BR | Same flow with Portuguese node names and messages |
 
-Os arquivos `01`, `02` e `03` são as versões anteriores em português dos casos `04`, `05` e `06`.
+Files `01`, `02` and `03` are the earlier Portuguese versions of use cases `04`, `05` and `06`.

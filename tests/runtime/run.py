@@ -106,12 +106,17 @@ try:
         summary['workflows'][name] = 'passed'
     records = [json.loads(line) for line in (out/'requests.jsonl').read_text().splitlines()]
     assert all(row['authenticated'] and not row['problems'] for row in records)
-    assert sum(row.get('body',{}).get('message') == 'FAIL401' for row in records if row.get('body')) == (1 if 'continue-on-fail' in a.workflows.split(',') else 0)
+    # Since 1.6.1 requests go through n8n's httpRequestWithAuthentication (required for
+    # verified community nodes). n8n core retries a request exactly once on HTTP 401,
+    # so an unauthorized call may reach the fixture twice; the API rejects both before
+    # any mutation runs. HTTP 409 is never retried, which proves there is no generic retry.
+    HTTP401_HITS = (1, 2) if 'continue-on-fail' in a.workflows.split(',') else (0,)
+    assert sum(row.get('body',{}).get('message') == 'FAIL401' for row in records if row.get('body')) in HTTP401_HITS
     if 'mutation-failures' in a.workflows.split(','):
-        for callback in ['https://fixture.test/fail401', 'https://fixture.test/fail409']:
-            assert sum((row.get('body') or {}).get('receivedCallbackUrl') == callback for row in records) == 1
-        assert sum((row.get('body') or {}).get('caption') == 'FAIL401' for row in records) == 1
-        assert sum(row['path'].endswith('/SIMULATE401') for row in records) == 1
+        assert sum((row.get('body') or {}).get('receivedCallbackUrl') == 'https://fixture.test/fail401' for row in records) in (1, 2)
+        assert sum((row.get('body') or {}).get('receivedCallbackUrl') == 'https://fixture.test/fail409' for row in records) == 1
+        assert sum((row.get('body') or {}).get('caption') == 'FAIL401' for row in records) in (1, 2)
+        assert sum(row['path'].endswith('/SIMULATE401') for row in records) in (1, 2)
     summary.update({'httpRequests':len(records),'authAndContractChecks':'passed','result':'passed'})
 finally:
     for name in [engine,fixture]:

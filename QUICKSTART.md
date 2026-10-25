@@ -1,20 +1,21 @@
-# Começando com Wafly no n8n
+# Getting started with Wafly in n8n
 
-1. No n8n self-hosted, abra Settings → Community Nodes → Install a community node.
-2. Instale `n8n-nodes-wafly` e adicione um node Wafly ao workflow.
-3. Crie uma credencial Wafly API com Client Token, o código/ID da instância e
-   seu Token, copiados do painel. Instance é o código público, não o nome.
-4. Mantenha Base URL como `https://wafly.com.br/api-bridge-whats`. Salve e teste.
-5. Monte Manual Trigger → Wafly, Message → Send Text, com um número próprio ou
-   autorizado e uma mensagem de teste. Confirme o recebimento no aparelho.
+1. On self-hosted n8n, open Settings → Community Nodes → Install a community node.
+2. Install `n8n-nodes-wafly` and add a Wafly node to a workflow.
+3. Create a Wafly API credential with the Client Token, the instance code/ID and
+   its Token, copied from the Wafly panel. Instance is the public code, not the name.
+4. Keep Base URL as `https://wafly.com.br/api-bridge-whats`. Save and test.
+5. Build Manual Trigger → Wafly, Message → Send Text with your own or an
+   authorized number and a test message. Confirm it arrived on the phone.
 
-Para receber mensagens, use Webhook POST com Production URL ativa e configure
-Webhook → Set Webhook. O evento chega normalmente em `$json.body`; examine o
-payload antes de mapear e filtre mensagens próprias para evitar loops.
+To receive messages, use a POST Webhook with an active Production URL and
+configure Webhook → Set Webhook. The event usually arrives in `$json.body`;
+inspect the payload before mapping it and filter out your own messages to avoid
+loops.
 
-No n8n Cloud, use HTTP Request e Webhook em vez de instalar o pacote.
+On n8n Cloud, install the verified Wafly node from the nodes panel, or use HTTP Request and Webhook nodes.
 
-Guia completo: https://wafly.com.br/tutoriais/whatsapp-api-n8n/
-Instalação manual, Docker e atualização: [INSTALL.md](INSTALL.md)
+Full guide: https://wafly.com.br/tutoriais/whatsapp-api-n8n/
+Manual installation, Docker and updates: [INSTALL.md](INSTALL.md)
 API: https://wafly.com.br/api-docs
 Templates: https://wafly.com.br/templates/
