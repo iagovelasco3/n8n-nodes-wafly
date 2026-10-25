@@ -9,22 +9,28 @@
 
 This is an n8n community node for the **Wafly WhatsApp Bridge API**. It lets you send WhatsApp messages, manage groups and configure webhooks directly from your n8n workflows.
 
-[Wafly](https://wafly.io/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_intro) is a managed WhatsApp API platform: cloud-hosted instances connected via QR Code, REST API, real-time webhooks and unlimited messages.
+[Wafly](https://wafly.io/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_intro) is a managed WhatsApp API platform: cloud-hosted instances connected via QR Code or pairing code, REST API, real-time webhooks, message buffering for AI agents, audio transcription, and unlimited messages.
 
-**[Start a free 3-day trial](https://wafly.io/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_top_cta)** — $20/month per connected WhatsApp number for international accounts.
+- 🇧🇷 **Brazil:** **[Try 3 days free, no card](https://wafly.com.br/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_top_cta_br)** — **BRL 59.90/month** per number (or **BRL 39.90/month** above 10 numbers on a Partner account). See the [ready-made n8n templates](https://wafly.com.br/templates/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_templates_br), [Wafly vs Evolution API on a VPS](https://wafly.com.br/comparativos/evolution-api-gerenciada/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_evolution_br) and [Z-API alternative](https://wafly.com.br/comparativos/alternativa-z-api/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_zapi_br).
+- 🌍 **International:** **[Start a free 3-day trial](https://wafly.io/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_top_cta)** — **$20/month** per connected WhatsApp number, no credit card required.
 
 ## 🧩 Ready-made workflow templates
 
 Five workflows you can import and run, instead of starting from a blank canvas. The lead-qualification flagship is in Brazilian Portuguese and includes an end-to-end test payload:
 
-| Template | What it does |
-|---|---|
-| [AI agent replies once](examples/templates/04-whatsapp-ai-agent-replies-once.json) | Buffers messages that arrive in a burst so your agent answers once instead of three times |
-| [Qualify WhatsApp leads with AI (pt-BR version)](examples/templates/08-qualify-whatsapp-leads-and-hand-off.json) | Same flow as the English template, with Portuguese node names and messages |
-| [Qualify WhatsApp leads with AI (English)](examples/templates/08-qualify-whatsapp-leads-and-hand-off.en.json) | Filters inbound messages, qualifies contacts and hands hot leads to a person |
-| [Moderate a group](examples/templates/05-moderate-whatsapp-group.json) | Approves join requests, welcomes members and removes link spam |
-| [Send OTP with SMS fallback](examples/templates/06-send-otp-over-whatsapp.json) | Validates the number first, falls back to SMS when WhatsApp is unreachable |
-| [Alert on disconnect](examples/templates/07-alert-when-whatsapp-number-disconnects.json) | Checks the connection on a schedule and alerts when the number drops |
+| Template | Language | What it does |
+|---|---|---|
+| [01 — AI assistant with buffer](examples/templates/01-atendente-ia-whatsapp.json) | pt-BR | Portuguese version of 04: groups split messages and replies once with an AI agent |
+| [02 — Group moderation](examples/templates/02-moderacao-grupo-whatsapp.json) | pt-BR | Portuguese version of 05: approves join requests, welcomes members and removes link spam |
+| [03 — OTP on WhatsApp with SMS fallback](examples/templates/03-otp-whatsapp-fallback-sms.json) | pt-BR | Portuguese version of 06: validates the number and falls back to SMS when unavailable |
+| [04 — AI agent replies once](examples/templates/04-whatsapp-ai-agent-replies-once.json) | EN | Buffers messages that arrive in a burst so your agent answers once instead of three times |
+| [05 — Moderate a group](examples/templates/05-moderate-whatsapp-group.json) | EN | Approves join requests, welcomes members and removes link spam |
+| [06 — Send OTP with SMS fallback](examples/templates/06-send-otp-over-whatsapp.json) | EN | Validates the number first, falls back to SMS when WhatsApp is unreachable |
+| [07 — Alert on disconnect](examples/templates/07-alert-when-whatsapp-number-disconnects.json) | EN | Checks the connection on a schedule and alerts when the number drops |
+| [08 — Qualify WhatsApp leads with AI (pt-BR)](examples/templates/08-qualify-whatsapp-leads-and-hand-off.json) | pt-BR | Same flow as the English template, with Portuguese node names and messages |
+| [08 — Qualify WhatsApp leads with AI (English)](examples/templates/08-qualify-whatsapp-leads-and-hand-off.en.json) | EN | Filters inbound messages, qualifies contacts and hands hot leads to a person |
+
+You can also copy any workflow with one click (including two HTTP Request examples for **n8n Cloud**) at **[wafly.com.br/templates](https://wafly.com.br/templates/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_template_gallery)**.
 
 Import the JSON, create the **Wafly API** credential and activate. All of them run on
 self-hosted n8n. n8n Cloud offers the verified version of this node from the nodes panel; while a newer release is under n8n review, use HTTP Request nodes on Cloud for the operations it adds.

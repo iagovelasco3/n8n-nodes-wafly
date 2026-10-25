@@ -4,6 +4,12 @@ A standalone Node.js 22+ example for people building **systems, SaaS products or
 
 It is neither a ready-made agent nor a production implementation. It runs without installing dependencies and without the n8n node from this repository.
 
+## Start with your own instance
+
+No credentials yet? **[Create my 3-day Wafly trial, no card](https://wafly.com.br/signup?utm_source=github&utm_medium=repository&utm_campaign=rest_quickstart_20261022&utm_content=backend_rest_start)**. Create an instance, connect a number of your own and copy the Client-Token, the public ID and the instance token into the private environment below. After the trial, BRL 59.90 per number/month for up to 10 instances in Brazil; check the conditions on the website. This example uses the **unofficial** Flex API, which carries a risk of number restriction.
+
+Already have an instance? Start with the local tests and the setup below. You do not need to register another account, migrate your current operation or message customers to try the example. Prefer to compare first? [See Wafly's price and conditions](https://wafly.com.br/comparativos/quanto-custa-api-whatsapp/?utm_source=github&utm_medium=repository&utm_campaign=rest_quickstart_20261022&utm_content=backend_rest_compare).
+
 ## What you will test
 
 - Send a text only to the configured number of your own.
