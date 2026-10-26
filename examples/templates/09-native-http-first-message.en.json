@@ -1,0 +1,204 @@
+{
+  "name": "Send your first WhatsApp message with Wafly using HTTP Request",
+  "active": false,
+  "nodes": [
+    {
+      "id": "manual",
+      "name": "Run one authorized test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "config",
+      "name": "Configure your own instance",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        230,
+        0
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "instance",
+              "name": "instance",
+              "type": "string",
+              "value": "YOUR_INSTANCE_ID"
+            },
+            {
+              "id": "token",
+              "name": "instanceToken",
+              "type": "string",
+              "value": "YOUR_INSTANCE_TOKEN"
+            },
+            {
+              "id": "phone",
+              "name": "phone",
+              "type": "string",
+              "value": "YOUR_AUTHORIZED_NUMBER_WITH_COUNTRY_CODE"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "type": "string",
+              "value": "My own Wafly HTTP integration test."
+            },
+            {
+              "id": "authorized",
+              "name": "authorizedRecipient",
+              "type": "boolean",
+              "value": false
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "guard",
+      "name": "Validate one authorized recipient",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        470,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (items.length !== 1) throw new Error('This starter accepts exactly one input, not a recipient list.');\nconst c = items[0].json;\nif (!/^[A-Za-z0-9_-]{1,128}$/.test(c.instance || '') || c.instance === 'YOUR_INSTANCE_ID') throw new Error('Configure your own instance.');\nif (!/^[A-Za-z0-9_-]{8,256}$/.test(c.instanceToken || '') || c.instanceToken === 'YOUR_INSTANCE_TOKEN') throw new Error('Configure your own instance token privately.');\nif (!/^[1-9][0-9]{9,14}$/.test(c.phone || '')) throw new Error('Use an authorized number with country code and digits only.');\nif (c.authorizedRecipient !== true) throw new Error('Confirm that this recipient is yours or explicitly authorized before enabling the request.');\nif (typeof c.message !== 'string' || !c.message.trim() || c.message.length > 500) throw new Error('Use a test message of 1 to 500 characters.');\nreturn [{ json: c }];"
+      }
+    },
+    {
+      "id": "send",
+      "name": "Send one text - enable after setup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        710,
+        0
+      ],
+      "disabled": true,
+      "retryOnFail": false,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://wafly.com.br/api-bridge-whats/instances/' + encodeURIComponent($json.instance) + '/token/' + encodeURIComponent($json.instanceToken) + '/send-text' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({phone: $json.phone, message: $json.message}) }}",
+        "options": {
+          "timeout": 15000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "note",
+      "name": "Start here - Wafly HTTP starter",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -1050
+      ],
+      "parameters": {
+        "width": 1100,
+        "height": 970,
+        "color": 1,
+        "content": "# Wafly HTTP starter\n\n## Who is this for?\nIntegrators who want a small, manual first-message test with the Wafly REST API using native n8n nodes, without installing a community node or connecting an AI account.\n\n## How it works\nEdit Fields holds your configuration. A Code node validates one input and requires explicit recipient authorization. HTTP Request sends one text message and is disabled by default. There is no schedule, contact list, loop, or automatic retry.\n\n## Setup\n1. Create your own [Wafly account](https://wafly.com.br/signup?utm_source=n8n&utm_medium=workflow_template&utm_campaign=wafly_http_starter_202610&utm_content=creator_description) and connect an instance you control.\n2. Replace the placeholders. Use your own or an explicitly authorized recipient and set `authorizedRecipient` to true only after checking it.\n3. Create a Header Auth credential: name `Client-Token`, value your private client token. Select it in HTTP Request.\n4. Enable HTTP Request only when ready, then run the manual trigger once.\n\nThe instance token is part of the API URL and private workflow configuration. Restrict project access and remove tokens before sharing exports or screenshots. A timeout may occur after acceptance: verify before repeating. HTTP 2xx/messageId is acceptance, not delivery or reading; check your own device.\n\n## Requirements and disclosure\nWafly is a paid, managed, non-official WhatsApp API with a three-day trial; regional pricing applies. It is not Meta's WhatsApp Cloud API, and account restriction risks remain. No unsolicited bulk messaging. Maintained by the Wafly team. [Setup guide](https://wafly.com.br/tutoriais/enviar-mensagem-whatsapp-api/)."
+      }
+    },
+    {
+      "id": "setup-note",
+      "name": "Configure privately before enabling",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        190,
+        180
+      ],
+      "parameters": {
+        "width": 530,
+        "height": 270,
+        "color": 7,
+        "content": "## Configure privately\nReplace the placeholders in Edit Fields. Use your own connected instance and an authorized recipient. Set authorizedRecipient to true only after checking the number.\n\nIn HTTP Request, select your Header Auth credential: Client-Token = your client token. Instance tokens are sensitive URL components: never share a configured export."
+      }
+    },
+    {
+      "id": "send-note",
+      "name": "One attempt - inspect acceptance separately",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        750,
+        180
+      ],
+      "parameters": {
+        "width": 480,
+        "height": 270,
+        "color": 7,
+        "content": "## One deliberate attempt\nHTTP Request is disabled until you finish setup. Enable it, then run the manual trigger once. Automatic retries are off.\n\n2xx/messageId means API acceptance, not WhatsApp delivery or reading. A timeout can happen after acceptance: check your own device before repeating. This is not a bulk messaging workflow."
+      }
+    }
+  ],
+  "connections": {
+    "Run one authorized test": {
+      "main": [
+        [
+          {
+            "node": "Configure your own instance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configure your own instance": {
+      "main": [
+        [
+          {
+            "node": "Validate one authorized recipient",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate one authorized recipient": {
+      "main": [
+        [
+          {
+            "node": "Send one text - enable after setup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "saveExecutionProgress": false
+  },
+  "pinData": {},
+  "tags": []
+}
