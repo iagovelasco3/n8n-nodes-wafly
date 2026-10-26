@@ -24,6 +24,6 @@ Imported and executed with n8n 2.43.7 in an isolated local container with no ext
 
 Wafly is a paid, managed, **non-official WhatsApp API**, maintained by the Wafly team; restriction risks remain. It is not Meta's Cloud API. Standard Brazil price is R$59.90 per number/month, with a three-day trial without a card. n8n hosting and AI costs are separate. [Integration guide and current terms](https://wafly.com.br/tutoriais/whatsapp-api-n8n/).
 
-The n8n catalog submission 21603 was not published: reviewer feedback said the starter was too basic and suggested a beginner YouTube walkthrough. That video is being prepared separately. This file is a public source example, **not an approved n8n catalog template**. No new catalog submission or package release is made by publishing this example.
+This is an independent public source example, not a published or approved n8n catalog template.
 
 The existing UTM in the workflow identifies this starter asset. It does not certify that someone discovered it in the n8n catalog or establish an individual platform click.
