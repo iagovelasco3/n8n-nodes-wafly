@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "checked_utc": "2026-10-28T17:44:20.410794+00:00",
+  "interface_lab": "Lovable own isolated project, not published",
+  "states_observed": [
+    "accepted with synthetic ID and delivery not checked",
+    "401 rejected",
+    "200 without ID is not success",
+    "timeout blocks new UI attempt"
+  ],
+  "backend_tests": {
+    "Deno2.9.6_pure": 17,
+    "Deno_native_local_HTTP": 1,
+    "PostgreSQL16_reservation_and_RLS": "passed with network none"
+  },
+  "Cloud_or_customer_deploy": false,
+  "real_WhatsApp_messages": 0,
+  "production_signups": 0,
+  "proof_boundary": "Separate UI and backend validation; not a full live integration test."
+}

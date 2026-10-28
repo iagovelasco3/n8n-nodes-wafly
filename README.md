@@ -14,6 +14,10 @@ This is an n8n community node for the **Wafly WhatsApp Bridge API**. It lets you
 - 🇧🇷 **Brazil:** **[Try 3 days free, no card](https://wafly.com.br/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_top_cta_br)** — **BRL 59.90/month** per number (or **BRL 39.90/month** above 10 numbers on a Partner account). See the [ready-made n8n templates](https://wafly.com.br/templates/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_templates_br), [Wafly vs Evolution API on a VPS](https://wafly.com.br/comparativos/evolution-api-gerenciada/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_evolution_br) and [Z-API alternative](https://wafly.com.br/comparativos/alternativa-z-api/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_zapi_br).
 - 🌍 **International:** **[Start a free 3-day trial](https://wafly.io/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_top_cta)** — **$20/month** per connected WhatsApp number, no credit card required.
 
+## Building an app with AI?
+
+Use the [Wafly REST starter for existing apps](examples/builders-rest/README.md): TypeScript, a Supabase Edge adapter, a prompt for Lovable and local tests. It starts in preview mode, keeps secrets on the backend and distinguishes API acceptance from delivery. The interface lab is simulated; no live WhatsApp delivery or universal platform compatibility is claimed.
+
 ## 🧩 Ready-made workflow templates
 
 Five workflows you can import and run, instead of starting from a blank canvas. The lead-qualification flagship is in Brazilian Portuguese and includes an end-to-end test payload:

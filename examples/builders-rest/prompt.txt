@@ -1,0 +1,19 @@
+Adapte o app existente para integrar a API REST da Wafly pelo backend. Não crie outro SaaS, CRM, projeto ou formulário de cadastro. Preserve a stack, autenticação, dados, políticas, consentimento e tracking atuais.
+
+Kit público de referência: https://wafly.com.br/downloads/wafly-builder-starter-20261028.zip
+Contrato: https://wafly.com.br/tutoriais/enviar-mensagem-whatsapp-api/
+Guia: https://wafly.com.br/parceiros/api-whatsapp-para-saas/#kit-builder
+
+Primeiro identifique a stack e mostre o plano de integração. Se o app já usa Supabase, adapte core.ts, o handler de supabase/functions/wafly-send-text e a migração de reserva persistente. Revise a tabela antes de qualquer migração. Se usa server functions de outra stack, adapte autenticação e reserva persistente nativas; não importe um adapter Supabase como se fosse universal. Não desative autenticação, RLS ou verificação de JWT para contornar um erro.
+
+Objetivo inicial: uma ação explícita do dono autenticado do app produzir uma prévia. Use WAFLY_DISPATCH_ENABLED=false. A tela só informa message, nunca tokens, instância ou destinatário. O backend valida a sessão fresca e o UUID do dono, aceita apenas a origem HTTPS configurada e vincula a operação à instância e ao próprio número de teste configurados em Secrets.
+
+Use a interface de Secrets do servidor para WAFLY_CLIENT_TOKEN, WAFLY_INSTANCE_ID, WAFLY_INSTANCE_TOKEN, WAFLY_TEST_PHONE, WAFLY_OWNER_USER_ID e APP_ORIGIN. Não peça os valores no chat. Não use variáveis VITE_/NEXT_PUBLIC_, não coloque service-role no browser, não imprima URLs com token, corpo ou erro bruto. Backend Supabase usa suas variáveis de servidor; não passe service-role ao frontend.
+
+O contrato a conferir é POST https://wafly.com.br/api-bridge-whats/instances/{instance}/token/{token}/send-text com Client-Token e JSON {phone,message}. Não execute esse endereço durante a implementação ou testes. Use fetch mockado com rede externa bloqueada. A resposta precisa de messageId válido para ser aceita; DUPLICATE_ não é envio novo. ID aceito não é entregue/lido.
+
+Para o primeiro teste, a tabela do kit permite uma única reserva persistente por dono, antes da chamada. Duplicação, timeout, 5xx ou resposta sem prova não autorizam retentar ou apagar a reserva. O frontend bloqueia toque duplo, mas a prova de unicidade vem do banco. Não habilite WAFLY_DISPATCH_ENABLED, não faça envio real nem publique automaticamente. Entregue diff e instruções para o dono revisar e optar pelo primeiro envio ao próprio número.
+
+Valide prévia sem credenciais Wafly, sessão ausente/inválida, usuário de outra conta, origem não autorizada, tentativa de alterar instância/telefone, payload inválido, concorrência, 2xx sem ID, timeout e DUPLICATE_. Não crie instância, QR, callback, cobrança, automação, disparo em lote ou contato com clientes.
+
+Explique que este é um primeiro teste de dono único, não um sistema multi-tenant pronto. Para notificações de produção, será preciso chave por evento de negócio, isolamento por cliente, limites e conciliação. A oferta Flex Wafly é não oficial; não prometa parceria ou conector nativo Lovable/Meta, entrega garantida ou risco zero.
