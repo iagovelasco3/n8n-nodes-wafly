@@ -1,0 +1,2 @@
+[functions.wafly-text-v2]
+verify_jwt = true

@@ -1,0 +1,18 @@
+{
+  "version": "2026-10-29-v2",
+  "passed": true,
+  "checked_utc": "2026-10-29T23:22:55.288715+00:00",
+  "runtime": "Deno2.9.6 + PostgreSQL16 + PostgREST12.2.3, internal network",
+  "backend_tests": {
+    "pure": 10,
+    "integration": 23,
+    "databaseControls": 13
+  },
+  "auth": "synthetic Supabase Auth responses; fresh owner guard exercised; verify_jwt=true retained",
+  "api": "exact current production bridge classes; outbound PubSub/WhatsApp effect replaced by counter",
+  "delivery": "synthetic response for consumer validation, not a real callback/handset receipt",
+  "Cloud_or_customer_deploy": false,
+  "real_WhatsApp_messages": 0,
+  "production_signups": null,
+  "proof_boundary": "Local isolated staging. No hosted Supabase/Lovable or real WhatsApp delivery claim. v1 record and key/time immutability verified."
+}

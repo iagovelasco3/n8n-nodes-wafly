@@ -1,0 +1,290 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Wafly — envio com chave e consulta de status, referência para backend",
+    "version": "2026-10-29-v2",
+    "description": "Recorte da API para o kit builders v2. Idempotency-Key é opcional na API e obrigatório no kit; o contrato legado sem chave permanece. Mesma chave+corpo+dono+instância por24h. O kit limita POST a23h da reserva e preserva tentativas v1. Não é conector nativo, OpenAPI completa, nem autorização de envio. Flex não oficial da Meta."
+  },
+  "servers": [
+    {
+      "url": "https://wafly.com.br/api-bridge-whats"
+    }
+  ],
+  "security": [
+    {
+      "ClientToken": []
+    }
+  ],
+  "paths": {
+    "/instances/{instance}/token/{token}/send-text": {
+      "post": {
+        "operationId": "requestKeyedWaflyText",
+        "summary": "Solicitar uma intenção autorizada com chave persistida",
+        "x-server-only": true,
+        "parameters": [
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "Instância do proprietário, configurada no backend.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Segredo da instância. Nunca usar no browser/chat/log.",
+            "schema": {
+              "type": "string",
+              "writeOnly": true
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Opcional na API; obrigatório no kit v2. Uma chave por intenção, 24h de retenção; não trocar em timeout.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._:-]{8,128}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "phone",
+                  "message"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "phone": {
+                    "type": "string",
+                    "description": "Um único destinatário autorizado com DDI e DDD."
+                  },
+                  "message": {
+                    "type": "string",
+                    "description": "Texto original da intenção; corpo igual na recuperação."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Pedido inválido."
+          },
+          "401": {
+            "description": "Credencial recusada."
+          },
+          "402": {
+            "description": "Acesso requer revisão."
+          },
+          "403": {
+            "description": "Acesso recusado."
+          },
+          "404": {
+            "description": "Instância/recibo não encontrados para o proprietário ou recibo removido após expiração."
+          },
+          "409": {
+            "description": "Chave usada com outro corpo; restaure a operação original."
+          },
+          "410": {
+            "description": "Recibo expirado; concilie sem reenviar."
+          },
+          "429": {
+            "description": "Limite; não criar retry automático."
+          },
+          "503": {
+            "description": "Confirmação indisponível; manter chave/ID."
+          },
+          "default": {
+            "description": "Falha/resultado incerto; não autoriza nova intenção."
+          },
+          "200": {
+            "description": "Recibo da operação com chave; não significa entrega/leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageReceipt"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Recibo da operação com chave; não significa entrega/leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instance}/token/{token}/messages/{messageId}/status": {
+      "get": {
+        "operationId": "readWaflyTextReceipt",
+        "summary": "Consultar recibo autenticado sem enviar ou reconectar sessão",
+        "x-server-only": true,
+        "parameters": [
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "description": "Instância do proprietário, configurada no backend.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Segredo da instância. Nunca usar no browser/chat/log.",
+            "schema": {
+              "type": "string",
+              "writeOnly": true
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "description": "ID original de envio com chave na mesma instância/proprietário.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Pedido inválido."
+          },
+          "401": {
+            "description": "Credencial recusada."
+          },
+          "402": {
+            "description": "Acesso requer revisão."
+          },
+          "403": {
+            "description": "Acesso recusado."
+          },
+          "404": {
+            "description": "Instância/recibo não encontrados para o proprietário ou recibo removido após expiração."
+          },
+          "409": {
+            "description": "Chave usada com outro corpo; restaure a operação original."
+          },
+          "410": {
+            "description": "Recibo expirado; concilie sem reenviar."
+          },
+          "429": {
+            "description": "Limite; não criar retry automático."
+          },
+          "503": {
+            "description": "Confirmação indisponível; manter chave/ID."
+          },
+          "default": {
+            "description": "Falha/resultado incerto; não autoriza nova intenção."
+          },
+          "200": {
+            "description": "Recibo da operação com chave; não significa entrega/leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageReceipt"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Recibo da operação com chave; não significa entrega/leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ClientToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Client-Token"
+      }
+    },
+    "schemas": {
+      "MessageReceipt": {
+        "type": "object",
+        "required": [
+          "messageId",
+          "instance",
+          "state",
+          "delivery",
+          "expiresAt",
+          "automaticRetry"
+        ],
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{24}$"
+          },
+          "instance": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "PROCESSING",
+              "QUEUED",
+              "ACCEPTED",
+              "DELIVERED",
+              "FAILED",
+              "UNKNOWN"
+            ]
+          },
+          "delivery": {
+            "type": "string",
+            "enum": [
+              "not_observed",
+              "confirmed"
+            ],
+            "description": "confirmed apenas com DELIVERED; nunca comprova leitura."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "automaticRetry": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          },
+          "replayed": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

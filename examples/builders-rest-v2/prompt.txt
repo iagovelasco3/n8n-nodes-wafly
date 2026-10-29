@@ -1,0 +1,22 @@
+Adapte meu app existente à API REST Flex da Wafly pelo backend. Preserve stack, autenticação, dados, RLS, consentimento e tracking. Não crie outro SaaS, CRM, cadastro ou infraestrutura.
+
+Kit v2: https://wafly.com.br/downloads/wafly-builder-starter-20261029-v2.zip
+Fonte: https://github.com/iagovelasco3/n8n-nodes-wafly/tree/main/examples/builders-rest-v2
+Contrato mínimo: https://wafly.com.br/downloads/wafly-builder-openapi-20261029-v2.json
+Guia: https://wafly.com.br/parceiros/api-whatsapp-para-saas/#kit-builder
+
+Leia o README e mostre o diff antes de instalar no meu projeto. Se já usa Supabase, adapte core.ts, frontend-example.ts e a função wafly-text-v2. Em outra stack, adapte autenticação e reserva persistente nativas. Não desative JWT, RLS ou autenticação para contornar erros.
+
+Comece em WAFLY_DISPATCH_ENABLED=false. A prévia consulta a sessão fresca do mesmo projeto e exige o UUID do dono, sem reserva ou envio. A tela só envia action, message e confirmação de destinatário. Instância, número, Client-Token e token ficam em Secrets no servidor; não peça valores no chat, não use VITE_/NEXT_PUBLIC_, não exponha service-role nem imprima URL/erro bruto.
+
+Revise as migrações e o schema. A v2 é aditiva à tabela original wafly_builder_first_attempts e compartilha a reserva única por dono. Projeto novo aplica a migração v1 e a aditiva v2; quem já tem v1 aplica só a ainda não aplicada. Não apague tabela/registro nem reaplique a migração antiga. Uma tentativa v1 sem chave deve permanecer bloqueada para conciliação; não invente chave nem recibo.
+
+Implemente quatro botões manuais, sem mount/efeito/timer: preview(), sendAuthorized(), status() e recoverAuthorized(). A primeira intenção autorizada reserva uma chave UUID e data imutáveis no banco antes do POST. O backend usa Client-Token e Idempotency-Key com {phone,message} em /instances/{instance}/token/{token}/send-text. Uma reserva por dono impede clique duplo e concorrência entre processos. Este é um primeiro teste do dono, não serviço multi-tenant de notificações.
+
+Depois de timeout, NÃO chame send de novo nem gere chave. Recuperação explícita usa a mesma reserva, instância, proprietário e texto original. Com ID persistido, faz só GET /instances/{instance}/token/{token}/messages/{messageId}/status. Sem ID, reutiliza a mesma chave dentro da janela. API retém por24h; kit bloqueia POST após23h da reserva. Não renovar data/chave nem apagar reserva após expiração; conciliar antes de nova intenção. GET funciona com envio desligado.
+
+Mostre messageId, state, delivery, expiresAt, automaticRetry=false e aviso de conciliação quando existir. PROCESSING/QUEUED não são aceite nativo; ACCEPTED não é entrega; DELIVERED exige callback correlacionado e não é leitura. UNKNOWN e erro de SDK/HTTP não autorizam novo envio. Não implemente retry, polling contínuo, batch, cron ou novo worker. O transporte pode repetir uma requisição; por isso toda repetição deve manter a chave persistida.
+
+Valide sem rede externa: preview, sessão ausente/estrangeira, segredo só no backend, alteração de instância/telefone/chave pelo browser, concorrência, timeout após aceite, mesma chave/um efeito, GET sem POST, registro v1 preservado, corpo diferente, expiração, gravação do ID falha e callback ausente. Não crie instância/QR/webhook, não cobre, não mande WhatsApp real e não publique no meu projeto automaticamente. Entregue código e instruções para o dono revisar e optar por um teste autorizado.
+
+Flex é não oficial da Meta e sujeita a restrição. Não prometa conector nativo/parceria Lovable/Meta/Supabase, entrega garantida, risco zero ou multi-tenant pronto. Backend, plataforma e IA têm custos próprios.
