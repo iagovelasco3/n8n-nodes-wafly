@@ -36,8 +36,10 @@ Five workflows you can import and run, instead of starting from a blank canvas. 
 
 You can also copy any workflow with one click (including two HTTP Request examples for **n8n Cloud**) at **[wafly.com.br/templates](https://wafly.com.br/templates/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_template_gallery)**.
 
-Import the JSON, create the **Wafly API** credential and activate. All of them run on
-self-hosted n8n. n8n Cloud offers the verified version of this node from the nodes panel; while a newer release is under n8n review, use HTTP Request nodes on Cloud for the operations it adds.
+Import the JSON, review the workflow and configure your own credentials before activating.
+The community-node templates above target self-hosted n8n. The verified Wafly node is
+also available on n8n Cloud, but each template still needs its own compatibility check;
+catalog availability alone does not validate every imported workflow.
 
 See the [template index and setup notes](examples/templates/README.md). To run the Portuguese template, [start a free 3-day Wafly trial](https://wafly.com.br/signup?utm_source=github&utm_medium=repository&utm_campaign=qualificacao_leads_whatsapp&utm_content=readme_template_08&template_id=n8n-08-qualificar-leads).
 For the English workflow, [try Wafly on wafly.io](https://wafly.io/signup?utm_source=github&utm_medium=repository&utm_campaign=lead_qualification&utm_content=readme_template_08_en&template_id=n8n-08-qualificar-leads).
@@ -153,9 +155,33 @@ n8n process after a manual installation when it is safe for your workflows.
 In queue mode, install the same version on every worker that executes the node.
 See the [n8n installation guide](https://docs.n8n.io/integrations/community-nodes/installation/manual-install/).
 
-The community node is for self-hosted n8n. On n8n Cloud, use the native
-HTTP Request and Webhook nodes as shown in the
-[Wafly guide](https://wafly.com.br/tutoriais/whatsapp-api-n8n/).
+### n8n Cloud: install from the canvas
+
+The official n8n verified-node registry lists **n8n-nodes-wafly 1.6.1** as published
+(checked October 30, 2026). Its actions include **Message → Send Text** and
+**Webhook → Set Webhook**. This identifies the published package, not a completed
+WhatsApp round trip in your Cloud account.
+
+1. As the n8n instance owner or admin, open the canvas and select **+** (or press **n**).
+2. Search for **Wafly WhatsApp** under **More from the community**, open its details
+   and select **Install**. Check the installed version and supported actions.
+3. Create the **Wafly API** credential described below. For incoming messages, use
+   n8n's native **Webhook** node (POST); **Set Webhook** configures the callback URL
+   on Wafly and is not an incoming-message trigger.
+4. Publish or activate your receiving workflow as required by your n8n version,
+   then configure its **Production URL**. Test your own authorized recipient before
+   enabling automatic replies; an API response or message ID alone is not delivery.
+
+If the verified node is hidden, ask your instance admin to check the **Verified
+community nodes** setting in the n8n Cloud console. Do not restart a shared instance
+without planning for its running workflows. See the
+[official n8n installation instructions](https://docs.n8n.io/integrations/community-nodes/installation-and-management/install-verified-community-nodes/).
+
+You can also use native **HTTP Request + Webhook** nodes in Cloud or self-hosted n8n.
+The [Wafly guide and safe HTTP starter](https://wafly.com.br/tutoriais/whatsapp-api-n8n/)
+remain available without installing the community node. Advanced operations depend
+on the selected connection; consult the
+[API contract and capability guide](https://wafly.com.br/downloads/wafly-api-contracts-20261030.md).
 
 ## 🔑 Credentials
 
