@@ -27,7 +27,7 @@ import_copy = dict(original, id='waflyOfflineMigrationLab20261022')
 (out/'import.json').write_text(json.dumps(import_copy, ensure_ascii=False))
 run(['docker','pull',image], 'image-pull.log')
 digest = json.loads(run(['docker','image','inspect',image], 'image-inspect.log'))[0]['RepoDigests']
-command = 'n8n --version > /work/n8n-version.log && n8n import:workflow --input=/work/import.json > /work/import.log 2>&1 && n8n execute --id=waflyOfflineMigrationLab20261022 --rawOutput > /work/execution.log 2>&1 && n8n export:workflow --id=waflyOfflineMigrationLab20261022 --output=/work/exported-laboratorio-n8n.json --pretty > /work/export.log 2>&1'
+command = 'n8n --version > /work/n8n-version.log && n8n import:workflow --input=/work/import.json > /work/import.log 2>&1 && n8n execute --id=waflyOfflineMigrationLab20261022 --rawOutput > /work/execution-1.log 2>&1 && n8n execute --id=waflyOfflineMigrationLab20261022 --rawOutput > /work/execution-2.log 2>&1 && n8n export:workflow --id=waflyOfflineMigrationLab20261022 --output=/work/exported-laboratorio-n8n.json --pretty > /work/export.log 2>&1'
 run(['docker','run','--rm','--network','none','--cap-drop','ALL','--security-opt','no-new-privileges',
      '-v',str(out)+':/work',
      '-e','N8N_DIAGNOSTICS_ENABLED=false','-e','N8N_VERSION_NOTIFICATIONS_ENABLED=false',
@@ -35,40 +35,49 @@ run(['docker','run','--rm','--network','none','--cap-drop','ALL','--security-opt
      '-e','N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false',
      '-e','N8N_ENCRYPTION_KEY=offline-synthetic-lab-only-not-a-credential',
      '--entrypoint','sh',image,'-c',command], 'container.log')
-text = (out/'execution.log').read_text()
-decoder = json.JSONDecoder()
-execution = None
-for i,char in enumerate(text):
-    if char != '{': continue
-    try: value,_ = decoder.raw_decode(text[i:])
-    except ValueError: continue
-    if isinstance(value,dict) and isinstance(value.get('data'),dict) and 'resultData' in value['data']:
-        execution=value;break
-assert execution is not None, text[-3000:]
-data=execution['data']['resultData']
-assert not data.get('error'),data.get('error')
-runs=data['runData']
-samples=runs['Amostras sintéticas'][-1]['data']['main'][0]
-outputs=runs['Normalizar e conferir'][-1]['data']['main'][0]
-assert len(samples)==len(outputs)==13
 fixtures=json.loads((out/'amostras-20261022.json').read_text())
-assert [r['json'] for r in samples] == fixtures['cases']
-seen=set()
-for i,(sample,row) in enumerate(zip(fixtures['cases'],outputs)):
-    actual=row['json']; assert actual['sample']==sample['name']
-    assert actual['accepted']==sample['expectedAccepted']
-    if sample.get('expectedReason'): assert actual['reason']==sample['expectedReason']
-    if actual['accepted']:
-        event=actual['event'];assert event['instance']==sample['expectedInstance']
-        assert event['provider']==sample['provider']
-        assert event['is_group'] is False and event['from_me'] is False
-        assert json.loads(event['dedupe_key'])==[sample['provider'],sample['expectedInstance'],event['message_id']]
-        assert actual['duplicate_in_sample']==(event['dedupe_key'] in seen)
-        seen.add(event['dedupe_key'])
-    else: assert 'event' not in actual and actual['duplicate_in_sample'] is False
-    assert row.get('pairedItem') == {'item':i},row
-(out/'outputs.json').write_text(json.dumps([r['json'] for r in outputs], ensure_ascii=False,indent=2)+'\n')
-(out/'execution-result.json').write_text(json.dumps(execution,ensure_ascii=False,indent=2)+'\n')
+all_outputs=[]
+for number in [1,2]:
+    text = (out/f'execution-{number}.log').read_text()
+    decoder = json.JSONDecoder()
+    execution = None
+    for i,char in enumerate(text):
+        if char != '{': continue
+        try: value,_ = decoder.raw_decode(text[i:])
+        except ValueError: continue
+        if isinstance(value,dict) and isinstance(value.get('data'),dict) and 'resultData' in value['data']:
+            execution=value;break
+    assert execution is not None, text[-3000:]
+    data=execution['data']['resultData']
+    assert not data.get('error'),data.get('error')
+    runs=data['runData']
+    samples=runs['Amostras sintéticas'][-1]['data']['main'][0]
+    outputs=runs['Normalizar e conferir'][-1]['data']['main'][0]
+    assert len(samples)==len(outputs)==13
+    assert [r['json'] for r in samples] == fixtures['cases']
+    seen=set()
+    for i,(sample,row) in enumerate(zip(fixtures['cases'],outputs)):
+        actual=row['json']; assert actual['sample']==sample['name']
+        assert actual['accepted']==sample['expectedAccepted']
+        if sample.get('expectedReason'): assert actual['reason']==sample['expectedReason']
+        if actual['accepted']:
+            event=actual['event'];assert event['instance']==sample['expectedInstance']
+            assert event['provider']==sample['provider']
+            assert event['is_group'] is False and event['from_me'] is False
+            assert json.loads(event['dedupe_key'])==[sample['provider'],sample['expectedInstance'],event['message_id']]
+            assert actual['duplicate_in_sample']==(event['dedupe_key'] in seen)
+            seen.add(event['dedupe_key'])
+        else: assert 'event' not in actual and actual['duplicate_in_sample'] is False
+        assert row.get('pairedItem') == {'item':i},row
+    rows=[r['json'] for r in outputs]
+    all_outputs.append(rows)
+    (out/f'outputs-run{number}.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2)+'\n')
+    (out/f'execution-result-{number}.json').write_text(json.dumps(execution,ensure_ascii=False,indent=2)+'\n')
+assert all_outputs[0]==all_outputs[1]
+first_wafly=next(i for i,s in enumerate(fixtures['cases']) if s['name']=='Texto Wafly')
+repeat_wafly=next(i for i,s in enumerate(fixtures['cases']) if s['name']=='Repetição do texto Wafly')
+assert all(rows[first_wafly]['duplicate_in_sample'] is False for rows in all_outputs)
+assert all(rows[repeat_wafly]['duplicate_in_sample'] is True for rows in all_outputs)
 exported=json.loads((out/'exported-laboratorio-n8n.json').read_text())
 if isinstance(exported,list): assert len(exported)==1;exported=exported[0]
 assert exported['nodes']==original['nodes']
@@ -76,10 +85,17 @@ assert exported['connections']==original['connections']
 assert all(exported['settings'].get(k)==v for k,v in original['settings'].items())
 assert exported['active'] is False
 assert exported['name']==original['name']
+assert len(original)==7 and all(exported[k]==v for k,v in original.items())
+assert exported['staticData'] is None
 summary={'passed':True,'started_utc':started,'completed_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
  'n8n_version':(out/'n8n-version.log').read_text().strip(),'image':image,'image_digests':digest,
  'network_mode':'none','diagnostics':False,'credentials':0,'external_API_calls':0,'WhatsApp_sends':0,
  'manual_trigger':True,'nodes':4,'samples':13,'existing_Node_checks':checks['checks'],
+ 'workflow_imports':1,'consecutive_executions':2,'same_container_and_n8n_data_directory':True,
+ 'output_rows_per_execution':[len(rows) for rows in all_outputs],'outputs_identical_across_executions':True,
+ 'duplicate_in_sample_resets_each_execution':True,'durable_dedupe':False,
+ 'duplicate_reset_evidence':{'first_Texto_Wafly_duplicate_flags':[rows[first_wafly]['duplicate_in_sample'] for rows in all_outputs],'repeat_Texto_Wafly_duplicate_flags':[rows[repeat_wafly]['duplicate_in_sample'] for rows in all_outputs]},
+ 'all_7_original_fields_identical':True,'exported_staticData':None,
  'actual_n8n_CLI_import_execute_export':True,'export_nodes_connections_equal_original':True,
  'original_settings_preserved':True,'output_rows':len(outputs),'accepted_rows':sum(r['json']['accepted'] for r in outputs),
  'rejected_rows':sum(not r['json']['accepted'] for r in outputs),
