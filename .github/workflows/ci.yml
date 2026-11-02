@@ -36,4 +36,7 @@ jobs:
         if: always()
         with:
           name: runtime-${{ matrix.n8n }}
-          path: /tmp/wafly-runtime/*.log
+          path: |
+            /tmp/wafly-runtime/*.log
+            /tmp/wafly-runtime/package.tgz
+            /tmp/wafly-runtime/summary.json
