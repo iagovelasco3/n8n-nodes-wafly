@@ -1,0 +1,23 @@
+name: PHP Java quickstart examples
+on:
+  push:
+    branches: ['qa/php-java-quickstart-20261102']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  php8-native-mock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect existing PHP runtime without installing
+        run: php -v && php -m
+      - name: Run exact PHP example against loopback fixture
+        run: python3 tests/php-java-quickstart-20261102/run-mock.py --runtime php --executable php --source tests/php-java-quickstart-20261102/enviar-mensagem-20261102.php --out /tmp/php-quickstart-proof
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: php8-quickstart-20261102
+          path: /tmp/php-quickstart-proof
+          retention-days: 30
