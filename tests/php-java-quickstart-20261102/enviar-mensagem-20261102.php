@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-// PHP 8+ com as extensões cURL e JSON. Execute somente no seu backend.
+// PHP 8+ CLI com as extensões cURL e JSON. Execute somente no seu backend.
 // Configure WAFLY_CLIENT_TOKEN, WAFLY_INSTANCE, WAFLY_TOKEN,
 // WAFLY_PHONE (DDI + DDD + número, só dígitos) e WAFLY_MESSAGE.
 // WAFLY_BASE_URL é opcional; HTTP só é aceito em loopback para testes locais.
