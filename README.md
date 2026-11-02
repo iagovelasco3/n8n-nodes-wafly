@@ -14,6 +14,18 @@ This is an n8n community node for the **Wafly WhatsApp Bridge API**. It lets you
 - 🇧🇷 **Brazil:** **[Try 3 days free, no card](https://wafly.com.br/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_top_cta_br)** — **BRL 59.90/month** per number (or **BRL 39.90/month** above 10 numbers on a Partner account). See the [ready-made n8n templates](https://wafly.com.br/templates/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_templates_br), [Wafly vs Evolution API on a VPS](https://wafly.com.br/comparativos/evolution-api-gerenciada/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_evolution_br) and [Z-API alternative](https://wafly.com.br/comparativos/alternativa-z-api/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_zapi_br).
 - 🌍 **International:** **[Start a free 3-day trial](https://wafly.io/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_top_cta)** — **$20/month** per connected WhatsApp number, no credit card required.
 
+## Switching from Evolution or Z-API?
+
+Already have an integration? Compare fictional incoming one-to-one text payloads
+from Evolution 2, Z-API and Wafly with the [migration compatibility kit](https://wafly.com.br/tutoriais/migrar-evolution-z-api-n8n/?utm_source=github&utm_medium=repository&utm_campaign=migration_compatibility_20261101&utm_content=readme_migration_kit&utm_term=evolution_zapi#kit-de-migracao).
+Run the samples locally in your browser without credentials or message sending.
+The kit covers text normalization; adapting authentication, sending, media,
+groups and status remains part of your integration. It does not migrate sessions
+or certify n8n Cloud workflows.
+
+After comparing, follow the kit's trial link and validate your integration with
+a separate number you own before changing production.
+
 ## Building an app with AI?
 
 Use the [Wafly REST starter for existing apps](examples/builders-rest/README.md): TypeScript, a Supabase Edge adapter, a prompt for Lovable and local tests. It starts in preview mode, keeps secrets on the backend and distinguishes API acceptance from delivery. The interface lab is simulated; no live WhatsApp delivery or universal platform compatibility is claimed.
