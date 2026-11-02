@@ -1,6 +1,8 @@
 # Ready-made Wafly templates for n8n
 
-Every template in this gallery uses the `n8n-nodes-wafly` community node and therefore needs a self-hosted n8n.
+Every template in this gallery uses the `n8n-nodes-wafly` community node. Version 1.6.1 is published in the n8n verified-node catalogue (checked 2 November 2026). On n8n Cloud, an Owner/Admin can install **Wafly WhatsApp** from the canvas node panel; self-hosted installations can also use the community package.
+
+**The complete templates in this gallery have not been validated on n8n Cloud.** Configure credentials, adapt and test each workflow in your environment before activation. Installing the node does not prove workflow execution or WhatsApp delivery. See the [installation and webhook guide](https://wafly.com.br/tutoriais/whatsapp-api-n8n/#n8n-cloud-node-heading).
 
 ## Featured: lead qualification
 
