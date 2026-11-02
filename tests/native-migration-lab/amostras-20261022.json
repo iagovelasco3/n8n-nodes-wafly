@@ -1,0 +1,305 @@
+{
+  "version": "1.0.0",
+  "reviewedAt": "2026-10-22",
+  "synthetic": true,
+  "scope": "Texto recebido individual; exemplos sem pessoas ou credenciais reais.",
+  "cases": [
+    {
+      "name": "Texto Evolution 2",
+      "provider": "evolution2",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "event": "messages.upsert",
+        "instance": "homologacao-exemplo",
+        "data": {
+          "key": {
+            "id": "EXEMPLO-TEXTO-001",
+            "remoteJid": "5511000000000@s.whatsapp.net",
+            "fromMe": false
+          },
+          "message": {
+            "conversation": "Quero comparar a operação gerenciada."
+          },
+          "messageType": "conversation"
+        }
+      },
+      "expectedAccepted": true
+    },
+    {
+      "name": "Texto estendido Evolution 2",
+      "provider": "evolution2",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "event": "messages.upsert",
+        "instance": "homologacao-exemplo",
+        "data": {
+          "key": {
+            "id": "EXEMPLO-TEXTO-002",
+            "remoteJid": "5511000000000@s.whatsapp.net",
+            "fromMe": false
+          },
+          "message": {
+            "extendedTextMessage": {
+              "text": "Quero validar o fluxo no n8n.",
+              "contextInfo": {
+                "quotedMessage": {
+                  "conversation": "mensagem anterior"
+                }
+              }
+            }
+          },
+          "messageType": "conversation"
+        }
+      },
+      "expectedAccepted": true
+    },
+    {
+      "name": "Texto Z-API",
+      "provider": "zapi",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "type": "ReceivedCallback",
+        "instanceId": "homologacao-exemplo",
+        "messageId": "EXEMPLO-TEXTO-001",
+        "phone": "5511000000000",
+        "fromMe": false,
+        "isGroup": false,
+        "isNewsletter": false,
+        "isStatusReply": false,
+        "isEdit": false,
+        "waitingMessage": false,
+        "broadcast": false,
+        "text": {
+          "message": "Quero comparar a operação gerenciada."
+        }
+      },
+      "expectedAccepted": true
+    },
+    {
+      "name": "Texto Wafly",
+      "provider": "wafly",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "type": "ReceivedCallback",
+        "instanceId": "homologacao-exemplo",
+        "messageId": "EXEMPLO-TEXTO-001",
+        "phone": "5511000000000",
+        "fromMe": false,
+        "isGroup": false,
+        "isNewsletter": false,
+        "isStatusReply": false,
+        "isEdit": false,
+        "waitingMessage": false,
+        "broadcast": false,
+        "text": {
+          "message": "Quero comparar a operação gerenciada."
+        }
+      },
+      "expectedAccepted": true
+    },
+    {
+      "name": "Eco enviado por mim",
+      "provider": "evolution2",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "event": "messages.upsert",
+        "instance": "homologacao-exemplo",
+        "data": {
+          "key": {
+            "id": "EXEMPLO-TEXTO-001",
+            "remoteJid": "5511000000000@s.whatsapp.net",
+            "fromMe": true
+          },
+          "message": {
+            "conversation": "Quero comparar a operação gerenciada."
+          },
+          "messageType": "conversation"
+        }
+      },
+      "expectedAccepted": false,
+      "expectedReason": "mensagem_propria_ou_direcao_incerta"
+    },
+    {
+      "name": "Grupo",
+      "provider": "zapi",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "type": "ReceivedCallback",
+        "instanceId": "homologacao-exemplo",
+        "messageId": "EXEMPLO-TEXTO-001",
+        "phone": "120000000000000000-group",
+        "fromMe": false,
+        "isGroup": true,
+        "isNewsletter": false,
+        "isStatusReply": false,
+        "isEdit": false,
+        "waitingMessage": false,
+        "broadcast": false,
+        "text": {
+          "message": "Quero comparar a operação gerenciada."
+        }
+      },
+      "expectedAccepted": false,
+      "expectedReason": "destino_fora_do_escopo"
+    },
+    {
+      "name": "LID sem telefone",
+      "provider": "evolution2",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "event": "messages.upsert",
+        "instance": "homologacao-exemplo",
+        "data": {
+          "key": {
+            "id": "EXEMPLO-TEXTO-001",
+            "remoteJid": "100000000000000@lid",
+            "fromMe": false
+          },
+          "message": {
+            "conversation": "Quero comparar a operação gerenciada."
+          },
+          "messageType": "conversation"
+        }
+      },
+      "expectedAccepted": false,
+      "expectedReason": "destino_fora_do_escopo"
+    },
+    {
+      "name": "Imagem com legenda",
+      "provider": "wafly",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "type": "ReceivedCallback",
+        "instanceId": "homologacao-exemplo",
+        "messageId": "EXEMPLO-TEXTO-001",
+        "phone": "5511000000000",
+        "fromMe": false,
+        "isGroup": false,
+        "isNewsletter": false,
+        "isStatusReply": false,
+        "isEdit": false,
+        "waitingMessage": false,
+        "broadcast": false,
+        "text": {},
+        "image": {
+          "caption": "Isto é legenda, não texto simples",
+          "imageUrl": "https://example.invalid/foto.jpg"
+        }
+      },
+      "expectedAccepted": false,
+      "expectedReason": "conteudo_fora_do_escopo"
+    },
+    {
+      "name": "Atualização de status",
+      "provider": "evolution2",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "event": "messages.update",
+        "instance": "homologacao-exemplo",
+        "data": {
+          "key": {
+            "id": "EXEMPLO-TEXTO-001",
+            "remoteJid": "5511000000000@s.whatsapp.net",
+            "fromMe": false
+          },
+          "message": {
+            "conversation": "Quero comparar a operação gerenciada."
+          },
+          "messageType": "conversation"
+        }
+      },
+      "expectedAccepted": false,
+      "expectedReason": "evento_fora_do_escopo"
+    },
+    {
+      "name": "Outra instância",
+      "provider": "wafly",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "type": "ReceivedCallback",
+        "instanceId": "outra-instancia",
+        "messageId": "EXEMPLO-TEXTO-001",
+        "phone": "5511000000000",
+        "fromMe": false,
+        "isGroup": false,
+        "isNewsletter": false,
+        "isStatusReply": false,
+        "isEdit": false,
+        "waitingMessage": false,
+        "broadcast": false,
+        "text": {
+          "message": "Quero comparar a operação gerenciada."
+        }
+      },
+      "expectedAccepted": false,
+      "expectedReason": "instancia_divergente"
+    },
+    {
+      "name": "Direção ausente",
+      "provider": "zapi",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "type": "ReceivedCallback",
+        "instanceId": "homologacao-exemplo",
+        "messageId": "EXEMPLO-TEXTO-001",
+        "phone": "5511000000000",
+        "isGroup": false,
+        "isNewsletter": false,
+        "isStatusReply": false,
+        "isEdit": false,
+        "waitingMessage": false,
+        "broadcast": false,
+        "text": {
+          "message": "Quero comparar a operação gerenciada."
+        }
+      },
+      "expectedAccepted": false,
+      "expectedReason": "mensagem_propria_ou_direcao_incerta"
+    },
+    {
+      "name": "Sem ID",
+      "provider": "wafly",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "type": "ReceivedCallback",
+        "instanceId": "homologacao-exemplo",
+        "messageId": "",
+        "phone": "5511000000000",
+        "fromMe": false,
+        "isGroup": false,
+        "isNewsletter": false,
+        "isStatusReply": false,
+        "isEdit": false,
+        "waitingMessage": false,
+        "broadcast": false,
+        "text": {
+          "message": "Quero comparar a operação gerenciada."
+        }
+      },
+      "expectedAccepted": false,
+      "expectedReason": "id_invalido"
+    },
+    {
+      "name": "Repetição do texto Wafly",
+      "provider": "wafly",
+      "expectedInstance": "homologacao-exemplo",
+      "payload": {
+        "type": "ReceivedCallback",
+        "instanceId": "homologacao-exemplo",
+        "messageId": "EXEMPLO-TEXTO-001",
+        "phone": "5511000000000",
+        "fromMe": false,
+        "isGroup": false,
+        "isNewsletter": false,
+        "isStatusReply": false,
+        "isEdit": false,
+        "waitingMessage": false,
+        "broadcast": false,
+        "text": {
+          "message": "Quero comparar a operação gerenciada."
+        }
+      },
+      "expectedAccepted": true
+    }
+  ]
+}

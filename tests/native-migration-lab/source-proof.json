@@ -1,0 +1,29 @@
+{
+  "read_utc": "2026-11-02T18:40:59.250885+00:00",
+  "sources": [
+    {
+      "url": "https://wafly.com.br/tutoriais/migrar-evolution-z-api-n8n/laboratorio-n8n-20261022.json",
+      "file": "laboratorio-n8n-20261022.json",
+      "sha256": "515aea72d989cb9ca4b74e0394f7cf710963748492ef76e9b1ebbbc0ad829f74",
+      "http": 200
+    },
+    {
+      "url": "https://wafly.com.br/tutoriais/migrar-evolution-z-api-n8n/amostras-20261022.json",
+      "file": "amostras-20261022.json",
+      "sha256": "0ad51a456bd21865dedcfbc3e00f9e3582c3627280fb2ab0d8b771b9e7109522",
+      "http": 200
+    },
+    {
+      "url": "https://wafly.com.br/tutoriais/migrar-evolution-z-api-n8n/normalizador-20261022.mjs",
+      "file": "normalizador-20261022.mjs",
+      "sha256": "de92c56bd4c790559204865d7a9e97773e922762c2174a22c85d07dbf20495b0",
+      "http": 200
+    },
+    {
+      "url": "https://wafly.com.br/tutoriais/migrar-evolution-z-api-n8n/testar-kit-20261022.mjs",
+      "file": "testar-kit-20261022.mjs",
+      "sha256": "b4a19552529ab7bb184930eb1e5b9d27c74b0c05d4083f89b51bef128c9dd98e",
+      "http": 200
+    }
+  ]
+}

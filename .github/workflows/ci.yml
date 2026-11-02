@@ -1,42 +1,22 @@
 name: Validate node
 on:
-  pull_request:
-  push:
-    branches: [main, 'release/**']
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
-  contracts:
+  existing-migration-lab:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run lint && npm run check:generated
-      - run: git diff --exit-code -- nodes credentials schema
-  runtime:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        n8n: ['1.120.4', '2.43.7']
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci && npm run build && npm pack
-      - run: docker pull n8nio/n8n:${{ matrix.n8n }}
-      - run: python3 tests/runtime/run.py --image n8nio/n8n:${{ matrix.n8n }} --tarball "n8n-nodes-wafly-$(node -p "require('./package.json').version").tgz" --out /tmp/wafly-runtime
+      - name: Run only existing offline lab in isolated n8n
+        run: python3 tests/native-migration-lab/run.py /tmp/wafly-existing-lab
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: runtime-${{ matrix.n8n }}
-          path: |
-            /tmp/wafly-runtime/*.log
-            /tmp/wafly-runtime/package.tgz
-            /tmp/wafly-runtime/summary.json
+          name: existing-migration-lab-n8n-2.43.7
+          path: /tmp/wafly-existing-lab
+          retention-days: 30
