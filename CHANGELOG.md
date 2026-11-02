@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.6.2] - Unreleased
+
+### Changed
+- Documentation only: synchronize npm instructions with the existing verified Wafly node 1.6.1 listing on n8n Cloud; individual workflow compatibility and real Cloud execution remain separate checks.
+- Include the existing local Evolution/Z-API incoming-text compatibility kit and its validation limits from the public README.
+- No runtime, operation, credential, dependency, parameter, default or endpoint changes.
+
 ## [1.6.1] - 2026-10-25
 
 ### Changed

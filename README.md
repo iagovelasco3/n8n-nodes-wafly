@@ -17,7 +17,7 @@ This is an n8n community node for the **Wafly WhatsApp Bridge API**. It lets you
 ## Switching from Evolution or Z-API?
 
 Already have an integration? Compare fictional incoming one-to-one text payloads
-from Evolution 2, Z-API and Wafly with the [migration compatibility kit](https://wafly.com.br/tutoriais/migrar-evolution-z-api-n8n/?utm_source=github&utm_medium=repository&utm_campaign=migration_compatibility_20261101&utm_content=readme_migration_kit&utm_term=evolution_zapi#kit-de-migracao).
+from Evolution 2, Z-API and Wafly with the [migration compatibility kit](https://wafly.com.br/tutoriais/migrar-evolution-z-api-n8n/?utm_source=n8n_node_readme&utm_medium=documentation&utm_campaign=migration_compatibility_20261102&utm_content=readme_migration_kit&utm_term=evolution_zapi#kit-de-migracao).
 Run the samples locally in your browser without credentials or message sending.
 The kit covers text normalization; adapting authentication, sending, media,
 groups and status remains part of your integration. It does not migrate sessions
@@ -28,7 +28,7 @@ a separate number you own before changing production.
 
 ## Building an app with AI?
 
-Use the [Wafly REST starter for existing apps](examples/builders-rest/README.md): TypeScript, a Supabase Edge adapter, a prompt for Lovable and local tests. It starts in preview mode, keeps secrets on the backend and distinguishes API acceptance from delivery. The interface lab is simulated; no live WhatsApp delivery or universal platform compatibility is claimed.
+Use the [Wafly REST starter for existing apps](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/builders-rest/README.md): TypeScript, a Supabase Edge adapter, a prompt for Lovable and local tests. It starts in preview mode, keeps secrets on the backend and distinguishes API acceptance from delivery. The interface lab is simulated; no live WhatsApp delivery or universal platform compatibility is claimed.
 
 ## 🧩 Ready-made workflow templates
 
@@ -36,15 +36,15 @@ Five workflows you can import and run, instead of starting from a blank canvas. 
 
 | Template | Language | What it does |
 |---|---|---|
-| [01 — AI assistant with buffer](examples/templates/01-atendente-ia-whatsapp.json) | pt-BR | Portuguese version of 04: groups split messages and replies once with an AI agent |
-| [02 — Group moderation](examples/templates/02-moderacao-grupo-whatsapp.json) | pt-BR | Portuguese version of 05: approves join requests, welcomes members and removes link spam |
-| [03 — OTP on WhatsApp with SMS fallback](examples/templates/03-otp-whatsapp-fallback-sms.json) | pt-BR | Portuguese version of 06: validates the number and falls back to SMS when unavailable |
-| [04 — AI agent replies once](examples/templates/04-whatsapp-ai-agent-replies-once.json) | EN | Buffers messages that arrive in a burst so your agent answers once instead of three times |
-| [05 — Moderate a group](examples/templates/05-moderate-whatsapp-group.json) | EN | Approves join requests, welcomes members and removes link spam |
-| [06 — Send OTP with SMS fallback](examples/templates/06-send-otp-over-whatsapp.json) | EN | Validates the number first, falls back to SMS when WhatsApp is unreachable |
-| [07 — Alert on disconnect](examples/templates/07-alert-when-whatsapp-number-disconnects.json) | EN | Checks the connection on a schedule and alerts when the number drops |
-| [08 — Qualify WhatsApp leads with AI (pt-BR)](examples/templates/08-qualify-whatsapp-leads-and-hand-off.json) | pt-BR | Same flow as the English template, with Portuguese node names and messages |
-| [08 — Qualify WhatsApp leads with AI (English)](examples/templates/08-qualify-whatsapp-leads-and-hand-off.en.json) | EN | Filters inbound messages, qualifies contacts and hands hot leads to a person |
+| [01 — AI assistant with buffer](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/01-atendente-ia-whatsapp.json) | pt-BR | Portuguese version of 04: groups split messages and replies once with an AI agent |
+| [02 — Group moderation](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/02-moderacao-grupo-whatsapp.json) | pt-BR | Portuguese version of 05: approves join requests, welcomes members and removes link spam |
+| [03 — OTP on WhatsApp with SMS fallback](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/03-otp-whatsapp-fallback-sms.json) | pt-BR | Portuguese version of 06: validates the number and falls back to SMS when unavailable |
+| [04 — AI agent replies once](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/04-whatsapp-ai-agent-replies-once.json) | EN | Buffers messages that arrive in a burst so your agent answers once instead of three times |
+| [05 — Moderate a group](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/05-moderate-whatsapp-group.json) | EN | Approves join requests, welcomes members and removes link spam |
+| [06 — Send OTP with SMS fallback](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/06-send-otp-over-whatsapp.json) | EN | Validates the number first, falls back to SMS when WhatsApp is unreachable |
+| [07 — Alert on disconnect](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/07-alert-when-whatsapp-number-disconnects.json) | EN | Checks the connection on a schedule and alerts when the number drops |
+| [08 — Qualify WhatsApp leads with AI (pt-BR)](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/08-qualify-whatsapp-leads-and-hand-off.json) | pt-BR | Same flow as the English template, with Portuguese node names and messages |
+| [08 — Qualify WhatsApp leads with AI (English)](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/08-qualify-whatsapp-leads-and-hand-off.en.json) | EN | Filters inbound messages, qualifies contacts and hands hot leads to a person |
 
 You can also copy any workflow with one click (including two HTTP Request examples for **n8n Cloud**) at **[wafly.com.br/templates](https://wafly.com.br/templates/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_template_gallery)**.
 
@@ -53,7 +53,7 @@ The community-node templates above target self-hosted n8n. The verified Wafly no
 also available on n8n Cloud, but each template still needs its own compatibility check;
 catalog availability alone does not validate every imported workflow.
 
-See the [template index and setup notes](examples/templates/README.md). To run the Portuguese template, [start a free 3-day Wafly trial](https://wafly.com.br/signup?utm_source=github&utm_medium=repository&utm_campaign=qualificacao_leads_whatsapp&utm_content=readme_template_08&template_id=n8n-08-qualificar-leads).
+See the [template index and setup notes](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/README.md). To run the Portuguese template, [start a free 3-day Wafly trial](https://wafly.com.br/signup?utm_source=github&utm_medium=repository&utm_campaign=qualificacao_leads_whatsapp&utm_content=readme_template_08&template_id=n8n-08-qualificar-leads).
 For the English workflow, [try Wafly on wafly.io](https://wafly.io/signup?utm_source=github&utm_medium=repository&utm_campaign=lead_qualification&utm_content=readme_template_08_en&template_id=n8n-08-qualificar-leads).
 
 For a step-by-step Brazilian Portuguese walkthrough, see
@@ -67,7 +67,7 @@ not Meta's Official WhatsApp API.
 ### REST backend example — no n8n required
 
 Building your own system, SaaS or AI agent? The independent
-[Node.js REST + webhooks example](examples/backend-rest/README.md)
+[Node.js REST + webhooks example](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/backend-rest/README.md)
 keeps credentials server-side and demonstrates a test-only text sender plus
 a persistent, deduplicating receiver. It has no external dependencies and
 does not require n8n. Local tests are included; real WhatsApp delivery is a
