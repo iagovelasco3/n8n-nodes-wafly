@@ -1,8 +1,12 @@
-# Installing n8n-nodes-wafly 1.6.1
+# Installing n8n-nodes-wafly 1.6.2
 
-Use this package on self-hosted n8n. n8n Cloud offers the verified version of the
-node from the nodes panel; for anything it does not cover yet, integrate through
-HTTP Request and Webhook nodes: https://wafly.com.br/tutoriais/whatsapp-api-n8n/
+This guide targets published package **1.6.2**, currently listed in the verified
+n8n catalog (checked 2026-11-04). On n8n Cloud, an Owner/Admin can install
+**Wafly WhatsApp** from the canvas node panel. On self-hosted n8n, use the UI or
+manual method below. Verified availability does not certify every workflow;
+HTTP Request + Webhook remains an alternative.
+
+New to Wafly? [Connect a test number and validate one send/reply first](QUICKSTART.md).
 
 ## From the UI
 
@@ -21,7 +25,7 @@ As the user that runs n8n:
 ```bash
 mkdir -p ~/.n8n/nodes
 cd ~/.n8n/nodes
-npm install n8n-nodes-wafly@1.6.1
+npm install n8n-nodes-wafly@1.6.2
 ```
 
 With Docker, enter the container with `docker exec -it CONTAINER_NAME sh` and use

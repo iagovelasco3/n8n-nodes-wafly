@@ -26,6 +26,16 @@ or certify n8n Cloud workflows.
 After comparing, follow the kit's trial link and validate your integration with
 a separate number you own before changing production.
 
+## Start with one real test
+
+Connect a separate WhatsApp number you own, send one message and verify the
+reply in your webhook before importing a complete automation. A successful
+credential/status check is not a sent or delivered message.
+
+- Follow the [first-test guide in Portuguese](https://wafly.com.br/comparativos/whatsapp-api-para-n8n/?utm_source=github&utm_medium=repository&utm_campaign=n8n_first_test_20261104&utm_content=readme_first_test_br#primeiro-teste-n8n), or the [English quickstart](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/QUICKSTART.md).
+- Wafly WhatsApp is a **verified community node**, available from the n8n Cloud canvas to Owner/Admin users. This does not certify every workflow or make Wafly Flex Meta's Official WhatsApp API. HTTP Request remains an alternative.
+- The Wafly trial lasts three days and requires no credit card. Keep your own n8n/AI services and their costs separate.
+
 ## Building an app with AI?
 
 Use the [Wafly REST starter for existing apps](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/builders-rest/README.md): TypeScript, a Supabase Edge adapter, a prompt for Lovable and local tests. It starts in preview mode, keeps secrets on the backend and distinguishes API acceptance from delivery. The interface lab is simulated; no live WhatsApp delivery or universal platform compatibility is claimed.
