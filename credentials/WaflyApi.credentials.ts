@@ -14,6 +14,13 @@ export class WaflyApi implements ICredentialType {
     'https://wafly.io/api-docs?utm_source=n8n&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=credential_help';
   properties: INodeProperties[] = [
     {
+      displayName:
+        'New to Wafly? <a href="https://wafly.com.br/signup?utm_source=n8n&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=credential_signup" target="_blank">Create a free 3-day test account</a> (no card required), connect your own number, then copy the Client Token, instance ID and instance token from the dashboard.',
+      name: 'signupNotice',
+      type: 'notice',
+      default: '',
+    },
+    {
       displayName: 'Client Token',
       name: 'clientToken',
       type: 'string',
