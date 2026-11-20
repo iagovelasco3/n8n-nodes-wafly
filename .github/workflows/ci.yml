@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci && npm run build && npm pack
+      - run: npm ci && npm run build && node scripts/prepare-npm-readme.mjs --write && npm pack
       - run: docker pull n8nio/n8n:${{ matrix.n8n }}
       - run: python3 tests/runtime/run.py --image n8nio/n8n:${{ matrix.n8n }} --tarball "n8n-nodes-wafly-$(node -p "require('./package.json').version").tgz" --out /tmp/wafly-runtime
       - uses: actions/upload-artifact@v4

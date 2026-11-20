@@ -40,3 +40,7 @@ If publishing fails, investigate the result before retrying. Do not unpublish or
 overwrite an existing version. A defect after a release requires a corrective
 version, and whoever administers a given n8n can pin the previous installation
 explicitly.
+
+## README channel tags
+
+The repository README identifies tracked links as `github/repository`. Before packing in CI and before the authorized npm publication, `scripts/prepare-npm-readme.mjs --write` renders those links as `npm/community_node` in the ephemeral checkout. It preserves destinations, campaigns, content identifiers and fragments. Existing published npm versions are unchanged. Do not copy the rendered npm README back to the repository. This link repair does not authorize a release, tag, npm publication or Creator Portal edit.

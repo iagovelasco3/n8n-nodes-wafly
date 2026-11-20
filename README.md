@@ -9,15 +9,15 @@
 
 This is an n8n community node for the **Wafly WhatsApp Bridge API**. It lets you send WhatsApp messages, manage groups and configure webhooks directly from your n8n workflows.
 
-[Wafly](https://wafly.io/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_intro) is a managed WhatsApp API platform: cloud-hosted instances connected via QR Code or pairing code, REST API, real-time webhooks, message buffering for AI agents, audio transcription, and unlimited messages.
+[Wafly](https://wafly.io/?utm_source=github&utm_medium=repository&utm_campaign=n8n_integration&utm_content=readme_intro) is a managed WhatsApp API platform: cloud-hosted instances connected via QR Code or pairing code, REST API, real-time webhooks, message buffering for AI agents, audio transcription, and unlimited messages.
 
-- 🇧🇷 **Brazil:** **[Try 3 days free, no card](https://wafly.com.br/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_top_cta_br)** — **BRL 59.90/month** per number (or **BRL 39.90/month** above 10 numbers on a Partner account). See the [ready-made n8n templates](https://wafly.com.br/templates/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_templates_br), [Wafly vs Evolution API on a VPS](https://wafly.com.br/comparativos/evolution-api-gerenciada/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_evolution_br) and [Z-API alternative](https://wafly.com.br/comparativos/alternativa-z-api/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_zapi_br).
-- 🌍 **International:** **[Start a free 3-day trial](https://wafly.io/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_top_cta)** — **$20/month** per connected WhatsApp number, no credit card required.
+- 🇧🇷 **Brazil:** **[Try 3 days free, no card](https://wafly.com.br/signup?utm_source=github&utm_medium=repository&utm_campaign=n8n_integration&utm_content=readme_top_cta_br)** — **BRL 59.90/month** per number (or **BRL 39.90/month** above 10 numbers on a Partner account). See the [ready-made n8n templates](https://wafly.com.br/templates/?utm_source=github&utm_medium=repository&utm_campaign=n8n_integration&utm_content=readme_templates_br), [Wafly vs Evolution API on a VPS](https://wafly.com.br/comparativos/evolution-api-gerenciada/?utm_source=github&utm_medium=repository&utm_campaign=n8n_integration&utm_content=readme_evolution_br) and [Z-API alternative](https://wafly.com.br/comparativos/alternativa-z-api/?utm_source=github&utm_medium=repository&utm_campaign=n8n_integration&utm_content=readme_zapi_br).
+- 🌍 **International:** **[Start a free 3-day trial](https://wafly.io/signup?utm_source=github&utm_medium=repository&utm_campaign=n8n_integration&utm_content=readme_top_cta)** — **$20/month** per connected WhatsApp number, no credit card required.
 
 ## Switching from Evolution or Z-API?
 
 Already have an integration? Compare fictional incoming one-to-one text payloads
-from Evolution 2, Z-API and Wafly with the [migration compatibility kit](https://wafly.com.br/tutoriais/migrar-evolution-z-api-n8n/?utm_source=n8n_node_readme&utm_medium=documentation&utm_campaign=migration_compatibility_20261102&utm_content=readme_migration_kit&utm_term=evolution_zapi#kit-de-migracao).
+from Evolution 2, Z-API and Wafly with the [migration compatibility kit](https://wafly.com.br/tutoriais/migrar-evolution-z-api-n8n/?utm_source=github&utm_medium=repository&utm_campaign=migration_compatibility_20261102&utm_content=readme_migration_kit&utm_term=evolution_zapi#kit-de-migracao).
 Run the samples locally in your browser without credentials or message sending.
 The kit covers text normalization; adapting authentication, sending, media,
 groups and status remains part of your integration. It does not migrate sessions
@@ -56,7 +56,7 @@ Five workflows you can import and run, instead of starting from a blank canvas. 
 | [08 — Qualify WhatsApp leads with AI (pt-BR)](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/08-qualify-whatsapp-leads-and-hand-off.json) | pt-BR | Same flow as the English template, with Portuguese node names and messages |
 | [08 — Qualify WhatsApp leads with AI (English)](https://github.com/iagovelasco3/n8n-nodes-wafly/blob/main/examples/templates/08-qualify-whatsapp-leads-and-hand-off.en.json) | EN | Filters inbound messages, qualifies contacts and hands hot leads to a person |
 
-You can also copy any workflow with one click (including two HTTP Request examples for **n8n Cloud**) at **[wafly.com.br/templates](https://wafly.com.br/templates/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=readme_template_gallery)**.
+You can also copy any workflow with one click (including two HTTP Request examples for **n8n Cloud**) at **[wafly.com.br/templates](https://wafly.com.br/templates/?utm_source=github&utm_medium=repository&utm_campaign=n8n_integration&utm_content=readme_template_gallery)**.
 
 Import the JSON, review the workflow and configure your own credentials before activating.
 The community-node templates above target self-hosted n8n. The verified Wafly node is
@@ -67,7 +67,7 @@ See the [template index and setup notes](https://github.com/iagovelasco3/n8n-nod
 For the English workflow, [try Wafly on wafly.io](https://wafly.io/signup?utm_source=github&utm_medium=repository&utm_campaign=lead_qualification&utm_content=readme_template_08_en&template_id=n8n-08-qualificar-leads).
 
 For a step-by-step Brazilian Portuguese walkthrough, see
-[qualifying WhatsApp leads with AI and n8n](https://wafly.com.br/solucoes/qualificar-leads-whatsapp-ia-n8n/?utm_source=github&utm_medium=community_node&utm_campaign=n8n_flagship_202609&utm_content=readme_qualificar_leads).
+[qualifying WhatsApp leads with AI and n8n](https://wafly.com.br/solucoes/qualificar-leads-whatsapp-ia-n8n/?utm_source=github&utm_medium=repository&utm_campaign=n8n_flagship_202609&utm_content=readme_qualificar_leads).
 It covers import, credentials, the incoming-message webhook and human handoff.
 This workflow requires self-hosted n8n; Wafly Flex connects by QR Code and is
 not Meta's Official WhatsApp API.
@@ -222,7 +222,7 @@ instance list. Messaging and session operations still require both fields.
 
 ### How to get your credentials
 
-1. [Create your Wafly account](https://wafly.io/signup?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=credentials_setup) or log in to the dashboard
+1. [Create your Wafly account](https://wafly.io/signup?utm_source=github&utm_medium=repository&utm_campaign=n8n_integration&utm_content=credentials_setup) or log in to the dashboard
 2. Complete the free 3-day trial setup
 3. Go to **Instances** and create or select an instance
 4. Copy the **Client-Token**, **Instance** and **Token**
@@ -527,7 +527,7 @@ This workflow sends an automatic message every day at 9am:
 
 For more information about the available endpoints and their parameters, see the full API documentation:
 
-- [Wafly API documentation](https://wafly.io/api-docs?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=api_documentation)
+- [Wafly API documentation](https://wafly.io/api-docs?utm_source=github&utm_medium=repository&utm_campaign=n8n_integration&utm_content=api_documentation)
 - Base URL: `https://wafly.com.br/api-bridge-whats` (one base URL for wafly.com.br and wafly.io accounts)
 
 ## 🛠️ Development
@@ -602,7 +602,7 @@ Contributions are welcome! Please:
 ## 💬 Support
 
 - **Email**: contato@wafly.com.br
-- **Website**: [wafly.io](https://wafly.io/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=support)
+- **Website**: [wafly.io](https://wafly.io/?utm_source=github&utm_medium=repository&utm_campaign=n8n_integration&utm_content=support)
 - **WhatsApp community**: [Join the group](https://chat.whatsapp.com/BWS3Sv7TM738uIafAueH2J)
 - **Discord community**: [Join the Discord](https://discord.gg/ME2yyKZUFp)
 
@@ -613,4 +613,4 @@ Contributions are welcome! Please:
 
 ---
 
-Made with ❤️ by the [Wafly](https://wafly.io/?utm_source=npm&utm_medium=community_node&utm_campaign=n8n_integration&utm_content=footer) team
+Made with ❤️ by the [Wafly](https://wafly.io/?utm_source=github&utm_medium=repository&utm_campaign=n8n_integration&utm_content=footer) team
